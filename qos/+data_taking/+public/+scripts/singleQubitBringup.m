@@ -3,10 +3,17 @@
 %% initialization, run this code section before doing anything else,
 % and run it whenever your are not sure whether the system is ready to run,
 % repeatedly run the initialization process will not bring your any harm.
+<<<<<<< HEAD
 cd('D:\code\matlab\QOS\qos');addpath('D:\code\matlab\QOS\qos\dlls');
 disp('Initializing...');
 import data_taking.public.xmon.*  % because all xmon data taking functions that your are going to need are here 
 QS = qes.qSettings.GetInstance('D:\code\matlab\QOS\settings');  % create the settings object, the settings root directory must be correct
+=======
+cd('D:\QOS\qos');addpath('D:\QOS\qos\dlls');
+disp('Initializing...');
+import data_taking.public.xmon.*  % because all xmon data taking functions that your are going to need are here 
+QS = qes.qSettings.GetInstance('D:\QOS\settings');  % create the settings object, the settings root directory must be correct
+>>>>>>> fc56515f8bf7c089caf4e435946a93e16224507d
 QS.SU('yulin');     % switch to your private settings directory, make your own settings directory(by copy and paste other's repo and make changes)
 QS.SS('s170302');   % it's good habit to start a new session now and then by copy an old session so that you can always trace back if something gose wrong
 QS.CreateHw();      % create all necessary hardware objects
