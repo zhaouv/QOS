@@ -12,7 +12,7 @@ function [zdc, slop] = f012zdc(q, f01)
 	end
 	zdc_amp2f01 = q.zdc_amp2f01;
 	zdc_amp2f01_driv = polyder(zdc_amp2f01);
-    if nargin < 2
+    if nargin < 2 || isempty(01) % optimal point
         r = roots(zdc_amp2f01_driv);
         r = sort(r(isreal(r)));
         r = r(r>=q.zdc_amp2f01ValidRng(1) & r<=q.zdc_amp2f01ValidRng(2));

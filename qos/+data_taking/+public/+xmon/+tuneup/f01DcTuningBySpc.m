@@ -19,15 +19,21 @@ function varargout = f01DcTuningBySpc(varargin)
     
     import data_taking.public.xmon.spectroscopy1_zdc
     
-    args = util.processArgs(varargin,{'gui',false,'save',true});
+    args = qes.util.processArgs(varargin,{'gui',false,'save',true});
 	q = copy(getQubits(args,{'qubit'})); % we may need to modify the qubit properties, better make a copy to avoid unwanted modifications to the original.
 	
 	if isempty(q.zdc_ampCorrection)
 		q.zdc_ampCorrection = 0;
-	[dcAmp, slop] = sqc.util.f012zdc(q,args.f01);
+	end
 	
-	precision = (3*q.t_spcFWHM_est/...
-		q.zdc_amp2f_freqUnit/slop)*q.zdc_amp2f_dcUnit;
+	[dcAmp, slop] = sqc.util.f012zdc(q,args.f01);
+	[~, idx] = min(abs(dcAmp-q.dc_amp)); % closest to the current dc amp
+	dcAmp = dcAmp(idx);
+	slop = slop(idx);
+	if slop == 0
+		slop = q.zdc_amp2f01(1)/5;
+	end
+	precision = abs(3*q.t_spcFWHM_est/slop);
 	
 	if args.gui
 		hf = figure('Units','characters',...
@@ -43,37 +49,47 @@ function varargout = f01DcTuningBySpc(varargin)
     f01 = args.f01;
     count = 1;
 	err = Inf;
-    while err > q.t_spcFWHM_est/20 || count <= 10
+    while err > q.t_spcFWHM_est/10 || count <= 15
         dcAmp_r = dcAmp(end) + precision;
         dcAmp_l = dcAmp(end) - precision;
 		if count == 1
 			FREQ_SEARCH_RNG = 15*q.t_spcFWHM_est;
-			f = f01(end)-FREQ_SEARCH_RNG:q.t_spcFWHM_est/10:f01(end)+FREQ_SEARCH_RNG;
-		elseif err > 2*q.t_spcFWHM_est
+			f = f01(end)-FREQ_SEARCH_RNG:q.t_spcFWHM_est/5:f01(end)+FREQ_SEARCH_RNG;
+		elseif err > 3*q.t_spcFWHM_est
 			FREQ_SEARCH_RNG = 10*q.t_spcFWHM_est;
-			f = f01(end)-FREQ_SEARCH_RNG:q.t_spcFWHM_est/10:f01(end)+FREQ_SEARCH_RNG;
+			f = f01(end)-FREQ_SEARCH_RNG:q.t_spcFWHM_est/5:f01(end)+FREQ_SEARCH_RNG;
 		elseif err > q.t_spcFWHM_est
 			FREQ_SEARCH_RNG = 5*q.t_spcFWHM_est;
 			f = f01(end)-FREQ_SEARCH_RNG:q.t_spcFWHM_est/10:f01(end)+FREQ_SEARCH_RNG;
 		else
 			FREQ_SEARCH_RNG = 2*q.t_spcFWHM_est;
-			f = f01(end)-FREQ_SEARCH_RNG:q.t_spcFWHM_est/20:f01(end)+FREQ_SEARCH_RNG;
+			f = f01(end)-FREQ_SEARCH_RNG:q.t_spcFWHM_est/10:f01(end)+FREQ_SEARCH_RNG;
 		end
         
         e = spectroscopy1_zdc('qubit',q,'bias',dcAmp_r,'driveFreq',f,'save',false,'gui',false);
-		P_r = smooth(e.data{1},5);
+		if count == 1
+			vis = range(e.data{1});
+			if vis < 0.15
+				throw(MException('QOS_f01DcTuningBySpc:visibilityTooLow',...
+					'visibility too low, at least 0.15 for f01DcTuningBySpc to work, %0.2f measured', vis);
+			elseif vis < 5/sqrt(q.r_avg)
+				throw(MException('QOS_xyGateAmpTuner:rAvgTooLow',...
+					'readout average number %d too small.', q.r_avg);
+			end
+		end
+		P_r = smooth(e.data{1},3);
         [~,idx] = max(P_r);
 		f01_r = f(idx);
         err_r = abs(f01_r - args.f01);
         
         e = spectroscopy1_zdc('qubit',q,'bias',dcAmp,'driveFreq',f,'save',false,'gui',false);
-		P_c = smooth(e.data{1},5);
+		P_c = smooth(e.data{1},3);
         [~,idx] = max(P_c);
 		f01_c = f(idx);
         err_c = abs(f01_c - args.f01);
         
         e = spectroscopy1_zdc('qubit',q,'bias',dcAmp_l,'driveFreq',f,'save',false,'gui',false);
-		P_l = smooth(e.data{1},5);
+		P_l = smooth(e.data{1},3);
         [~,idx] = max(P_l);
 		f01_l = f(idx);
         err_l = abs(f01_l - args.f01);
@@ -110,6 +126,8 @@ function varargout = f01DcTuningBySpc(varargin)
         QS.saveSSettings({q.name,'f01'},f01(end));
         QS.saveSSettings({q.name,'zdc_amp'},dcAmp(end));
 		QS.saveSSettings({q.name,'zdc_ampCorrection'},dcAmp(end)-dcAmp(1)+q.zdc_ampCorrection);
+		QS.saveSSettings({q.name,'zpls_amp2f01Df'},[]);
+		QS.saveSSettings({q.name,'zpls_amp2f02Df'},[]);
     end
 	
 	varargout{1} = dcAmp(end);

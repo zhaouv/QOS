@@ -1,7 +1,7 @@
-function varargout = zdc2f01(varargin)
-% map out z dc bias amplitude to qubit frequency f01. 
+function zplsAmp2dcAmp(qName,auto)
+
 %
-% <[_f_]> = zdc2f01('qubit',_c&o_,...
+% <[_f_]> = zplsAmp2dcAmp('qubit',_c&o_,...
 %       'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -13,65 +13,25 @@ function varargout = zdc2f01(varargin)
 % {}: must be a cell array
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as the form correct pairs.
+	
     
     % Yulin Wu, 2017/1/8
-
-    import data_taking.public.xmon.spectroscopy1_zdc
-    import data_taking.public.xmon.bringup.iq2prob_01
-	import data_taking.public.xmon.bringup.xyGateAmpTuner
+    
+    fcn_name = 'zplsAmp2dcAmp'; % this and args will be saved with data
+    import data_taking.public.xmon.spectroscopy1_zpa
 	import data_taking.public.util.getQubits
-	
-	RECAL_FREQRANGE = 20e6;
-	IQ2PROB_NUMSAMPLES = 2e4;
-	PITUNNER_NUMSAMPLES = 2e3;
-	RESTOL = 10e6;
-	
-	freqUnit = 1e9; % dc val can be several micro Amper, that's ~15 orders from frequency in Hz, polyfit fails easily,
-					% thus we transfer frequency unit to GHz to reduce the order difference.
+
+	RESTOL = 2e6;
+	freqUnit = 1e9;
     
     args = qes.util.processArgs(varargin,{'gui',false,'save',true});
 	q = copy(getQubits(args,{'qubit'})); % we need to modify the qubit properties, better make a copy to avoid unwanted modifications to the original.
 
-	if isempty(q.zdc_amp2f01)
-		throw(MException('QOS_zdc2f01:invalidInitialValue',...
-		'zdc_amp2f01 empty, zdc_amp2f01(1) is taken as the initial value for M(1/M is the modulation cycle of f01 in dc bias)'));
-	if q.zdc_amp2f01(1) == 0
-		throw(MException('QOS_zdc2f01:invalidInitialValue',...
-		'invalid initial value for M(1/M is the modulation cycle of f01 in dc bias), value of M can not be zero.'));
+	if isempty(q.zpls_amp2dcAmp)
+		throw(MException('QOS_zplsAmp2dcAmp:invalidInitialValue',...
+			'zpls_amp2dcAmp empty, to run zplsAmp2dcAmp, an initial guess of zpls_amp2dcAmpulse must be set.'));
 	end
-	if q.zdc_amp2fFreqRng < 200e6 || q.zdc_amp2fFreqRng > 2e9
-		throw(MException('QOS_zdc2f01:invalidAmp2fFreqRng',...
-			'zdc_amp2fFreqRng out of supported range:[200e6, 2e9]'));
-	end
-	
-	% standard qubit tuneup proceedure:
-	% n, ...
-	% n+1, measure f01(S21) at zdc_amp = 0;
-	% n+2, power rabi(S21) to find pi pulse;
-	% n+3, with pi pulse, find the optimal readout frequency;
-	% n+4, find the iq raw data to probablity centers;
-	% n+5, fine calibrate pi pulse with power rabi(|1> probability) or ignore this step if pi pulse already good enough.
-	% n+6, measure zdc2f01
-	% ...
-	% so here if q.zdc_amp ~= 0, you might be using incorrect qubit settings, copy and paste another qubit's
-	% settings without changing the values of some crutial entries for example, or you might be doing things
-	% in a non standard way and is responsible for possible risks.
-	if q.zdc_amp ~= 0
-		warning('q.zdc_amp ~= 0.');
-	end
-	
-	M = q.zdc_amp2f01(1); % initial guess of the modulation period(1/M) of qubit spectrum in dc bias
-%	offset = 0; % initial guess of the dc value of the optimal point, zero or close to zero
-%	fmax = q.f01; % use the qubit frequency at the optimal point as the initial guess
-%	fc = 0; % just use zero as the initial guess
-	addprop(q,'amp2f_poly__');
-	% addprop(q,'amp2f__');
-	% addprop(q,'f2amp__');
-	q.amp2f_poly__ = q.f01*[2*M,1];
-	% q.amp2f__ = @(x) fmax*sqrt(abs(cos(pi*M*abs(x-offset))))+fc*(sqrt(abs(cos(pi*M*abs(x-offset))))-1);
-	% q.f2amp__  = {@(x)M*acos((x+fc)^2/(fc+fmax)^2)/pi+offset,...
-	%			@(x)-acos((x+fc)^2/(fc+fmax)^2)/(M*pi)+offset};
-				
+			
 	f01_ini = q.f01;
     function f_ = sweepFreq(bias_)
         f01_est = freqUnit*polyval(q.amp2f_poly__,bias_);
@@ -80,17 +40,12 @@ function varargout = zdc2f01(varargin)
             q.t_zdc2freqFreqStep*ceil((f01_est+q.t_zdc2freqFreqSrchRng/2)/q.t_zdc2freqFreqStep);
     end
 
-	r_iq2prob_center0_backup = q.r_iq2prob_center0;
-	r_iq2prob_center0_backup = q.r_iq2prob_center1;
-    last_cal_freq = f01_ini;
     QS = qes.qSettings.GetInstance();
 
     bias = [];
     f01 = [];
     P = {};
     Frequency = {};
-	meanRes = 0;
-	currentRes = Inf;
     while true
         if isempty(bias)
             bias = 0;
@@ -134,8 +89,8 @@ function varargout = zdc2f01(varargin)
                     db = dbForward;
                 else
                     db = db(1);
-                    if db > 1.5*dbForward % avoid blow up
-                        db = 1.5*dbForward;
+                    if db > 3*dbForward % avoid blow up
+                        db = dbForward;
                     end
                 end
             end
@@ -148,7 +103,6 @@ function varargout = zdc2f01(varargin)
             f01 = [f01,f(midx)];
             dbForward = db;
             q.f01 = f01(end);
-			lastIdx = numel(f01);
         end
         if ~stopBiasBackward
             zdc_amp2f01_ = q.amp2f_poly__;
@@ -169,8 +123,8 @@ function varargout = zdc2f01(varargin)
                     db = dbBackward;
                 else
                     db = db(end);
-                    if db < 1.5*dbBackward % avoid blow up
-                        db = 1.5*dbBackward;
+                    if db < 3*dbBackward % avoid blow up
+                        db = dbBackward;
                     end
                 end
             end
@@ -183,7 +137,6 @@ function varargout = zdc2f01(varargin)
             f01 = [f(midx),f01];
             dbBackward = db;
             q.f01 = f01(1);
-            lastIdx = 1;
         end
         try
             zdc_amp2f01_backup = q.amp2f_poly__;

@@ -8,34 +8,25 @@ function [zdc, slop] = f012zdc(q, f01)
 		throw(MException('QOS_setF01:illegaleAmp2f01Func',...
                 sprintf('%s: illegale zdc_amp2f01, zdc_amp2f01 should be a parameter array: [M, offset, fmax, fc]', q.name)));
 	end
-	zdc_amp2f01 = q.zdc_amp2f01;
-    if nargin < 2 % 
-        r = roots(zdc_amp2f01_driv);
-        r = sort(r(isreal(r)));
-        r = r(r>=q.zdc_amp2f01ValidRng(1) & r<=q.zdc_amp2f01ValidRng(2));
-        if isempty(r)
-            throw(MException('QOS_f012zdc:badSettings',...
-                sprintf('domain of definition''zdc_amp2f01ValidRng'' of zdc_amp2f01 for qubit %s dose not cover the optimal point.', q.name)));
-        elseif length(r) > 1
-            throw(MException('QOS_f012zdc:badSettings',...
-                sprintf('zdc_amp2f01 for qubit %s has more than one extrema in its domain of definition, thus not a valid fit for xmon f01 spectrum.', q.name)));
-        end
-		[d,idx] = max(abs(q.zdc_amp2f01ValidRng-r(1)));
-		slop = zdc_amp2f01_driv(r(1)+sign(idx-1.5)*d/5);
+	M = q.zdc_amp2f01(1);
+	offset = q.zdc_amp2f01(2);
+	fmax = q.zdc_amp2f01(3);
+	fc = q.zdc_amp2f01(4);
+    if nargin < 2 || isempty(01) % optimal point
+        r = offset;
+		slop = 0;
     else
-        zdc_amp2f01(end) = zdc_amp2f01(end) - f01/q.zdc_amp2f_freqUnit;
-        r = roots(zdc_amp2f01_);
-        r = sort(r(isreal(r)));
-        r = r(r>=q.zdc_amp2f01ValidRng(1) & r<=q.zdc_amp2f01ValidRng(2));
-        if isempty(r)
-            throw(MException('QOS_f012zdc:badSettings',...
-                sprintf('zdc_amp2f01 setting for qubit %s has no root for %0.3e Hz', q.name,...
-                args.f01/q.zdc_amp2f_freqUnit)));
-        elseif length(r) > 1
-            throw(MException('QOS_f012zdc:badSettings',...
-                sprintf('zdc_amp2f01 for qubit %s has more than one extrema in its domain of definition, thus not a valid fit for xmon f01 spectrum.', q.name)));
-        end
-		slop = zdc_amp2f01_driv(r(1));
+		if f01 <= fmax
+			t = ((f01+fc)/(fc+fmax))^2;
+			r = [offset - M*acos(t)/pi, offset + M*acos(t)/pi];
+			slop = -pi*M*(fmax+fc)/2./sqrt(cos(pi*M*(r-offset))).*sin(pi*M*(r-offset));
+		elseif f01-fmax < 1e6
+			r = offset;
+			slop = 0;
+		else
+			throw(MException('QOS_setF01:f01OutOfRange',...
+                sprintf('%s: f01 greater than maximum %0.4fMHz.', q.name, fmax/1e9)));
+		end
     end
-    zdc = (r(1)+q.zdc_ampCorrection)*q.zdc_amp2f_dcUnit;
+    zdc = r+q.zdc_ampCorrection;
 end
