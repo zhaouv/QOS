@@ -1,5 +1,5 @@
 function varargout  = getQubits(args,qNameFields)
-    % get qubit by name
+    % get qubit by name, if name is qubit object already, the object itself is returned
     
     % Yulin Wu, 2017/1/4
     
@@ -12,7 +12,8 @@ function varargout  = getQubits(args,qNameFields)
             ME.throwAsCaller();
         end
 		if isa(args.(qNameFields{ii}),'sqc.qobj.qobject')
-			% if it is a qubit object already, return the qubit object, do not return the qubit object in qubits! important!
+			% if it is a qubit object already, return the qubit object, 
+			% do not return the qubit object in qubits! important!
 			varargout{ii} = args.(qNameFields{ii});
 		else
 			varargout{ii} = qubits{qes.util.find(args.(qNameFields{ii}),qubits)};

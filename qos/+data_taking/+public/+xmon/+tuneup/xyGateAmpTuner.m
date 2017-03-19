@@ -36,13 +36,16 @@ function varargout = xyGateAmpTuner(varargin)
 				'X, Y X/2 -X/2 X2m X2p Y/2 -Y/2 Y2m Y2p')));
 	end
 	amps = linspace(0,da.vpp/2,NUM_RABI_SAMPLING_PTS);
-	e = rabi_amp1('qubit',args.qubit,'bias',0,'biasLonger',0,'xyDriveAmp',amps,...
+	e = rabi_amp1('qubit',q,'bias',0,'biasLonger',0,'xyDriveAmp',amps,...
 		'detuning',0,'driveTyp',args.gateTyp,'gui',false,'save',false);
 	P = e.data{1};
 	rP = range(P);
 	if rP < 0.3
 		throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
 				'visibility too low, at least 0.3 for xyGateAmpTuner to work, %0.2f measured', rP);
+	elseif rP < 5/sqrt(q.r_avg)
+		throw(MException('QOS_xyGateAmpTuner:rAvgTooLow',...
+				'readout average number %d too small.', q.r_avg);
 	end
 	[maxP,maxIdx] = max(P);
 	if maxIdx < NUM_RABI_SAMPLING_PTS/3 ||...
@@ -50,7 +53,7 @@ function varargout = xyGateAmpTuner(varargin)
 		min(NUM_RABI_SAMPLING_PTS,round(maxIdx+NUM_RABI_SAMPLING_PTS/6))))...
 		> range(P)/2
 		throw(MException('QOS_xyGateAmpTuner:tooManyOscCycles',...
-				'too many oscillation cycles.');
+				'too many oscillation cycles or data SNR too low.');
 	end
 	dP = maxP-P;
 	idx1 = find(dP(maxIdx:-1:1)>rP/4,1,'first');
@@ -70,7 +73,11 @@ function varargout = xyGateAmpTuner(varargin)
 %		 amps(idx1:idx2),P(idx1:idx2),maxP,amps(maxIdx),amps(idx2)-amp(idx1));
 
 	% gateAmp = roots(polyder(polyfit(amps(idx1:idx2),P(idx1:idx2),2)));
-	gateAmp = roots(polyder(polyfit(amps(idx1:idx2),P(idx1:idx2),3)));
+	p = polyfit(amps(idx1:idx2),P(idx1:idx2),3);
+	if mean(abs(polyval(p,amps(idx1:idx2))-P(idx1:idx2))) > range(P(idx1:idx2))/4
+		throw(MException('QOS_xyGateAmpTuner:fittingFailed','fitting error too large.'));
+	end
+	gateAmp = roots(polyder(p));
 	
 	if gateAmp < amps(idx1) || gateAmp > amps(idx2)
 		throw(MException('QOS_xyGateAmpTuner:xyGateAmpTuner',...

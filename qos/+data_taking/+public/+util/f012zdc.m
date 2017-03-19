@@ -1,0 +1,41 @@
+function [zdc, slop] = f012zdc(q, f01)
+% calculates z dc bias amp from f01
+% if f01 not given, finds the symmetric point(zdc where f01 is maximum)
+    
+    % Yulin Wu, 2017/3/9
+
+	if numel(q.zdc_amp2f01) ~= 4
+		throw(MException('QOS_setF01:illegaleAmp2f01Func',...
+                sprintf('%s: illegale zdc_amp2f01, zdc_amp2f01 should be a parameter array: [M, offset, fmax, fc]', q.name)));
+	end
+	zdc_amp2f01 = q.zdc_amp2f01;
+    if nargin < 2 % 
+        r = roots(zdc_amp2f01_driv);
+        r = sort(r(isreal(r)));
+        r = r(r>=q.zdc_amp2f01ValidRng(1) & r<=q.zdc_amp2f01ValidRng(2));
+        if isempty(r)
+            throw(MException('QOS_f012zdc:badSettings',...
+                sprintf('domain of definition''zdc_amp2f01ValidRng'' of zdc_amp2f01 for qubit %s dose not cover the optimal point.', q.name)));
+        elseif length(r) > 1
+            throw(MException('QOS_f012zdc:badSettings',...
+                sprintf('zdc_amp2f01 for qubit %s has more than one extrema in its domain of definition, thus not a valid fit for xmon f01 spectrum.', q.name)));
+        end
+		[d,idx] = max(abs(q.zdc_amp2f01ValidRng-r(1)));
+		slop = zdc_amp2f01_driv(r(1)+sign(idx-1.5)*d/5);
+    else
+        zdc_amp2f01(end) = zdc_amp2f01(end) - f01/q.zdc_amp2f_freqUnit;
+        r = roots(zdc_amp2f01_);
+        r = sort(r(isreal(r)));
+        r = r(r>=q.zdc_amp2f01ValidRng(1) & r<=q.zdc_amp2f01ValidRng(2));
+        if isempty(r)
+            throw(MException('QOS_f012zdc:badSettings',...
+                sprintf('zdc_amp2f01 setting for qubit %s has no root for %0.3e Hz', q.name,...
+                args.f01/q.zdc_amp2f_freqUnit)));
+        elseif length(r) > 1
+            throw(MException('QOS_f012zdc:badSettings',...
+                sprintf('zdc_amp2f01 for qubit %s has more than one extrema in its domain of definition, thus not a valid fit for xmon f01 spectrum.', q.name)));
+        end
+		slop = zdc_amp2f01_driv(r(1));
+    end
+    zdc = (r(1)+q.zdc_ampCorrection)*q.zdc_amp2f_dcUnit;
+end
