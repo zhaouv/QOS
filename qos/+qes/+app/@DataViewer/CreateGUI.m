@@ -4,22 +4,22 @@ function CreateGUI(obj)
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    system = lower(system_dependent('getos'));
-    if any([strfind(system, 'microsoft windows xp'),...
-            strfind(system, 'microsoft windows Vista'),...
-            strfind(system, 'microsoft windows 7'),...
-            strfind(system, 'microsoft windows server 2008'),...
-            strfind(system, 'microsoft windows server 2003')])
+    OPSYSTEM = lower(system_dependent('getos'));
+    if any([strfind(OPSYSTEM, 'microsoft windows xp'),...
+            strfind(OPSYSTEM, 'microsoft windows Vista'),...
+            strfind(OPSYSTEM, 'microsoft windows 7'),...
+            strfind(OPSYSTEM, 'microsoft windows server 2008'),...
+            strfind(OPSYSTEM, 'microsoft windows server 2003')])
         InfoDispHeight = 5; % characters
         SelectDataUILn = 30;
         panelpossize = [0,0,260,45];
         mainaxshift = 4;
-    elseif any([strfind(system, 'microsoft windows 10'),...
-            strfind(system, 'microsoft windows server 10'),...
-            strfind(system, 'microsoft windows server 2012')])
+    elseif any([strfind(OPSYSTEM, 'microsoft windows 10'),...
+            strfind(OPSYSTEM, 'microsoft windows server 10'),...
+            strfind(OPSYSTEM, 'microsoft windows server 2012')])
         InfoDispHeight = 6; % characters
         SelectDataUILn = 35;
-        panelpossize = [0,0,310,45];
+        panelpossize = [0,0,258.5,45];
         mainaxshift = 5;
     else
         InfoDispHeight = 5; % characters
@@ -237,7 +237,7 @@ function CreateGUI(obj)
     pos(3) = 16;
     handles.SaveFigBtn = uicontrol('Parent',handles.basepanel,'Style','pushbutton','string','Save Fig',...
         'FontSize',10,'FontUnits','points','Units','characters','Position',pos,...
-        'Callback',{@Savefig},'Tooltip','Fit the data.');
+        'Callback',{},'Tooltip','place holder.');
 
     pos = get(handles.DataFolderTitle,'Position');
     pos(2) = pos(2)-10.5-InfoDispHeight;
@@ -259,7 +259,13 @@ function CreateGUI(obj)
 
     pos = get(handles.HideUnhideBtn,'Position');
     pos_ = get(handles.NotesBox,'Position');
-    pos(3) = 15;
+% 	if any([strfind(OPSYSTEM, 'microsoft windows 10'),...
+%             strfind(OPSYSTEM, 'microsoft windows server 10'),...
+%             strfind(OPSYSTEM, 'microsoft windows server 2012')])
+% 		pos(3) = 15;
+% 	else
+% 		pos(3) = 15;
+% 	end
     pos(2) = pos_(2)-3.5;
     pos(4) = 3;
     handles.XYTraceBtn = uicontrol('Parent',handles.basepanel,'Style','toggle','string','XY Traces',...
@@ -280,7 +286,8 @@ function CreateGUI(obj)
 %    pos = get(handles.NextPageBtn,'Position');
     pos(1) = pos(1)+pos(3)+1;
     pos(2) = pos(2) + 1;
-    pos(3) = 12;
+	pos_ = get(handles.DeleteBtn,'Position');
+    pos(3) = pos_(1)+pos_(3)-pos(1);
     pos(4) = 1;
     handles.fileidxdisp = uicontrol('Parent',handles.basepanel,'Style','text','string','',...
         'FontSize',10,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
@@ -292,15 +299,7 @@ function CreateGUI(obj)
      pos(2) = pos_(2)+pos_(4)+1;
      pos(3) = panelpossize(3) - pos(1) - 1;
      pos(4) = panelpossize(4) - pos(2) - 1;
-%      handles.InfoTable = uitable('Parent',handles.basepanel,...
-%          'Data',table_data,...
-%          'ColumnName',{'Key','Value'},...
-%          'ColumnFormat',{'char','char'},...
-%          'ColumnEditable',[false,false],...
-%          'ColumnWidth',{'auto','auto'},...
-%          'RowName',[],...
-%          'FontUnits','normalized','FontSize',12,...
-%          'Units','characters','Position',pos);
+	 
      handles.InfoTable = uitable('Parent',handles.basepanel,...
          'Data',[],...
          'ColumnName',{'Key','Value'},...
@@ -310,15 +309,6 @@ function CreateGUI(obj)
          'RowName',[],...
          'Units','characters','Position',pos);
      
-%     handles.hList = uicontrol('Parent',handles.basepanel,'style', 'listbox', 'string', '',  'position',...
-%         [pos(1)+1164,pos(2)+5,255,593],'BackgroundColor',[0.9,1,0.8],'FontSize',11); %创建列表框，用于显示指定目录下所有文件
-%     set(handles.hList,'Callback', {@fileOpen});
-
- 
-%     pos = get(handles.mainax,'Position');
-%     handles.hList = uicontrol('Parent',handles.basepanel,'style', 'listbox', 'string', '',  'position',...
-%         [pos(1)+1164,pos(2)+5,255,593],'BackgroundColor',[0.9,1,0.8],'FontSize',11); %创建列表框，用于显示指定目录下所有文件
-%     set(handles.hList,'Callback', {@fileOpen});
 
     xdata = [];
     ydata = [];
@@ -502,70 +492,7 @@ function CreateGUI(obj)
     obj.uihandles = handles;
     set(handles.basepanel,'UserData',obj);
     obj.RefreshGUI();
-    
-    
-    
 
-    function fileOpen(hObject,eventdata)
-        % 若双击鼠标，打开所选的文件或文件夹
-        if strcmp(get(gcf, 'SelectionType'), 'open') %若双击鼠标左键
-            strs = get(hObject, 'String');  %获取列表框所有文件或文件夹名列表
-            index = get(hObject, 'Value');  %获取当前所选文件或文件夹的位置
-            pName = get(handles.DataFolder, 'String'); %获取当前路径
-            if index == 1     %若双击了第1个选项，则打开当前目录
-                wholepath=fileparts(pName);
-            else              %若选择了其它选项，直接打开
-                fName = strs{index};
-                wholepath=[pName '\' fName];
-            end
-            
-            if exist(wholepath, 'file')==7
-                OpenFolder(wholepath,hObject,eventdata);   %打开当前文件或文件夹
-                RefreshFolderCallback(hObject,eventdata)
-                obj.RefreshGUI();
-            elseif exist(wholepath, 'file')==2
-                OpenFile(wholepath,hObject,eventdata)
-                obj.RefreshGUI();
-            end
-        end
-        %         obj.RefreshGUI();
-    end
-%     function OpenFolder(str,hObject,eventdata)
-%         set(handles.DataFolder, 'string', str);
-%         str_all = dir(str); %也可写成str_all = dir([str '\*.*']);
-%         strNames = {str_all.name}; %获取所有文件和文件夹的名称
-%         strNames(1) = [];   %第1个文件名为当前文件夹的文件夹名
-%         strNames{1} = '←'; %第2个文件名为当前文件夹的文件夹名
-%         set(handles.hList, 'string', strNames, 'Value', 1); %显示所有文件和文件夹
-%         
-%     end
-    function OpenFile(wholepath,hObject,eventdata)
-        [pathstr,name,ext] = fileparts(wholepath);
-        switch ext
-            case{'.fig'}
-                open(wholepath)
-            case {'.jpg','.jpeg','.gif','.png','.txt'}
-                winopen(wholepath)
-            case {'.m'}
-                edit(wholepath)
-            case {'.mat'}
-                if exist([pathstr '/' name '.mat'],'file')
-                    %plot the data
-                    [~, idx] = ismember([name '.mat'], obj.datafiles);
-                    if get(handles.SelectData,'value')==3
-                        [~, idx]=ismember(idx, obj.hilighted);
-                    elseif get(handles.SelectData,'value')==2
-                        [~, idx]=ismember(idx, obj.unhidden);
-                    end
-                    obj.currentfile=idx;
-                    if idx==0
-                        errordlg('Error!','Data not found in database ');
-                    end
-                end
-            otherwise
-                winopen(wholepath)
-        end
-    end
     function SelectFolderCallback(src,entdata)
         persistent lastselecteddir
         if isempty(lastselecteddir) || ~exist(lastselecteddir,'dir')
@@ -612,30 +539,6 @@ elseif NorP < 0
 end
 end
 
-
-
-function Savefig(src,entdata)
-obj = get(get(src,'Parent'),'UserData');
-handles = obj.uihandles;
-indx=obj.currentfile;
-name=obj.datafiles_full(indx);
-name=name{1,1};
-h = figure('Units','normalized');
-hax_new = copyobj(handles.mainax,h);
-set(hax_new,'Units','normalized','Position',[0.12,0.12,0.8,0.8]);
-figname=[name(1:end-3),'fig'];
-pngname=[name(1:end-3),'png'];
-saveas(h, figname);
-saveas(h, pngname);
-close(h);
-end
-function SelectDataCallback(src,entdata)
-obj = get(get(src,'Parent'),'UserData');
-handles = obj.uihandles;
-selection = get(handles.SelectData,'value');
-obj.SelectData(selection);
-obj.RefreshGUI();
-end
 function SelectPlotFcnCallback(src,entdata)
 obj = get(get(src,'Parent'),'UserData');
 handles = obj.uihandles;
@@ -695,23 +598,6 @@ end
 function ExportDataCallback(src,entdata)
 obj = get(get(src,'Parent'),'UserData');
 obj.ExportData();
-end
-function DataFit(src,entdata)
-obj = get(get(src,'Parent'),'UserData');
-handles = obj.uihandles;
-indx=obj.currentfile;
-name=obj.datafiles_full(indx);
-filename=name{1,1};
-option=get(handles.FitFunction,'value');
-switch option
-    case 1
-        
-    case 2
-        
-    case 3
-        
-end
-
 end
 
 function GUIDeleteCallback(src,entdata)
