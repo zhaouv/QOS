@@ -216,6 +216,11 @@ classdef resonatorReadout < qes.measurement.prob
 % 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',mw_src_name);
 
 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',qubits{1}.channels.r_mw.instru);
+            if isempty(uSrc)
+                throw(MException('QOS_resonatorReadout:hwNotFound',...
+                    '%s not found in hardware pool, make sure it is selected in hardware settings and seccessfully created.',...
+                    qubits{1}.channels.r_mw.instru));
+            end
             obj.mw_src = uSrc.GetChnl(qubits{1}.channels.r_mw.chnl);
             obj.mw_src_power = qubits{1}.r_uSrcPower;
             obj.mw_src_frequency = qubits{1}.r_fc;
@@ -243,6 +248,11 @@ classdef resonatorReadout < qes.measurement.prob
 				obj.jpa.opDuration = qubits{1}.r_ln + 2*qubits{1}.r_jpa_longer;
                 
                 biasSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',obj.jpa.channels.bias.instru);
+                if isempty(biasSrc)
+                    throw(MException('QOS_resonatorReadout:hwNotFound',...
+                        '%s not found in hardware pool, make sure it is selected in hardware settings and seccessfully created.',...
+                        obj.jpa.channels.bias.instru));
+                end
                 obj.jpaBiasSrc = biasSrc.GetChnl(obj.jpa.channels.bias.chnl);
                 pumpMWSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',obj.jpa.channels.pump_mw.instru);
                 obj.jpaPumpMWSrc = pumpMWSrc.GetChnl(obj.jpa.channels.pump_mw.chnl);
@@ -312,7 +322,9 @@ classdef resonatorReadout < qes.measurement.prob
         function Run(obj)
             obj.GenWave();
             obj.Prep();
-			obj.r_wv.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
+            wvObj = obj.r_wv;
+            wvObj.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
+% 			obj.r_wv.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
             obj.r_wv.SendWave();
             if ~isempty(obj.jpa)
                 obj.jpa_pump_wv.SendWave();
