@@ -25,7 +25,11 @@ classdef USTCDAC < handle
         gain = zeros(1,4);      %通道增益
         offset = zeros(1,4);    %通道偏置
         offsetcorr = zeros(1,4);
+<<<<<<< HEAD
         outputdelay
+=======
+        
+>>>>>>> b9634fd49c28c5d3f69a56bedc1ca44d98c10c99
         trig_sel = 0;           %触发源选择
         trig_interval = 200e-6; %主板连续触发输出时间间隔
         ismaster = 0;           %主板标识
@@ -94,10 +98,17 @@ classdef USTCDAC < handle
             obj.SetTrigSel(obj.trig_sel);
             obj.SetTrigInterval(obj.trig_interval);
             obj.SetTotalCount(obj.trig_interval/4e-9 - 100);
+<<<<<<< HEAD
             obj.SetDACStart(floor(obj.sync_delay/8) + 1);
             obj.SetDACStop(floor(obj.sync_delay/8) + 10);
             obj.SetTrigStart(floor(obj.trig_delay/8) + 1);
             obj.SetTrigStop(floor(obj.trig_delay/8) + 10);
+=======
+            obj.SetDACStart(obj.sync_delay/4e-9 + 1);
+            obj.SetDACStop(obj.sync_delay/4e-9 + 10);
+            obj.SetTrigStart(obj.trig_delay/4e-9 + 1);
+            obj.SetTrigStop(obj.trig_delay/4e-9 + 10);
+>>>>>>> b9634fd49c28c5d3f69a56bedc1ca44d98c10c99
             obj.SetLoop(1,1,1,1);
             
 %             try_count = 10;

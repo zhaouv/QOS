@@ -85,6 +85,18 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         function obj = ustcadda_v1()
             obj.Config();
             obj.Open();
+<<<<<<< HEAD
+=======
+%             for ii = 1:obj.numDAChnls
+%                 obj.SendContinuousWave(ii,32768);
+% %                 obj.SendWave(ii,[2e4*ones(1,2000)]);
+%             end
+%             for ii = 1:obj.numDABoards
+%                 obj.da_list(ii).mask_min = 0;
+%             end
+%             obj.runReps = 30000;
+%             obj.Run(false);
+>>>>>>> b9634fd49c28c5d3f69a56bedc1ca44d98c10c99
         end
     end
     
@@ -176,7 +188,11 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.set('channel_amount',s.da_boards{k}.numChnls);
                 obj.da_list(k).da.set('gain',cell2mat(s.da_boards{k}.gain));
                 obj.da_list(k).da.set('sample_rate',s.da_boards{k}.samplingRate);
+<<<<<<< HEAD
                 obj.da_list(k).da.set('sync_delay',s.da_boards{k}.syncDelay); 
+=======
+                % obj.da_list(k).da.set('sync_delay',s.da_boards{k}.syncdelay); % removed
+>>>>>>> b9634fd49c28c5d3f69a56bedc1ca44d98c10c99
                 obj.da_list(k).da.set('trig_delay',s.da_boards{k}.daTrigDelayOffset);
                 %设置trig_sel默认值0
                 obj.da_list(k).da.set('trig_sel',s.trigger_source);
@@ -201,7 +217,11 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.da_list(obj.da_master_index).da.set('trig_interval',s.triggerInterval);
             
             % 映射通道
+<<<<<<< HEAD
             for k = 1:length(s.da_chnl_map)
+=======
+            for k = 1:length(s.da_chnl_map);
+>>>>>>> b9634fd49c28c5d3f69a56bedc1ca44d98c10c99
                 channel = fieldnames(s.da_chnl_map{k});
                 channel_info = s.da_chnl_map{k}.(channel{1});
 %                 channel_info = regexp(channel_info,' ', 'split');
@@ -303,6 +323,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         function [I,Q] = Run(obj,isSample)
             I=0;Q=0;ret = -1;
             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
+<<<<<<< HEAD
             
             
             
@@ -311,6 +332,10 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 
 
 
+=======
+            obj.ad_list(1).ad.SetTrigCount(obj.runReps);
+            obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
+>>>>>>> b9634fd49c28c5d3f69a56bedc1ca44d98c10c99
             % 停止除连续波形外的通道，启动触发通道
             for k = 1:obj.numDABoards
                 obj.da_list(k).da.StartStop((15 - obj.da_list(k).mask_min)*16);
@@ -344,9 +369,19 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).mask_plus = 0;
                 obj.da_list(k).da_trig_delay = 0;
             end
+<<<<<<< HEAD
         end
         
         function SendWave(obj,channel,data)
+=======
+            
+        end
+        
+        function SendWave(obj,channel,data)
+%             if channel == 2
+%                 kkk = 1;
+%             end
+>>>>>>> b9634fd49c28c5d3f69a56bedc1ca44d98c10c99
             obj.da_channel_list(channel).data = data;
             ch_info = obj.da_channel_list(channel);
             ch_delay = obj.da_channel_list(channel).delay;
