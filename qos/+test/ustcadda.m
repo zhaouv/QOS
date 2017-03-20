@@ -2,9 +2,7 @@
 %%
 import qes.*
 import qes.hwdriver.sync.*
-cd('Q:\qos');
-addpath('Q:\qos\dlls');
-QS = qSettings.GetInstance('Q:\settings');
+QS = qSettings.GetInstance('D:\QOS\settings');
 %% not needed unless you want to reconfigure the DACs and ADCs during the measurement
 % a DACs and ADCs reconfiguration is only needed when the hardware settings
 % has beens changed, a reconfiguration will update the changes to the
@@ -24,8 +22,8 @@ dcChnl2.dcval = 0;
 dcChnl3.dcval = 0;
 dcChnl4.dcval = 0;
 %%
-% daInterface = ustc_da_v1([3,4,5,6,7,8,9,10,11,12]);
-daInterface = ustc_da_v1([1,2]);
+daInterface = ustc_da_v1([1:40]);
+% daInterface = ustc_da_v1([1,2]);
 awgObj = awg.GetInstance('myAWG',daInterface);
 %%
 import sqc.wv.*
@@ -41,7 +39,17 @@ T(g);
 F(g);
 %%
 g.awg = awgObj;
-g.awgchnl = [1,2];
+
+tic
+for ii = 0:19
+g.awgchnl = [2*ii+1,2*ii+2];
+g.SendWave();
+end
+toc
+
+tic
+g.Run(200);
+toc
 %%
 g.awg.SetTrigOutDelay(1,0);
 g.output_delay = [0,0];
