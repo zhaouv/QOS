@@ -25,7 +25,7 @@ function q = qName2Obj(qName)
 	for jj = 1:numel(fn)
 		idx = find(strcmp(fn{jj},prop_names));
 		if ~isempty(idx)
-			if ~strcmpi(metadata.PropertyList(idx).SetAccess, 'Public');
+			if ~strcmpi(metadata.PropertyList(idx).SetAccess, 'Public')
 				continue;
 			end
 		else

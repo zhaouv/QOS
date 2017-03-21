@@ -11,7 +11,7 @@ function qubits = loadQubits()
         S = qes.qSettings.GetInstance();
     catch
         throw(MException('QOS_loadQubits:qSettingsNotCreated',...
-			'qSettings not created: create the qSettings object, set user and select session first(only need to do once).'));
+			'qSettings not created: create the qSettings object, set user and select session first.'));
     end
     s = S.loadSSettings();
     if isempty(s)
@@ -45,7 +45,7 @@ function qubits = loadQubits()
         for jj = 1:numel(fn)
             idx = find(strcmp(fn{jj},prop_names));
             if ~isempty(idx)
-                if ~strcmpi(metadata.PropertyList(idx).SetAccess, 'Public');
+                if ~strcmpi(metadata.PropertyList(idx).SetAccess, 'Public')
                     continue;
                 end
             else

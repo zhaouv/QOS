@@ -558,7 +558,13 @@ option=get(src,'Value');
 obj = get(get(src,'Parent'),'UserData');
 obj.HilightFile(option);
 end
-
+function SelectDataCallback(src,entdata)
+obj = get(get(src,'Parent'),'UserData');
+handles = obj.uihandles;
+selection = get(handles.SelectData,'value');
+obj.SelectData(selection);
+obj.RefreshGUI();
+end
 function ExtractLine(src,entdata)
 obj = get(get(src,'Parent'),'UserData');
 obj.ExtractLine();
