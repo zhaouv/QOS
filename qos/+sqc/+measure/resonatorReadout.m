@@ -72,28 +72,6 @@ classdef resonatorReadout < qes.measurement.prob
             end
             
             num_qubits = numel(qubits);
-%             da_i_names = {};
-%             for ii = 1:num_qubits
-%                 da_i_names{end+1} = qubits{ii}.channels.r_da_i.instru;
-%             end
-%             da_i_names = unique(da_i_names);
-%             if numel(da_i_names) > 1
-%                 throw(MException('resonatorReadout:daMismatch',...
-% 					'the qubits to readout has different DAs for I channel.'));
-%             end
-%             da_q_names = {};
-%             for ii = 1:num_qubits
-%                 da_q_names{end+1} = qubits{ii}.channels.r_da_q.instru;
-%             end
-%             da_q_names = unique(da_q_names);
-%             if numel(da_q_names) > 1
-%                 throw(MException('resonatorReadout:daMismatch',...
-% 					'the qubits to readout has different DAs for Q channel.'));
-%             end
-%             if ~strcmp(da_q_names{1},da_i_names{1})
-%                 throw(MException('resonatorReadout:daMismatch',...
-% 					'can not output I and Q on different awgs.'));
-%             end
 
             da_i_names = qubits{1}.channels.r_da_i.instru;
             da_q_names = qubits{1}.channels.r_da_q.instru;
@@ -101,25 +79,6 @@ classdef resonatorReadout < qes.measurement.prob
                 throw(MException('resonatorReadout:daMismatch',...
 					'can not output I and Q on different awgs.'));
             end
-            
-%             da_i_chnls = [];
-%             for ii = 1:num_qubits
-%                 da_i_chnls(end+1) = qubits{ii}.channels.r_da_i.chnl;
-%             end
-%             da_i_chnls = unique(da_i_chnls);
-%             if numel(da_i_chnls) > 1
-%                 throw(MException('resonatorReadout:daChannelMismatch',...
-% 					'the qubits to readout has different DA channels for I channel.'));
-%             end
-%             da_q_chnls = [];
-%             for ii = 1:num_qubits
-%                 da_q_chnls(end+1) = qubits{ii}.channels.r_da_q.chnl;
-%             end
-%             da_q_chnls = unique(da_q_chnls);
-%             if numel(da_q_chnls) > 1
-%                 throw(MException('resonatorReadout:daChannelMismatch',...
-% 					'the qubits to readout has different DA channels for Q channel.'));
-%             end
 
             da_i_chnls = qubits{1}.channels.r_da_i.chnl;
             da_q_chnls = qubits{1}.channels.r_da_q.chnl;
@@ -127,29 +86,6 @@ classdef resonatorReadout < qes.measurement.prob
                 throw(MException('resonatorReadout:daChnlSettingError',...
 					'can not output I and Q on the same channel.'));
             end
-            
-%             ad_i_names = {};
-%             for ii = 1:num_qubits
-%                 ad_i_names{end+1} = qubits{ii}.channels.r_ad_i.instru;
-%             end
-%             ad_i_names = unique(ad_i_names);
-%             if numel(ad_i_names) > 1
-%                 throw(MException('resonatorReadout:adMismatch',...
-% 					'the qubits to readout has different ADs for I channel.'));
-%             end
-%             ad_q_names = {};
-%             for ii = 1:num_qubits
-%                 ad_q_names{end+1} = qubits{ii}.channels.r_ad_q.instru;
-%             end
-%             ad_q_names = unique(ad_q_names);
-%             if numel(ad_q_names) > 1
-%                 throw(MException('resonatorReadout:adMismatch',...
-% 					'the qubits to readout has different ADs for Q channel.'));
-%             end
-%             if ~strcmp(ad_q_names{1},ad_i_names{1})
-%                 throw(MException('resonatorReadout:adMismatch',...
-% 					'can not digitize I and Q on different ADs.'));
-%             end
 
             ad_i_names = qubits{1}.channels.r_ad_i.instru;
             ad_q_names = qubits{1}.channels.r_ad_q.instru;
@@ -158,25 +94,6 @@ classdef resonatorReadout < qes.measurement.prob
 					'can not digitize I and Q on different ADs.'));
             end
              
-%             ad_i_chnls = [];
-%             for ii = 1:num_qubits
-%                 ad_i_chnls(end+1) = qubits{ii}.channels.r_ad_i.chnl;
-%             end
-%             ad_i_chnls = unique(ad_i_chnls);
-%             if numel(ad_i_chnls) > 1
-%                 throw(MException('resonatorReadout:daChannelMismatch',...
-% 					'the qubits to readout has different AD channels for I channel.'));
-%             end
-%             ad_q_chnls = [];
-%             for ii = 1:num_qubits
-%                 ad_q_chnls(end+1) = qubits{ii}.channels.r_ad_q.chnl;
-%             end
-%             ad_q_chnls = unique(ad_q_chnls);
-%             if numel(ad_q_chnls) > 1
-%                 throw(MException('resonatorReadout:daChannelMismatch',...
-% 					'the qubits to readout has different AD channels for Q channel.'));
-%             end
-
             ad_i_chnls = qubits{1}.channels.r_ad_i.chnl;
             ad_q_chnls = qubits{1}.channels.r_ad_q.chnl;
             if ad_i_chnls == ad_q_chnls
@@ -203,17 +120,6 @@ classdef resonatorReadout < qes.measurement.prob
             obj = obj@qes.measurement.prob(prob_obj);
             obj.n = prob_obj.n;
             obj.qubits = qubits;
-
-%           mw_src_name = qubits{1}.channels.r_mw.instru;
-% 			mw_src_chnl = obj.qubits{1}.channels.r_mw.chnl;
-%             for ii = 2:num_qubits
-%                 if ~strcmp(obj.qubits{ii}.channels.r_mw.instru, mw_src_name) ||...
-% 					obj.qubits{ii}.channels.r_mw.chnl ~= mw_src_chnl
-%                     throw(MException('resonatorReadout:settingsMismatch',...
-% 						'the qubits to readout has different mw sources/channel.'));
-%                 end
-%             end
-% 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',mw_src_name);
 
 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',qubits{1}.channels.r_mw.instru);
             if isempty(uSrc)
@@ -330,6 +236,7 @@ classdef resonatorReadout < qes.measurement.prob
                 obj.jpa_pump_wv.SendWave();
             end
             obj.data = obj.instrumentObject();
+            % extradata: 1 by numQubits cell
             obj.extradata = obj.instrumentObject.extradata;
             obj.dataready = true;
         end

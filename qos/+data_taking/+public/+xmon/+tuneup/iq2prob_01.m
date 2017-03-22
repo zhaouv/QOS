@@ -20,7 +20,7 @@ function varargout = iq2prob_01(varargin)
     import sqc.*
     import sqc.op.physical.*
 	
-	numSamples_MIN = 5e3;
+	numSamples_MIN = 1e3;
 	
 	args = util.processArgs(varargin,{'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
@@ -49,6 +49,12 @@ function varargout = iq2prob_01(varargin)
         iq_raw_0(ii,:) = R.extradata{1};
     end
     iq_raw_0 = iq_raw_0(:)';
+    
+    figure();plot(iq_raw_0,'.b');
+    hold on;
+    plot(iq_raw_1,'.r');
+    plot(mean(iq_raw_0),'+k');
+    plot(mean(iq_raw_1),'+g');
 
     [center0, center1] =... 
 		data_taking.public.dataproc.iq2prob_centers(iq_raw_0,iq_raw_1,~args.gui);

@@ -29,7 +29,7 @@ function varargout = s21_rAmp(varargin)
     R.state = 1;
     R.swapdata = true;
     R.name = 'iq';
-    R.datafcn = @(x)mean(cell2mat(x));
+    R.datafcn = @(x)mean(x);
     
     x = expParam(R,'mw_src_frequency');
     x.offset = q.r_fc - q.r_freq;

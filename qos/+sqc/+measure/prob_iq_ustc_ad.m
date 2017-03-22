@@ -29,10 +29,10 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
                 val = {val};
             end
             selected_qubits = sqc.util.loadQubits();
-            num_qs = numel(val);
-			obj.num_qs = num_qs;
-            qs = cell(1,num_qs);
-            for ii = 1:num_qs
+            num_qs_ = numel(val);
+			obj.num_qs = num_qs_;
+            qs = cell(1,num_qs_);
+            for ii = 1:num_qs_
                 if ~ischar(val{ii}) && ~isa(val{ii},'sqc.qobj.qobject')
                     error('input not a qubit.');
                 end
@@ -46,10 +46,10 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
                 qs{ii} = selected_qubits{qes.util.find(val{ii},selected_qubits)};
             end
             obj.qubits = qs;
-			center0_ = zeros(1,num_qs);
-            center1_ = zeros(1,num_qs);
-            center2_ = zeros(1,num_qs);
-            for ii = 1:num_qs
+			center0_ = zeros(1,num_qs_);
+            center1_ = zeros(1,num_qs_);
+            center2_ = zeros(1,num_qs_);
+            for ii = 1:num_qs_ 
                 center0_(ii) = obj.qubits{ii}.r_iq2prob_center0;
                 center1_(ii) = obj.qubits{ii}.r_iq2prob_center1;
                 center2_(ii) = obj.qubits{ii}.r_iq2prob_center2;
@@ -84,15 +84,12 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
             Run@qes.measurement.prob(obj);
             obj.instrumentObject.Run();
             iq_raw = obj.instrumentObject.extradata;
-            if ~iscell(iq_raw)
-                iq_raw = {iq_raw};
-            end
 			if obj.threeStates
 				p = zeros(obj.num_qs,obj.n);
                 for ii = 1:obj.num_qs
-                    d0 = abs(iq_raw{ii} - obj.center0);
-                    d1 = abs(iq_raw{ii} - obj.center1);
-                    d2 = abs(iq_raw{ii} - obj.center2);
+                    d0 = abs(iq_raw(ii,:) - obj.center0);
+                    d1 = abs(iq_raw(ii,:) - obj.center1);
+                    d2 = abs(iq_raw(ii,:) - obj.center2);
                     [~,minIdx] = min([d0; d1; d2],[],1);
 					p(ii,:) = minIdx-1;
                 end
@@ -107,8 +104,8 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
             else
 				p = zeros(obj.num_qs,obj.n);
                 for ii = 1:obj.num_qs
-                    d0 = abs(iq_raw{ii} - obj.center0);
-                    d1 = abs(iq_raw{ii} - obj.center1);
+                    d0 = abs(iq_raw(ii,:) - obj.center0);
+                    d1 = abs(iq_raw(ii,:) - obj.center1);
                     [~,minIdx] = min([d0; d1],[],1);
 					p(ii,:) = minIdx-1;
                 end

@@ -1,7 +1,6 @@
 function TwoQSwap(varargin)
 % TwoQSwap: two qubit swap
 % bias qubit q1, drive qubit q2 and readout qubit q1 and q2,
-% q1, q2 can be the same qubit or diferent qubits,
 % q1, q2 all has to be the selected qubits in the current session,
 % 
 % <_o_> = T1_111('qubit1',_o&c_,'qubit2',_o&c_,...
@@ -31,6 +30,11 @@ args = util.processArgs(varargin,{'gui',false,'notes',''});
 [q1, q2] =...
     data_taking.public.util.getQubits(args,{'qubit1', 'qubit2'});
 qs = {q1, q2};
+
+if q1==q2
+    throw(MException('QOS_TwoQSwap:sameQubitErr',...
+        'the source qubit and the target qubit are the same.'));
+end
 
 X = gate.X(qs{args.driveQubit});
 Z = op.zBias4Spectrum(qs{args.biasQubit}); % todo: use iSwap gate

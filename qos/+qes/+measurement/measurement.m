@@ -72,7 +72,7 @@ classdef (Abstract = true) measurement < qes.qHandle
             else
                 val = obj.data_img;
             end
-            if ~isempty(obj.datafcn)
+            if ~isempty(obj.datafcn) % return mean of data for example
                 val = feval(obj.datafcn,val);
             end
         end

@@ -6,7 +6,7 @@ classdef (Abstract = true) prob < qes.measurement.measurement
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     
-    properties (Abstract = true) % to be redefine in concrete subclasses. All GetP subclasses should have this property!
+    properties (Abstract = true) % to be redefine in concrete subclasses. All prob subclasses should have this property!
         n	% number of samples,  probability = number of event occurence/n
     end
 

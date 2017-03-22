@@ -35,7 +35,7 @@ R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 R.swapdata = true;
 R.name = 'iq';
-R.datafcn = @(x)mean(cell2mat(x));
+R.datafcn = @(x)mean(x);
 Z = op.zBias4Spectrum(biasQubit);
 
 x = expParam(Z,'zpulse_amp');

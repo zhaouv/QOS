@@ -80,8 +80,8 @@ switch args.dataTyp
         % pass
     case 'S21'
         R.swapdata = true;
-        R.name = 'iq';
-        R.datafcn = @(x)mean(abs(cell2mat(x)));
+        R.name = '|S21|';
+        R.datafcn = @(x)mean(abs(x));
     otherwise
         throw(MException('QOS_rabi_amp111','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
 end

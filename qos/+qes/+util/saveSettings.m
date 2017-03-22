@@ -51,7 +51,7 @@ function saveSettings(spath, field,value)
         
         return;
     end
-    for ii = 1:numFiles;
+    for ii = 1:numFiles
         if strcmp(fileinfo(ii).name,'.') || strcmp(fileinfo(ii).name,'..')
             continue;
         end

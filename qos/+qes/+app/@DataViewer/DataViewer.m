@@ -55,6 +55,7 @@ classdef (Sealed = true)DataViewer < handle
         uihandles % handles of ui componenents.
         donotplot = false;
         changed2newlst = false;
+		resizable
     end
     properties (Constant = true, GetAccess = private)
         numpreview = 8 % number of preview data files, do not change.
@@ -74,13 +75,21 @@ classdef (Sealed = true)DataViewer < handle
         availablefitfcns={'Spectrum','T_1','Ramsey','Rabi','Test'};
     end
     methods
-        function obj = DataViewer(datadir)
+        function obj = DataViewer(datadir, resizable_)
             if nargin && ischar(datadir) && isdir(datadir) && ~isempty(dir(datadir))
                 obj.datadir = datadir;
             else
                 obj.datadir = pwd;
             end
-            obj.CreateGUI();
+			if nargin < 2
+				resizable_ = true;
+			end
+			obj.resizable = resizable_;
+			if obj.resizable
+				obj.CreateGUI_resizable();
+			else
+				obj.CreateGUI_fixed();
+			end
         end
         function set.plotfunc(obj,val)
             val = round(val);
@@ -359,8 +368,8 @@ classdef (Sealed = true)DataViewer < handle
             end
         end
         SelectData(obj,choice)
-        
-        RefreshGUI(obj)
+        RefreshGUI_fixed(obj)
+        RefreshGUI_resizable(obj)
         DeleteFile(obj)
         HideFile(obj)
         HilightFile(obj,option)

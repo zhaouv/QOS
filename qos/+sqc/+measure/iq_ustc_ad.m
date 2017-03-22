@@ -98,18 +98,21 @@ classdef iq_ustc_ad < qes.measurement.iq
             end
             % typically, one need ot remove a few data points at the
             % beginning or at the end of each segament due to trigger
-            % and signal are not exactly syncronized in most cases
+            % and signal may not be exactly syncronized.
             selectidx = obj.startidx:eidx;
             Vi = Vi(:,selectidx);
             Vq = Vq(:,selectidx);
-            IQ = NaN*zeros(1,obj.n); 
+            numFreq = numel(obj.freq);
+            IQ = NaN*zeros(numFreq,obj.n);
             idx = 1:eidx - obj.startidx+1;
             t = (idx-1)/obj.instrumentObject.samplingRate;
-            kernel = exp(-2j*pi*obj.freq.*t);
-            for ii = 1:obj.n
-                IQ_ = kernel.*(Vi(ii,:)+1j*Vq(ii,:));
-                IQ_ = mean(Mc*[real(IQ_);imag(IQ_)],2); % correct mixer imballance
-                IQ(ii) = IQ_(1)+1j*IQ_(2);
+            for ii = 1:numFreq
+                kernel = exp(-2j*pi*obj.freq.*t);
+                for jj = 1:obj.n
+                    IQ_ = kernel.*(Vi(jj,:)+1j*Vq(jj,:));
+                    IQ_ = mean(Mc*[real(IQ_);imag(IQ_)],2); % correct mixer imballance
+                    IQ(ii,jj) = IQ_(1)+1j*IQ_(2);
+                end
             end
         end
         function Amp = Amp(obj,Vi, Vq)

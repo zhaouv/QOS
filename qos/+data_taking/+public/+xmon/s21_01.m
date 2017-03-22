@@ -26,13 +26,10 @@ function varargout = s21_01(varargin)
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
     X = gate.X(q);
-    R = measure.resonatorReadout(q);
+    R = measure.rReadout4S21_01(q);
     R.delay = X.length;
-    R.swapdata = true;
     R.name = 'iq';
-    R.datafcn = @(x)mean(cell2mat(x));
     
-    % with pi pulse
     x = expParam(R,'mw_src_frequency');
     x.offset = q.r_fc - q.r_freq;
     x.name = [q.name,' readout frequency'];
@@ -43,13 +40,17 @@ function varargout = s21_01(varargin)
     e1 = experiment();
     e1.sweeps = s1;
     e1.measurements = R;
-    if ~args.gui
-        e1.showctrlpanel = false;
-        e1.plotdata = false;
-    end
+    e1.showctrlpanel = false;
+    e1.plotdata = false;
     e1.savedata = false;
     e1.Run();
     iq_1 = e1.data{1};
+    if args.gui
+        ax = axes('Parent',figure('NumberTitle','off','Name','QOS | |0>, |1> s21'));
+        plot(ax, args.freq,abs(iq_1));
+        legend(ax,{'|1>'});
+        hold(ax,'on');
+    end
     
     % without pi pulse
     X = gate.X(q);
@@ -68,14 +69,22 @@ function varargout = s21_01(varargin)
     e0 = experiment();
     e0.sweeps = s1;
     e0.measurements = R;
-    if ~args.gui
-        e0.showctrlpanel = false;
-        e0.plotdata = false;
-    end
+    e0.showctrlpanel = false;
+    e0.plotdata = false;
     e0.savedata = false;
     e0.Run();
     
-    e0.data{1} = [e0.data{1},iq_1];
+    if args.gui
+        if ~isvalid(ax)
+            ax = axes('Parent',figure('NumberTitle','off','Name','QOS | |0>, |1> s21'));
+            plot(ax, args.freq, abs(iq_1));
+            hold(ax,'on');
+        end
+        plot(ax, args.freq, abs(cell2mat(e0.data{1})));
+        legend(ax,{'|1>, |0>'});
+    end
+    
+    e0.data{1} = [e0.data{1},e1.data{1}];
     e0.notes = args.notes;
     e0.addSettings({'fcn','args'},{fcn_name,args});
     if args.save

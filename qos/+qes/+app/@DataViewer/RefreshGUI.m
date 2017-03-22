@@ -163,7 +163,11 @@ function RefreshGUI(obj)
             feval(PlotFcn,data.Data, data.SweepVals,data.ParamNames,data.SwpMainParam,measurementnames,handles.mainax);
             colorbar('off','peer',handles.mainax);
             obj.uihandles.ColorBar = colorbar('peer',handles.mainax);
-            set(obj.uihandles.ColorBar,'Units','characters','Position',handles.colorbarpos);
+			if obj.resizable
+				set(obj.uihandles.ColorBar,'Units','normalized','Position',handles.colorbarpos);
+			else
+				set(obj.uihandles.ColorBar,'Units','characters','Position',handles.colorbarpos);
+			end
             set(handles.mainax,'Position',handles.mainaxfullpos);
         else
             plot(handles.mainax,NaN,NaN);
