@@ -5,7 +5,8 @@ classdef (Abstract = true) Z_z_base < sqc.op.physical.operator
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     properties
-        zpulse_amp % expose qubit setting g_Z<?>_z_amp for tunning
+        % zpulse_amp % expose qubit setting g_Z<?>_z_amp for tunning
+        amp
     end
     methods
         function obj = Z_z_base(qubit)

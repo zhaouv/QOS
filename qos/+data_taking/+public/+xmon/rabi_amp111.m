@@ -9,7 +9,7 @@ function varargout = rabi_amp111(varargin)
 % <_o_> = rabi_amp111('biasQubit',_c&o_,'biasAmp',[_f_],'biasLonger',_i_,...
 %       'driveQubit',_c&o_,...
 %       'readoutQubit',_c&o_,...
-%       'xyDriveAmp',[_f_],'detuning',[_f_],'driveTyp',_c_,...
+%       'xyDriveAmp',[_f_],'detuning',<[_f_]>,'driveTyp',_c_,...
 %       'dataTyp','_c_',...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -21,7 +21,7 @@ function varargout = rabi_amp111(varargin)
 % []: can be an array, scalar also acceptable
 % {}: must be a cell array
 % <>: optional, for input arguments, assume the default value if not specified
-% arguments order not important as long as the form correct pairs.
+% arguments order not important as long as they form correct pairs.
 
 % Yulin Wu, 2016/12/27
 
@@ -30,7 +30,8 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'gui',false,'notes','','detuning',0,'driveTyp','X','dataTyp','P','save',true});
+args = util.processArgs(varargin,{'detuning',0,'driveTyp','X','dataTyp','P',...
+    'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] =...
     data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
 
@@ -70,7 +71,7 @@ switch args.driveTyp
         XYLength = 2*g.length+g.gate_buffer;
 end
 Z = op.zBias4Spectrum(biasQubit);
-Z.zpulse_amp = args.biasAmp;
+Z.amp = args.biasAmp;
 Z.ln = XYLength + 2*args.biasLonger;
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = Z.length;

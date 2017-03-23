@@ -13,7 +13,7 @@ function varargout = spin_echo(varargin)
 % []: can be an array, scalar also acceptable
 % {}: must be a cell array
 % <>: optional, for input arguments, assume the default value if not specified
-% arguments order not important as long as the form correct pairs.
+% arguments order not important as long as they form correct pairs.
 
 
 % Yulin Wu, 2016/12/27

@@ -23,13 +23,13 @@ function varargout = optReadoutFreq(varargin)
     args = util.processArgs(varargin,{'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 	
-    R_AVG_MIN = 1000;
+    R_AVG_MIN = 1e3;
     if q.r_avg < R_AVG_MIN
         q.r_avg = R_AVG_MIN;
     end
     frequency = q.r_freq-3*q.t_rrDipFWHM_est:q.t_rrDipFWHM_est/20:q.r_freq+3*q.t_rrDipFWHM_est;
     e = s21_01('qubit',q,'freq',frequency);
-    data = cell2mat(e.data{1});
+    data = e.data{1};
     data = data(2:end,:); % 2:end, drop first point to deal with an ad bug, may not be necessary in future versions
     frequency = frequency(2:end);
     data(:,1) = abs(data(:,1)).*...
@@ -52,6 +52,20 @@ function varargout = optReadoutFreq(varargin)
         legend(ax,{'|1>','|0>','Max IQ separation'});
         xlabel(ax,'I');
         ylabel(ax,'Q');
+        xlim = get(ax,'XLim');
+        xRange = xlim(2) - xlim(1);
+        ylim = get(ax,'YLim');
+        yRange = ylim(2) - ylim(1);
+        dR = xRange - yRange;
+        if dR > 0
+            ylim(2) = ylim(2) + 0.5*dR;
+            ylim(1) = ylim(1) - 0.5*dR;
+            set(ax,'YLim',ylim);
+        else
+            xlim(2) = xlim(2) - 0.5*dR;
+            xlim(1) = xlim(1) + 0.5*dR;
+            set(ax,'XLim',xlim);
+        end
         title(ax,sprintf('Maximum IQ separation frequency: %0.5fGHHz',optFreq/1e9));
         set(ax,'PlotBoxAspectRatio',[1,1,1]);
         pbaspect(ax,[1,1,1]);

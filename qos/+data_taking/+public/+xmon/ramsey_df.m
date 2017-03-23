@@ -3,7 +3,7 @@ function varargout = ramsey_df(varargin)
 % 
 % <_o_> = ramsey('qubit',_c&o_,...
 %       'time',[_i_],'detuning',[_f_],...
-%       'dataTyp','_c_',...   % S21 or P
+%       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -14,7 +14,7 @@ function varargout = ramsey_df(varargin)
 % []: can be an array, scalar also acceptable
 % {}: must be a cell array
 % <>: optional, for input arguments, assume the default value if not specified
-% arguments order not important as long as the form correct pairs.
+% arguments order not important as long as they form correct pairs.
 
 % Yulin Wu, 2016/12/27
 
@@ -23,7 +23,7 @@ function varargout = ramsey_df(varargin)
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'gui',false,'notes','','detuning',0,'save',true});
+    args = util.processArgs(varargin,{'dataTyp','P','gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     X2 = gate.X2p(q);
@@ -36,7 +36,7 @@ function varargout = ramsey_df(varargin)
         case 'S21'
             R.swapdata = true;
             R.name = 'iq';
-            R.datafcn = @(x)mean(abs(cell2mat(x)));
+            R.datafcn = @(x)mean(abs(x));
         otherwise
             throw(MException('QOS_rabi_amp111','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end

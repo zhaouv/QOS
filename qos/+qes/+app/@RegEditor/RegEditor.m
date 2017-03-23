@@ -29,5 +29,10 @@ classdef (Sealed = true)RegEditor < handle
         table_data = TableData(obj,name,parentName)
     end
     methods (Static)
+		cm = ico_settings()
+		cm = ico_user()
+		cm = ico_hardware_pci()
+		cm = ico_hardwave_chip()
+		cm = ico_qobject()
     end
 end

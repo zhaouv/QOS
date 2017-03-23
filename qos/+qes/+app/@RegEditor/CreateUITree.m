@@ -6,18 +6,25 @@ function t = CreateUITree(obj)
     selectedSSGroups = ['public',obj.qs.loadSSettings('selected')];
     selectedHwSGroups = obj.qs.loadHwSettings('selected');
     
-    ss = uitreenode('v0', 'user settings', 'user settings', '.NULL', false);
+    ss = uitreenode('v0', 'session settings', [obj.qs.user, '-',obj.qs.session], '.NULL', false);
+	ss.setIcon(im2java(qes.app.RegEditor.ico_user()));
     for ii = 1:numel(selectedSSGroups)
-        ss.add(uitreenode('v0', selectedSSGroups{ii},  selectedSSGroups{ii},  [], true));
+		node = uitreenode('v0', selectedSSGroups{ii},  selectedSSGroups{ii},  [], true);
+		node.setIcon(im2java(qes.app.RegEditor.ico_qobject()));
+        ss.add(node);
     end
 
-    hws = uitreenode('v0', 'hardware settings', 'hardware settings', '.NULL', false);
+    hws = uitreenode('v0', 'hardware settings', 'hardware', '.NULL', false);
+	hws.setIcon(im2java(qes.app.RegEditor.ico_hardware_pci()));
     for ii = 1:numel(selectedHwSGroups)
-        hws.add(uitreenode('v0', selectedHwSGroups{ii},  selectedHwSGroups{ii},  [], true));
+		node = uitreenode('v0', selectedHwSGroups{ii},  selectedHwSGroups{ii},  [], true);
+		node.setIcon(im2java(qes.app.RegEditor.ico_hardwave_chip()));
+        hws.add(node);
     end
 
     % Root node
-    t = uitreenode('v0', 'Registry', 'Registry', [], false);
+    t = uitreenode('v0', 'registry', 'registry', [], false);
+	t.setIcon(im2java(qes.app.RegEditor.ico_settings()));
     t.add(hws);
     t.add(ss);
 end

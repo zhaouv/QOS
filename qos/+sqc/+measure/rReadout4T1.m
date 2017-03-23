@@ -20,13 +20,16 @@ classdef rReadout4T1 < sqc.measure.resonatorReadout_ss
             obj.drive_mw_src = drive_mw_src;
         end
         function Run(obj)
-            obj.drive_mw_src.on = true;
+%             obj.drive_mw_src.on = true;
             Run@sqc.measure.resonatorReadout_ss(obj);
             data_with_mw = obj.data;
-            obj.drive_mw_src.on = false;
+            data_with_mw_e = mean(obj.extradata);
+%             obj.drive_mw_src.on = false;
             Run@sqc.measure.resonatorReadout_ss(obj);
             data_without_mw = obj.data;
-            obj.data = [data_with_mw,data_without_mw];
+            data_without_mw_e = mean(obj.extradata);
+            obj.data = [data_without_mw,data_with_mw];
+            obj.extradata = [mean(abs(data_without_mw_e)),mean(abs(data_with_mw_e))];
             obj.dataready = true;
         end
     end

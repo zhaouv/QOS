@@ -13,14 +13,14 @@ function varargout = setF01(varargin)
 % []: can be an array, scalar also acceptable
 % {}: must be a cell array
 % <>: optional, for input arguments, assume the default value if not specified
-% arguments order not important as long as the form correct pairs.
+% arguments order not important as long as they form correct pairs.
     
     % Yulin Wu, 2017/2/8
 
     args = util.processArgs(varargin,{'gui',false,'save',true});
 	q = copy(getQubits(args,{'qubit'})); % we need to modify the qubit properties, better make a copy to avoid unwanted modifications to the original.
     
-    error('phased out');
+    error('this function is obsolete.');
 	
 	varargout{1} = [];
 end

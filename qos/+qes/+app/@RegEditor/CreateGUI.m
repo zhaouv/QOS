@@ -51,15 +51,12 @@ function CreateGUI(obj)
     handles.mtree.expand(rootNode);
     function SelectFcn(tree,~)
         nodes = tree.SelectedNodes;
-        if isempty(nodes)
+        if isempty(nodes) || ~nodes(1).isLeaf
             return;
         end
         node = nodes(1);
-        if ~node.isLeaf
-            return;
-        end
         name = get(node,'Name');
-        parentName = get(get(node,'Parent'),'Name');
+        parentName = get(get(node,'Parent'),'Value');
         obj.nodeName = name;
         obj.nodeParent = parentName;
         set(handles.InfoTable,'Data',obj.TableData(name,parentName));
@@ -70,7 +67,7 @@ function CreateGUI(obj)
          'ColumnName',{'Key','Value'},...
          'ColumnFormat',{'char','char'},...
          'ColumnEditable',[false,true],...
-         'ColumnWidth',{180,180},...
+         'ColumnWidth',{170,170},...
          'RowName',[],...
          'CellEditCallback',@saveValue,...
          'Position',[210,5,360,910]);
@@ -83,7 +80,7 @@ function CreateGUI(obj)
         name = tdata{entdata.Indices(1),1};
         try
             switch obj.nodeParent
-                case 'user settings'
+                case 'session settings'
                     obj.qs.saveSSettings({obj.nodeName, name},entdata.EditData);
                 case 'hardware settings'
                     obj.qs.saveHwSettings({obj.nodeName, name},entdata.EditData);

@@ -7,7 +7,7 @@ function table_data = TableData(obj,name,parentName)
     switch parentName
         case 'hardware settings'
             s = obj.qs.loadHwSettings(name);
-        case 'user settings'
+        case 'session settings'
             s = obj.qs.loadSSettings(name);
         otherwise
             throw(MException('QOS_RegEditor:unrecognizedInput',...
@@ -29,9 +29,9 @@ function table_data = Struct2TableData(data,prefix)
         if isnumeric(Value)
             if numel(Value) == 1
                 if abs(Value) < 1e3 && abs(Value) > 1e-3
-                    Value = num2str(Value);
+                    Value = num2str(Value,'%0.5f');
                 else
-                    Value = num2str(Value,'%0.3e');
+                    Value = num2str(Value,'%0.5e');
                 end
             else
                 Value = 'numeric array or matrix';
