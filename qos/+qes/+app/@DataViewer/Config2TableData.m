@@ -1,7 +1,7 @@
 function table_data = Config2TableData(Config)
 % 
 
-% Copyright 2017 Yulin Wu, USTC
+% Copyright 2017 Yulin Wu, USTC, China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     table_data = {};
@@ -30,11 +30,7 @@ function table_data = Struct2TableData(data,prefix)
         end
         if isnumeric(Value)
             if numel(Value) == 1
-                if abs(Value) < 1e3 && abs(Value) > 1e-3
-                    Value = num2str(Value);
-                else
-                    Value = num2str(Value,'%0.3e');
-                end
+                Value = qes.util.num2strCompact(Value);
             else
                 Value = 'numeric array or matrix';
             end

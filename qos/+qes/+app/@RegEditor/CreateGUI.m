@@ -53,20 +53,6 @@ function CreateGUI(obj)
         'value',1,'FontSize',9,'FontUnits','points','HorizontalAlignment','Left',...
         'ForegroundColor',[0.5,0.5,1],'BackgroundColor',[0.9,1,0.8],'Units','characters','Position',pos,'Callback',{@SelectSessionCallback},...
         'Tooltip','Select session.','Enable','off');
-    if ~isempty(obj.sessionList)
-        set(obj.guiHandles.SelectSession,'String',obj.sessionList,'Enable','on');
-        if ~isempty(obj.qs.session)
-            obj.sessionList = obj.userList(2:end);
-            set(obj.guiHandles.SelectSession,'String',obj.sessionList);
-            idx = qes.util.find(obj.qs.session,obj.sessionList);
-            if isempty(idx) || numel(idx) > 1
-                error('BUG! this should not happen!');
-            end
-            set(obj.guiHandles.SelectSession,'Value',idx,'Enable','on');
-            set(obj.guiHandles.iniBtn,'Enable','on');
-            obj.createUITree();
-        end
-    end
 
     pos_ = pos;
     pos = get(obj.guiHandles.SelectSessionTitle,'Position');
@@ -87,6 +73,21 @@ function CreateGUI(obj)
          'RowName',[],...
          'CellEditCallback',@saveValue,...
          'Position',[210,5,360,910]);
+     
+    if ~isempty(obj.sessionList)
+        set(obj.guiHandles.SelectSession,'String',obj.sessionList,'Enable','on');
+        if ~isempty(obj.qs.session)
+            obj.sessionList = obj.sessionList(2:end);
+            set(obj.guiHandles.SelectSession,'String',obj.sessionList);
+            idx = qes.util.find(obj.qs.session,obj.sessionList);
+            if isempty(idx) || numel(idx) > 1
+                error('BUG! this should not happen!');
+            end
+            set(obj.guiHandles.SelectSession,'Value',idx,'Enable','on');
+            set(obj.guiHandles.iniBtn,'Enable','on');
+            obj.createUITree();
+        end
+    end
 
     if ~isempty(obj.qs.user) && ~isempty(obj.qs.session)
     	obj.createUITree();

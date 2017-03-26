@@ -34,7 +34,7 @@ classdef (Sealed = true)RegEditor < handle
                 end
             end
             userList_ = {'_Not set_'};
-            fInfo = dir(obj.qs.root);
+            fInfo = dir(fullfile(obj.qs.root));
             for ii = 1:numel(fInfo)
                 if fInfo(ii).isdir &&...
                         ~ismember(fInfo(ii).name,{'.','..','calibration','hardware'}) &&...
@@ -58,22 +58,50 @@ classdef (Sealed = true)RegEditor < handle
             CreateGUI(obj);
         end
         function createUITree(obj)
+            fInfo = dir(fullfile(obj.qs.root,obj.qs.user,obj.qs.session));
+            SSGroups = {};
+            for ii = 1:numel(fInfo)
+                if ~fInfo(ii).isdir || strcmp(fInfo(ii).name,'.')||...
+                        strcmp(fInfo(ii).name,'..') ||...
+                        qes.util.startsWith(fInfo(ii).name,'_')
+                    continue;
+                end
+                SSGroups = [SSGroups, {fInfo(ii).name}];
+            end
             selectedSSGroups = ['public',obj.qs.loadSSettings('selected')];
-            selectedHwSGroups = obj.qs.loadHwSettings('selected');
-
             ss = uitreenode('v0', 'session settings', [obj.qs.user, '-',obj.qs.session], '.NULL', false);
             ss.setIcon(im2java(qes.app.RegEditor.ico_user()));
-            for ii = 1:numel(selectedSSGroups)
-                node = uitreenode('v0', selectedSSGroups{ii},  selectedSSGroups{ii},  [], true);
-                node.setIcon(im2java(qes.app.RegEditor.ico_qobject()));
+            for ii = 1:numel(SSGroups)
+                node = uitreenode('v0', SSGroups{ii},  SSGroups{ii},  [], true);
+                if qes.util.ismember(SSGroups{ii},selectedSSGroups) ||...
+                        strcmp(SSGroups{ii},'public')
+                    node.setIcon(im2java(qes.app.RegEditor.ico_qobject()));
+                else
+                    node.setIcon(im2java(brighten(qes.app.RegEditor.ico_qobject(),0.95)));
+                end
                 ss.add(node);
             end
-
+            fInfo = dir(fullfile(obj.qs.root,'hardware',...
+                qes.util.loadSettings(obj.qs.root,{'hardware','selected'})));
+            HwSGroups = {};
+            for ii = 1:numel(fInfo)
+                if ~fInfo(ii).isdir || strcmp(fInfo(ii).name,'.')||...
+                        strcmp(fInfo(ii).name,'..') ||...
+                        qes.util.startsWith(fInfo(ii).name,'_')
+                    continue;
+                end
+                HwSGroups = [HwSGroups, {fInfo(ii).name}];
+            end
+            selectedHwSGroups = obj.qs.loadHwSettings('selected');
             hws = uitreenode('v0', 'hardware settings', 'hardware', '.NULL', false);
             hws.setIcon(im2java(qes.app.RegEditor.ico_hardware_pci()));
-            for ii = 1:numel(selectedHwSGroups)
-                node = uitreenode('v0', selectedHwSGroups{ii},  selectedHwSGroups{ii},  [], true);
-                node.setIcon(im2java(qes.app.RegEditor.ico_hardwave_chip()));
+            for ii = 1:numel(HwSGroups)
+                node = uitreenode('v0', HwSGroups{ii},  HwSGroups{ii},  [], true);
+                if qes.util.ismember(HwSGroups{ii},selectedHwSGroups)
+                    node.setIcon(im2java(qes.app.RegEditor.ico_hardwave_chip()));
+                else
+                     node.setIcon(im2java(brighten(qes.app.RegEditor.ico_hardwave_chip(),0.7)));
+                end
                 hws.add(node);
             end
 
