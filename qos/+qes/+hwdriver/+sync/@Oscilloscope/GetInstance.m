@@ -6,7 +6,6 @@ function obj = GetInstance(name,interfaceobj,drivertype)
 
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
-
     persistent objlst;
     if isempty(objlst)
         if nargin == 0 || isempty(name)
@@ -14,9 +13,9 @@ function obj = GetInstance(name,interfaceobj,drivertype)
                 'No existing instance, all input paramenters should be specified!');
         end
         if nargin > 2
-            obj = Oscilloscope(name,interfaceobj,drivertype);
+            obj = qes.hwdriver.sync.Oscilloscope(name,interfaceobj,drivertype);
         else
-            obj = Oscilloscope(name,interfaceobj);
+            obj = qes.hwdriver.sync.Oscilloscope(name,interfaceobj);
         end
         objlst = obj;
     else
@@ -43,9 +42,9 @@ function obj = GetInstance(name,interfaceobj,drivertype)
                         'No existing instance, all input paramenter should be specified!');
                 end
                 if nargin > 2
-                    obj = Oscilloscope(name,interfaceobj,drivertype);
+                    obj = qes.hwdriver.sync.Oscilloscope(name,interfaceobj,drivertype);
                 else
-                    obj = Oscilloscope(name,interfaceobj);
+                    obj = qes.hwdriver.sync.Oscilloscope(name,interfaceobj);
                 end
                 objlst(end+1) = obj;
             end

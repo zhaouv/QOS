@@ -70,7 +70,45 @@ figure();
 semilogy(f/1e9,spc_amp);
 xlabel('frequency(GHz)');ylabel('amplitude');
 %% Oscilloscope
-iobj = visa('agilent','TCPIP0::C500014-70KC::inst0::INSTR');
-osc = Oscilloscope.GetInstance('tekdpo7000',dpo70404c,'tekdpo7000');
+dpo70404c =visa('agilent','TCPIP0::C500014-70KC::inst0::INSTR');
+osc = qes.hwdriver.sync.Oscilloscope.GetInstance('tekdpo7000',dpo70404c,'tekdpo7000');
 %%
-osc.CreatGUI();
+result=osc.CreatGUI;
+%result : class pointer
+%everytime click add ; result will refresh
+% >>result
+%
+% result = 
+% 
+%         t: [1×125000 double]
+%     waves: [125000×4 double]
+%     datas: [11×1 double]
+%
+%result.t;      1*datastop unit: s
+%result.waves;  datastop*4 unit: V
+%result.datas;  double(11,1) [Mearsure1~8,horizontalscale,horizontalposition,datastop]
+%%
+osc.horizontalposition=50;
+osc.horizontalscale=1.0000e-06;
+%osc.samplerate=<NR3>;
+%a={osc.horizontalscale,osc.acqlength,osc.samplerate}
+% set_able? 1 0 1
+%a{2}=10*a{1}*a{3}
+%And you should set datastop=acqlength to get all points
+osc.datastop=osc.acqlength;
+%
+osc.acquisitionmode='AVE';
+osc.acquisitionnumavg=100;
+%osc.acquisitionmode='SAM';
+%
+osc.datasource='ch1,ch2,ch3,ch4';
+datanow=osc.getdatanow();
+data=osc.getdata();%wait_trigger
+%div=data/32768*5;
+%
+% inputdatas=str2double(query(dpo70404c,'CH3:SCALe?'));% 1 div=? V
+% fprintf(dpo70404c,['CH2:SCALe ' num2str(0.1)]);% 1 div=? V
+% %div:-5~5 -> data -32767~32767   2^15=32768
+% 
+% inputdatas=str2double(query(dpo70404c,'CH3:POSition?'));
+% fprintf(dpo70404c,['CH2:POSition ' num2str(1)]);% ? div
