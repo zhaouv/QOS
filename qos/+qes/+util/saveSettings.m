@@ -97,22 +97,25 @@ function saveSettings(spath, field,value)
                         if ~isnumeric(value)
                             try
                                 if isnan(str2double(value))
-                                    error('saveSettings:invalidInput','value type of the current settings field is numeric, %s given.', class(value));
+                                    if ischar(value)
+                                        error('saveSettings:invalidInput',...
+                                            'value type of the current settings field is numeric, %s given.', value);
+                                    else
+                                        error('saveSettings:invalidInput',...
+                                            'value type of the current settings field is numeric, %s given.', class(value));
+                                    end
                                 end
                             catch
-                                error('saveSettings:invalidInput','value type of the current settings field is numeric, %s given.', class(value));
+                                error('saveSettings:invalidInput',...
+                                    'value type of the current settings field is numeric, %s given.', class(value));
                             end
                         end
                         if ~ischar(value) % if not converted to char string already by caller.
                             str = '';
                             for ww = 1:numel(value)
-                                if abs(value(ww)) >1e3 || abs(value(ww)) < 1e-3
-                                    str = [str,',',num2str(value(ww),'%0.5e')];
-                                else
-                                    str = [str,',',num2str(value(ww),'%0.5f')];
-                                end
+                                str = [str,',',qes.util.num2strCompact(value(ww))];
                             end
-                            value = str(2:end); % for array
+                            value = str(2:end);
                         end
                         newfilename = [field{1},'=',value,'.key'];
                         movefile(fullfile(spath,fileinfo(ii).name),fullfile(spath,newfilename));

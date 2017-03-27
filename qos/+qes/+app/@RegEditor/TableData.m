@@ -28,11 +28,7 @@ function table_data = Struct2TableData(data,prefix)
         end
         if isnumeric(Value)
             if numel(Value) == 1
-                if abs(Value) < 1e3 && abs(Value) > 1e-3
-                    Value = num2str(Value,'%0.5f');
-                else
-                    Value = num2str(Value,'%0.5e');
-                end
+                Value = qes.util.num2strCompact(Value);
             else
                 Value = 'numeric array or matrix';
             end

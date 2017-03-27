@@ -13,7 +13,7 @@ function CreateGUI(obj)
     warning('off');
     jf = get(obj.guiHandles.reWin,'JavaFrame');
     jf.setFigureIcon(javax.swing.ImageIcon(...
-        im2java(qes.ui.icons.qos1_32by32())));
+        qes.ui.icons.qos1));
     warning('on');
     movegui(obj.guiHandles.reWin,'center');
 %     obj.guiHandles.basepanel=uipanel(...

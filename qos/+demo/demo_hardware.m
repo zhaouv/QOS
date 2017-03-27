@@ -52,7 +52,7 @@ g.phase = pi/2;
 g.awg = awg;
 g.awgchnl = [4,3];
 g.SendWave();
-%%
+%% spectrumAnalyzer
 iobj = visa('agilent','TCPIP0::10.0.0.101::inst0::INSTR');
 spc = sync.spectrumAnalyzer.GetInstance('spc_n9030_1',iobj);
 %%
@@ -69,3 +69,8 @@ f = linspace(spc.startfreq,spc.stopfreq,numel(spc_data));
 figure();
 semilogy(f/1e9,spc_amp);
 xlabel('frequency(GHz)');ylabel('amplitude');
+%% Oscilloscope
+iobj = visa('agilent','TCPIP0::C500014-70KC::inst0::INSTR');
+osc = sync.Oscilloscope.GetInstance('tekdpo7000',iobj,'tekdpo7000');
+%%
+osc.CreatGUI();

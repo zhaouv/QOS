@@ -2,7 +2,7 @@
 %%
 import qes.*
 import qes.hwdriver.sync.*
-QS = qSettings.GetInstance('D:\QOS\settings');
+QS = qSettings.GetInstance('D:\settings');
 %% not needed unless you want to reconfigure the DACs and ADCs during the measurement
 % a DACs and ADCs reconfiguration is only needed when the hardware settings
 % has beens changed, a reconfiguration will update the changes to the
