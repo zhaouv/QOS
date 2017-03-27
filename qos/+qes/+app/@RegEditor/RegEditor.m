@@ -129,6 +129,8 @@ classdef (Sealed = true)RegEditor < handle
                 'Parent',obj.guiHandles.reWin,'Position',[5,5,200,600]);
             set(obj.guiHandles.mtree,'NodeSelectedCallback', @SelectFcn);
             obj.guiHandles.mtree.expand(rootNode);
+            obj.guiHandles.mtree.expand(ss);
+            obj.guiHandles.mtree.expand(hws);
 
             function SelectFcn(tree,~)
                 nodes = tree.SelectedNodes;

@@ -9,10 +9,16 @@ function idx = find(A,B)
     idx = [];
     if ischar(A)
         for ii  = 1:numel(B)
-            if ~ischar(B{ii})
-                continue;
-            elseif strcmp(B{ii},A)
-                idx = [idx, ii];
+            try 
+                if B{ii} == A % to equal object to its name
+                    idx = [idx, ii];
+                end
+            catch
+                if ~ischar(B{ii})
+                    continue;
+                elseif strcmp(B{ii},A)
+                    idx = [idx, ii];
+                end
             end
         end
     else

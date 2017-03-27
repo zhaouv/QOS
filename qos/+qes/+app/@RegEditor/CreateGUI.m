@@ -29,7 +29,7 @@ function CreateGUI(obj)
 
     pos = [0.25,winSize(4)-1.5,11,1];
     obj.guiHandles.SelectUserTitle = uicontrol('Parent',obj.guiHandles.reWin,'Style','text','string','User:',...
-        'FontSize',10,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
+        'FontSize',9,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
  
     pos(1) = pos(1)+pos(3)+1;
     pos(3) = 27;
@@ -50,7 +50,7 @@ function CreateGUI(obj)
     pos = get(obj.guiHandles.SelectUserTitle,'Position');
     pos(2) = pos(2)- 2;
     obj.guiHandles.SelectSessionTitle = uicontrol('Parent',obj.guiHandles.reWin,'Style','text','string','Session:',...
-        'FontSize',10,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
+        'FontSize',9,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
     
     pos(1) = pos(1)+pos(3)+1;
     pos(3) = 27;
@@ -62,7 +62,7 @@ function CreateGUI(obj)
     pos = get(obj.guiHandles.SelectSessionTitle,'Position');
     pos(2) = pos(2)- 2;
     obj.guiHandles.SelectHwTitle = uicontrol('Parent',obj.guiHandles.reWin,'Style','text','string','Hardware:',...
-        'FontSize',10,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
+        'FontSize',9,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
     
     pos(1) = pos(1)+pos(3)+1;
     pos(3) = 27;

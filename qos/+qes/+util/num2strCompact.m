@@ -9,11 +9,7 @@ function Value = num2strCompact(Value)
 
     if abs(Value) > 1e3 ||...
             (abs(Value) < 1e-3 && round(Value) ~= Value)
-        if round(Value) == Value
-            Value = num2str(Value,'%0.0e');
-        else
-            Value = num2str(Value,'%0.5e');
-        end
+        Value = num2str(Value,'%0.5e');
     else 
         if round(Value) == Value
             Value = num2str(Value,'%0.0f');
