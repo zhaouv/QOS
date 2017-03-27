@@ -4,16 +4,13 @@ classdef (Sealed = true)RegEditor < handle
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    properties
-
-    end
     properties (SetAccess = private, GetAccess = private)
         qs
         nodeParent
         nodeName
         userList
+        hwList
         sessionList
-        
         guiHandles
     end
     methods
@@ -29,8 +26,10 @@ classdef (Sealed = true)RegEditor < handle
                 end
                 try
                     obj.qs = qes.qSettings.GetInstance(qsRootDir);
-                catch
-                    throw(MException('QOS:qSettingsCreationErr','qSettings object can not be created.'));
+                catch ME
+                    msgbox(['qSettings object can not be created due to:',...
+                        getReport(ME,'extended','hyperlinks','off')],'Error!');
+                    return;
                 end
             end
             userList_ = {'_Not set_'};
@@ -43,6 +42,14 @@ classdef (Sealed = true)RegEditor < handle
                 end
             end
             obj.userList = userList_;
+            hwList_ = {'_Not set_'};
+            fInfo = dir(fullfile(obj.qs.root,'hardware'));
+            for ii = 1:numel(fInfo)
+                if fInfo(ii).isdir && ~ismember(fInfo(ii).name,{'.','..'})
+                    hwList_ = [hwList_,{fInfo(ii).name}];
+                end
+            end
+            obj.hwList = hwList_;
             if ~isempty(obj.qs.user)
                 fInfo = dir(fullfile(obj.qs.root,obj.qs.user));
                 sessionList_ = {'_Not set_'};
@@ -77,7 +84,10 @@ classdef (Sealed = true)RegEditor < handle
                         strcmp(SSGroups{ii},'public')
                     node.setIcon(im2java(qes.app.RegEditor.ico_qobject()));
                 else
-                    node.setIcon(im2java(brighten(qes.app.RegEditor.ico_qobject(),0.95)));
+                    ico = qes.app.RegEditor.ico_qobject();
+                    r = 0.4;
+                    ico = (1-r)+r*ico;
+                    node.setIcon(im2java(ico));
                 end
                 ss.add(node);
             end
@@ -100,7 +110,10 @@ classdef (Sealed = true)RegEditor < handle
                 if qes.util.ismember(HwSGroups{ii},selectedHwSGroups)
                     node.setIcon(im2java(qes.app.RegEditor.ico_hardwave_chip()));
                 else
-                     node.setIcon(im2java(brighten(qes.app.RegEditor.ico_hardwave_chip(),0.7)));
+                    ico = qes.app.RegEditor.ico_hardwave_chip();
+                    r = 0.4;
+                    ico = (1-r)+r*ico;
+                    node.setIcon(im2java(ico));
                 end
                 hws.add(node);
             end
