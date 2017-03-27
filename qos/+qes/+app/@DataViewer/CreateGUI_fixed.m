@@ -35,6 +35,11 @@ function CreateGUI_fixed(obj)
         'ToolBar','none','NumberTitle','off','Name','QOS | Data Viewer',...
         'Resize','off','HandleVisibility','callback','Color',BkGrndColor,...
         'DockControls','off');
+	warning('off');
+    jf = get(handles.dataviewwin,'JavaFrame');
+    jf.setFigureIcon(javax.swing.ImageIcon(...
+        im2java(qes.ui.icons.qos1_32by32())));
+    warning('on');
     ParentUnitOrig = get(handles.dataviewwin,'Units');
     set(handles.dataviewwin,'Units','characters');
     ParentPosOrig = get(handles.dataviewwin,'Position');

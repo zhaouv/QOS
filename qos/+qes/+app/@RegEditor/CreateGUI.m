@@ -156,7 +156,7 @@ function CreateGUI(obj)
                 'String',obj.userList);
         end
         obj.qs.user = user;
-        if isfield(obj.guiHandles,'mtree') && isvalid(obj.guiHandles.mtree)
+        if isfield(obj.guiHandles,'mtree') && ishghandle(obj.guiHandles.mtree)
             delete(obj.guiHandles.mtree);
         end
         set(obj.guiHandles.regTable,'Data',[]);
@@ -199,7 +199,7 @@ function CreateGUI(obj)
                 'String',obj.sessionList);
         end
         obj.qs.SS(session);
-        if isfield(obj.guiHandles,'mtree') && isvalid(obj.guiHandles.mtree)
+        if isfield(obj.guiHandles,'mtree') && ishghandle(obj.guiHandles.mtree)
             delete(obj.guiHandles.mtree);
         end
         set(obj.guiHandles.regTable,'Data',[]);
@@ -219,7 +219,7 @@ function CreateGUI(obj)
                 'String',obj.hwList);
         end
         obj.qs.SHW(hw);
-        if isfield(obj.guiHandles,'mtree') && isvalid(obj.guiHandles.mtree)
+        if isfield(obj.guiHandles,'mtree') && ishghandle(obj.guiHandles.mtree)
             delete(obj.guiHandles.mtree);
         end
         set(obj.guiHandles.regTable,'Data',[]);
