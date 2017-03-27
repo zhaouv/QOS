@@ -1,4 +1,4 @@
-function HardCodeImage(imagefile,codefilename,codefilepath,icnsize)
+function hardCodeImage(imagefile,codefilename,codefilepath,icnsize)
     % HardCodeImage hard code a image(png, other formats not tested) into a matlab code file
     % imagefile: full path of image file
     % example:
@@ -48,10 +48,10 @@ function HardCodeImage(imagefile,codefilename,codefilepath,icnsize)
         fprintf(fid,['\tCData(:,:,',num2str(ii,'%0.0f'),')=[...\n']);
         for jj = 1:sz(1)
             str = '\t\t';
-            for kk = 1:sz(2);
+            for kk = 1:sz(2)
                 if isnan(im(jj,kk,ii))
                     str = [str,'NaN'];
-                elseif im(jj,kk,ii)
+                elseif im(jj,kk,ii) && round(im(jj,kk,ii)) ~= im(jj,kk,ii)
                     str = [str,num2str(im(jj,kk,ii),'%0.3f')];
                 else
                     str = [str,num2str(im(jj,kk,ii),'%0.0f')];

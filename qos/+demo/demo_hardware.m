@@ -71,6 +71,6 @@ semilogy(f/1e9,spc_amp);
 xlabel('frequency(GHz)');ylabel('amplitude');
 %% Oscilloscope
 iobj = visa('agilent','TCPIP0::C500014-70KC::inst0::INSTR');
-osc = Oscilloscope.GetInstance('tekdpo7000',dpo70404c,'tekdpo7000');
+osc = sync.Oscilloscope.GetInstance('tekdpo7000',iobj,'tekdpo7000');
 %%
 osc.CreatGUI();
