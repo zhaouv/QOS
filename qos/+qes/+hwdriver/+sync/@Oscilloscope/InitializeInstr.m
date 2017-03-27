@@ -19,9 +19,9 @@ function [varargout] = InitializeInstr(obj)
                 if strcmp(obj.interfaceobj.Status,'closed')
                     fopen(obj.interfaceobj);
                 end
-                fprintf(obj.interfaceobj,'*RST');
+%                fprintf(obj.interfaceobj,'*RST');
                 % set work mode to linear(default)
-                fprintf(obj.interfaceobj,':INITiate:IMMediate'); % trig
+%                fprintf(obj.interfaceobj,':INITiate:IMMediate'); % trig
             otherwise
                  ErrMsg = ['Unsupported instrument: ',TYP];
         end

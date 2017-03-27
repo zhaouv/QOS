@@ -1,11 +1,13 @@
-classdef Oscilloscope < Instrument
+classdef Oscilloscope < qes.hwdriver.sync.instrument
     % Temporary Oscilloscope driver for IQ readout, basic.
     % Currently support Tek DPO7040C Digital Phosphor Oscilloscope only.
 
 % Copyright 2016 Yarui_Zheng, Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % zhengyarui@iphy.ac.cn,mail4ywu@gmail.com/mail4ywu@icloud.com
-    
-    properties
+    properties (Access = private)
+        uihandles
+    end
+    properties  
         samplerate % unit : samples per second
         acqlength % record length.
         acqduration % timebase duration.
@@ -392,6 +394,7 @@ classdef Oscilloscope < Instrument
                 sources = strsplit(val,{','});
                 sourcesstr = '';
                 for source = sources
+                    sourcestr = source;
                     switch source{1}
                         case {'ch1','chanel1'}
                             sourcestr = 'CH1';
@@ -619,7 +622,80 @@ classdef Oscilloscope < Instrument
                     if isempty(data)
                         error('Oscilloscope_Temp: Data readout fail!');
                     end
-                    datas = [datas;data'];
+                    datas = [datas,data];
+                else
+                    pause(0.05);
+                    msg = query(obj.interfaceobj,'*ESR?');
+                    if str2double(msg) ~= 0
+                        error(['Oscilloscope_Temp: Errmsg4 = ' msg])
+                    end
+                    break;
+                end
+            end
+        end
+        function datas = getdatanow(obj)
+            datas = [];
+            getdatatimer = tic();
+            pause(0.005)
+            fprintf(obj.interfaceobj,'*CLS');
+            dataformatstr = lower(obj.dataformat);
+            wfmoutputbnfmtstr = lower(obj.wfmoutputbnfmt);
+            nbits = obj.wfmoutputbitnr;
+            wfmoutputbytorstr = obj.wfmoutputbytor;
+            npoints = obj.wfmoutprenrpt;
+            nframes = obj.wfmoutprenrfr;
+            pause(0.005)
+            fprintf(obj.interfaceobj,'CURVe?');
+                pause(0.05);
+            while(toc(getdatatimer)<obj.timeout)
+                pause(0.01);
+                nextchar = fread(obj.interfaceobj,1,'char');
+                if nextchar == '#'
+                    pause(0.01)
+                    strx = char(fread(obj.interfaceobj,1,'char'));
+                    x = hex2dec(strx);
+                    pause(0.01)
+                    stry = char(fread(obj.interfaceobj,x,'char'));
+                    ndatabytes = str2double(stry);
+                    data = [];
+                    pause(0.01)
+                    switch dataformatstr
+                        case 'ascii' % ASCIi specifiesthe ASCII representation of signed INT, FLOAT.
+                            datastr = fread(obj.interfaceobj,ndatabytes,'char');
+                            datastrs = strsplit(datastr,',');
+                            data = num2str(datastrs);
+                        case 'fastest'% FAStest specifies that the data be sent in the fastest possible manner
+                            obj.interfaceobj.ByteOrder = 'b';
+                            if strcmp(wfmoutputbnfmtstr,'ri')
+                                data = fread(obj.interfaceobj,ndatabytes/nbits*8,['int' num2str(nbits)]);
+                            elseif strcmp(wfmoutputbnfmtstr,'fp')
+                                data = fread(obj.interfaceobj,ndatabytes/nbits*8,['float' num2str(nbits)]);
+                            else
+                                error('Oscilloscope_Temp: Unkown error!')
+                            end
+                        case 'ribinary' % RIBinary specifies signed integer data point representation with the most significant byte transferred first.
+                            obj.interfaceobj.ByteOrder = 'b';
+                            pause(0.01)
+                            data = fread(obj.interfaceobj,ndatabytes/nbits*8,['int' num2str(nbits)]);
+                        case 'rpbinary' % RPBinaryspecifies the positive integer data-point representation, with the most significant byte transferred first.
+                            obj.interfaceobj.ByteOrder = 'l';
+                            pause(0.01)
+                            data = fread(obj.interfaceobj,ndatabytes/nbits*8,['uint' num2str(nbits)]);
+                        case 'fpbinary' % FPBinaryspecifies thefloating point (width = 4) data
+                            obj.interfaceobj.ByteOrder = 'b';
+                            pause(0.01)
+                            data = fread(obj.interfaceobj,ndatabytes/nbits*8,['float' num2str(nbits)]);
+                        case 'sribinary'
+                            error('to be writed')
+                        case 'sprbinary'
+                            error('to be writed')
+                        case 'sfrbinary'
+                            error('to be writed')
+                    end
+                    if isempty(data)
+                        error('Oscilloscope_Temp: Data readout fail!');
+                    end
+                    datas = [datas,data];
                 else
                     pause(0.05);
                     msg = query(obj.interfaceobj,'*ESR?');
@@ -633,7 +709,7 @@ classdef Oscilloscope < Instrument
     end
     
     methods (Access = private)
-        function obj = Oscilloscope_Temp(name,interfaceobj,drivertype)
+        function obj = Oscilloscope(name,interfaceobj,drivertype)
             if isempty(interfaceobj)
                 error('Oscilloscope_Temp:InvalidInput',...
                     'Input ''%s'' can not be empty!',...
@@ -642,7 +718,7 @@ classdef Oscilloscope < Instrument
             if nargin < 3
                 drivertype = [];
             end
-            obj = obj@Instrument(name,interfaceobj,drivertype);
+            obj = obj@qes.hwdriver.sync.instrument(name,interfaceobj,drivertype);
             ErrMsg = obj.InitializeInstr();
             if ~isempty(ErrMsg)
                 error('Oscilloscope_Temp:InstSetError',[obj.name, ': %s'], ErrMsg);
@@ -824,4 +900,5 @@ classdef Oscilloscope < Instrument
     
     
 end
+
 
