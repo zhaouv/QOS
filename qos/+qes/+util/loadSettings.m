@@ -38,7 +38,7 @@ function data = loadSettings(spath, fields)
     end
     fileinfo = dir(spath);
     numFiles = numel(fileinfo);
-    for ii = 1:numFiles;
+    for ii = 1:numFiles
         if strcmp(fileinfo(ii).name,'.') || strcmp(fileinfo(ii).name,'..') ||...
                 strcmp(fileinfo(ii).name(1),'_') % files, directories starts with an underscore are special purpose files/folders
             if ii == numFiles && ~isempty(fields)
