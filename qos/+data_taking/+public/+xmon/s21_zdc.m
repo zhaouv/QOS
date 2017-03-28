@@ -17,7 +17,7 @@ function varargout = s21_zdc(varargin)
 
 % Yulin Wu, 2017/1/13
 
-    fcn_name = 'data_taking.public.xmon.s21_rAmp'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.s21_zdc'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
@@ -25,7 +25,8 @@ function varargout = s21_zdc(varargin)
     args = util.processArgs(varargin,{'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
-    dcSrc = qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.chnnls);
+    dcSrc = qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.chnnls.z_dc.instru);
+    dcChnl = dcSrc.GetChnl(q.chnnls.z_dc.chnl);
     
     R = measure.resonatorReadout_ss(q);
     R.state = 1;
@@ -33,18 +34,17 @@ function varargout = s21_zdc(varargin)
     R.name = 'iq';
     R.datafcn = @(x)mean(x);
     
-    x = expParam(R,'mw_src_frequency');
-    x.offset = q.r_fc - q.r_freq;
-    x.name = [q.name,' readout frequency'];
-    y = expParam(R,'r_amp');
-    y.name = [q.name,' readout amplitude'];
+    x = expParam(dcChnl,'dcval');
+    x.name = [q.name,' dc bias'];
+    y = expParam(R,'mw_src_frequency');
+    y.offset = q.r_fc - q.r_freq;
+    y.name = [q.name,' readout frequency'];
     s1 = sweep(x);
-    s1.vals = args.freq;
+    s1.vals = args.dcAmp;
     s2 = sweep(y);
-    s2.vals = args.amp;
+    s2.vals = args.freq;
     e = experiment();
     e.sweeps = [s1,s2];
-%     e.sweeps = [s2,s1];
     e.measurements = R;
     
     if ~args.gui

@@ -9,11 +9,18 @@ function b = ismember(A,B)
     b = false;
     if ischar(A)
         for ii  = 1:numel(B)
-            if ~ischar(B{ii})
-                continue;
-            elseif strcmp(B{ii},A)
-                b = true;
-                break;
+            try 
+                if B{ii} == A % to equal object to its name
+                    b = true;
+                    break;
+                end
+            catch
+                if ~ischar(B{ii})
+                    continue;
+                elseif strcmp(B{ii},A)
+                    b = true;
+                    break;
+                end
             end
         end
     else

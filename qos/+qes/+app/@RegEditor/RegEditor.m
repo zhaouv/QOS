@@ -65,6 +65,7 @@ classdef (Sealed = true)RegEditor < handle
             CreateGUI(obj);
         end
         function createUITree(obj)
+            warning('off');
             fInfo = dir(fullfile(obj.qs.root,obj.qs.user,obj.qs.session));
             SSGroups = {};
             for ii = 1:numel(fInfo)
@@ -128,6 +129,8 @@ classdef (Sealed = true)RegEditor < handle
                 'Parent',obj.guiHandles.reWin,'Position',[5,5,200,600]);
             set(obj.guiHandles.mtree,'NodeSelectedCallback', @SelectFcn);
             obj.guiHandles.mtree.expand(rootNode);
+            obj.guiHandles.mtree.expand(ss);
+            obj.guiHandles.mtree.expand(hws);
 
             function SelectFcn(tree,~)
                 nodes = tree.SelectedNodes;
@@ -141,6 +144,7 @@ classdef (Sealed = true)RegEditor < handle
                 obj.nodeParent = parentName;
                 set(obj.guiHandles.regTable,'Data',obj.TableData(name,parentName));
             end
+            warning('on');
         end
         
         function delete(obj)

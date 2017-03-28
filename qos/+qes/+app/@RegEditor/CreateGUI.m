@@ -4,8 +4,14 @@ function CreateGUI(obj)
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
+    largeSreenSize = false;
+
     BkGrndColor = [0.941   0.941   0.941];
-    winSize = [0,0,112,70];
+    if largeSreenSize
+        winSize = [0,0,112,70];
+    else
+        winSize = [0,0,105,45];
+    end
     obj.guiHandles.reWin = figure('Units','characters','MenuBar','none',...
         'ToolBar','none','NumberTitle','off','Name','QOS | Registry Editor',...
         'Resize','off','HandleVisibility','callback','Color',BkGrndColor,...
@@ -29,10 +35,10 @@ function CreateGUI(obj)
 
     pos = [0.25,winSize(4)-1.5,11,1];
     obj.guiHandles.SelectUserTitle = uicontrol('Parent',obj.guiHandles.reWin,'Style','text','string','User:',...
-        'FontSize',10,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
+        'FontSize',9,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
  
     pos(1) = pos(1)+pos(3)+1;
-    pos(3) = 27;
+    pos(3) = 21;
     obj.guiHandles.SelectUser = uicontrol('Parent',obj.guiHandles.reWin,'Style','popupmenu','String',obj.userList,...
         'value',1,'FontSize',9,'FontUnits','points','HorizontalAlignment','Left',...
         'ForegroundColor',[0.5,0.5,1],'BackgroundColor',[0.9,1,0.8],'Units','characters','Position',pos,'Callback',{@SelectUserCallback},...
@@ -46,30 +52,78 @@ function CreateGUI(obj)
         end
         set(obj.guiHandles.SelectUser,'Value',idx);
     end
+    
+    pos(1) = pos(1)+pos(3)+0.5;
+    pos(3) = 3;
+    pos(2) = pos(2)-0.5;
+    pos(4) = 1.5;
+    obj.guiHandles.copySession = uicontrol('Parent',obj.guiHandles.reWin,'Style','pushbutton','string','C',...
+        'FontSize',10,'FontUnits','points',...
+        'Units','characters','Position',pos,'Callback',{@CopyCallback,1},...
+        'Tooltip','copy current user settings group.','Enable','off');
+		
+	pos(1) = pos(1)+pos(3)+0.5;
+    pos(3) = 2;
+    obj.guiHandles.deleteSession = uicontrol('Parent',obj.guiHandles.reWin,'Style','pushbutton','string','X',...
+        'FontSize',10,'FontUnits','points','ForegroundColor',[1,0,0],...
+        'Units','characters','Position',pos,'Callback',{@deleteCallback,1},...
+        'Tooltip','delete current user settings group.');
 
     pos = get(obj.guiHandles.SelectUserTitle,'Position');
     pos(2) = pos(2)- 2;
     obj.guiHandles.SelectSessionTitle = uicontrol('Parent',obj.guiHandles.reWin,'Style','text','string','Session:',...
-        'FontSize',10,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
+        'FontSize',9,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
     
     pos(1) = pos(1)+pos(3)+1;
-    pos(3) = 27;
+    pos(3) = 21;
     obj.guiHandles.SelectSession = uicontrol('Parent',obj.guiHandles.reWin,'Style','popupmenu','string','_Not Set_',...
         'value',1,'FontSize',9,'FontUnits','points','HorizontalAlignment','Left',...
         'ForegroundColor',[0.5,0.5,1],'BackgroundColor',[0.9,1,0.8],'Units','characters','Position',pos,'Callback',{@SelectSessionCallback},...
         'Tooltip','Select session.','Enable','off');
+		
+	pos(1) = pos(1)+pos(3)+0.5;
+    pos(3) = 3;
+    pos(2) = pos(2)-0.5;
+    pos(4) = 1.5;
+    obj.guiHandles.copySession = uicontrol('Parent',obj.guiHandles.reWin,'Style','pushbutton','string','C',...
+        'FontSize',10,'FontUnits','points',...
+        'Units','characters','Position',pos,'Callback',{@CopyCallback,2},...
+        'Tooltip','copy current session.','Enable','off');
+		
+	pos(1) = pos(1)+pos(3)+0.5;
+    pos(3) = 2;
+    obj.guiHandles.deleteSession = uicontrol('Parent',obj.guiHandles.reWin,'Style','pushbutton','string','X',...
+        'FontSize',10,'FontUnits','points','ForegroundColor',[1,0,0],...
+        'Units','characters','Position',pos,'Callback',{@deleteCallback,2},...
+        'Tooltip','delete current session.');
     
     pos = get(obj.guiHandles.SelectSessionTitle,'Position');
     pos(2) = pos(2)- 2;
     obj.guiHandles.SelectHwTitle = uicontrol('Parent',obj.guiHandles.reWin,'Style','text','string','Hardware:',...
-        'FontSize',10,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
+        'FontSize',9,'FontUnits','points','HorizontalAlignment','Left','Units','characters','Position',pos);
     
     pos(1) = pos(1)+pos(3)+1;
-    pos(3) = 27;
+    pos(3) = 21;
     obj.guiHandles.SelectHw = uicontrol('Parent',obj.guiHandles.reWin,'Style','popupmenu','string','_Not Set_',...
         'value',1,'FontSize',9,'FontUnits','points','HorizontalAlignment','Left',...
         'ForegroundColor',[0.5,0.5,1],'BackgroundColor',[0.9,1,0.8],'Units','characters','Position',pos,'Callback',{@SelectHwCallback},...
         'Tooltip','Select hardware group.','Enable','on');
+    
+    pos(1) = pos(1)+pos(3)+0.5;
+    pos(3) = 3;
+    pos(2) = pos(2)-0.5;
+    pos(4) = 1.5;
+    obj.guiHandles.copySession = uicontrol('Parent',obj.guiHandles.reWin,'Style','pushbutton','string','C',...
+        'FontSize',10,'FontUnits','points',...
+        'Units','characters','Position',pos,'Callback',{@CopyCallback,3},...
+        'Tooltip','copy current hardware settings group.','Enable','off');
+		
+	pos(1) = pos(1)+pos(3)+0.5;
+    pos(3) = 2;
+    obj.guiHandles.deleteSession = uicontrol('Parent',obj.guiHandles.reWin,'Style','pushbutton','string','X',...
+        'FontSize',10,'FontUnits','points','ForegroundColor',[1,0,0],...
+        'Units','characters','Position',pos,'Callback',{@deleteCallback,3},...
+        'Tooltip','delete current hardware settings group.');
 
     pos_ = pos;
     pos = get(obj.guiHandles.SelectHwTitle,'Position');
@@ -80,6 +134,7 @@ function CreateGUI(obj)
         'FontSize',10,'FontUnits','points',...
         'Units','characters','Position',pos,'Callback',{@InitializeCallback},...
         'Tooltip','Create hardware objects.','Enable','off');
+    
 
     obj.guiHandles.regTable = uitable('Parent',obj.guiHandles.reWin,...
          'Data',[],...
@@ -156,7 +211,7 @@ function CreateGUI(obj)
                 'String',obj.userList);
         end
         obj.qs.user = user;
-        if isfield(obj.guiHandles,'mtree') && isvalid(obj.guiHandles.mtree)
+        if isfield(obj.guiHandles,'mtree') && ishghandle(obj.guiHandles.mtree)
             delete(obj.guiHandles.mtree);
         end
         set(obj.guiHandles.regTable,'Data',[]);
@@ -199,7 +254,7 @@ function CreateGUI(obj)
                 'String',obj.sessionList);
         end
         obj.qs.SS(session);
-        if isfield(obj.guiHandles,'mtree') && isvalid(obj.guiHandles.mtree)
+        if isfield(obj.guiHandles,'mtree') && ishghandle(obj.guiHandles.mtree)
             delete(obj.guiHandles.mtree);
         end
         set(obj.guiHandles.regTable,'Data',[]);
@@ -219,7 +274,7 @@ function CreateGUI(obj)
                 'String',obj.hwList);
         end
         obj.qs.SHW(hw);
-        if isfield(obj.guiHandles,'mtree') && isvalid(obj.guiHandles.mtree)
+        if isfield(obj.guiHandles,'mtree') && ishghandle(obj.guiHandles.mtree)
             delete(obj.guiHandles.mtree);
         end
         set(obj.guiHandles.regTable,'Data',[]);
