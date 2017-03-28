@@ -2,7 +2,7 @@ function varargout = s21_zdc(varargin)
 % scan resonator s21 vs frequency and qubit z dc bias
 % 
 % <_o_> = s21_zdc('qubit',_c&o_,...
-%       'freq',[_f_],'dcAmp',[_f_],...
+%       'freq',[_f_],'amp',[_f_],...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -25,8 +25,8 @@ function varargout = s21_zdc(varargin)
     args = util.processArgs(varargin,{'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
-    dcSrc = qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.chnnls.z_dc.instru);
-    dcChnl = dcSrc.GetChnl(q.chnnls.z_dc.chnl);
+    dcSrc = qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.z_dc.instru);
+    dcChnl = dcSrc.GetChnl(q.channels.z_dc.chnl);
     
     R = measure.resonatorReadout_ss(q);
     R.state = 1;
@@ -40,10 +40,11 @@ function varargout = s21_zdc(varargin)
     y.offset = q.r_fc - q.r_freq;
     y.name = [q.name,' readout frequency'];
     s1 = sweep(x);
-    s1.vals = args.dcAmp;
+    s1.vals = args.amp;
     s2 = sweep(y);
     s2.vals = args.freq;
     e = experiment();
+    e.name = 's21-zdc';
     e.sweeps = [s1,s2];
     e.measurements = R;
     

@@ -1,7 +1,7 @@
-function varargout = ramsey(varargin)
-% ramsey: ramsey oscillation
+function varargout = ramsey_dz(varargin)
+% ramsey_dz: ramsey oscillation, detune by z detune pulse
 % 
-% <_o_> = ramsey('qubit',_c&o_,...
+% <_o_> = ramsey_dz('qubit',_c&o_,...
 %       'time',[_i_],'detuning',<[_f_]>,...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
@@ -19,7 +19,7 @@ function varargout = ramsey(varargin)
 
 % Yulin Wu, 2016/12/27
 
-    fcn_name = 'data_taking.public.xmon.ramsey'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.ramsey_dz'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
@@ -40,7 +40,7 @@ function varargout = ramsey(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_ramsey:unrcognizedDataTyp',...
+            throw(MException('QOS_ramsey_dz:unrcognizedDataTyp',...
                 'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 

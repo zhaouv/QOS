@@ -4,24 +4,33 @@
 import data_taking.public.util.*
 import data_taking.public.xmon.*
 qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-dips = [7.04343, 7.00426, 6.9902, 6.9618,NaN,NaN,NaN,6.79613,NaN,NaN]*1e9; % by qubit index
+dips = [7.04343, 7.00426, 6.9902, 6.9618,6.9199,6.88215,6.8335,6.79613,6.75390,6.70932]*1e9; % by qubit index
 scanRange = 5e6; % fine scan each qubit dips
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
-s21_rAmp('qubit','q1','freq',[dips(2)-1e6:0.025e6:dips(2)+1e6],'amp',[6e3],...  % logspace(log10(1000),log10(32768),25)
+s21_rAmp('qubit','q1','freq',[dips(5)-1e6:0.05e6:dips(5)+1e6],'amp',[logspace(log10(1000),log10(32768),25)],...  % logspace(log10(1000),log10(32768),25)
       'notes','attenuation:26dB','gui',true,'save',true);
+%%
+s21_zdc('qubit', 'q5',...
+      'freq',[dips(5)-3.5e6:0.2e6:dips(5)+1e6],'amp',[-3e4:3e3:3e4],...
+      'gui',true,'save',true);
+%%
+setZDC('q4',0);
+s21_zpa('qubit', 'q4',...
+      'freq',[dips(4)-2.2e6:0.15e6:dips(4)+1e6],'amp',[-3e4:2e3:3e4],...
+      'gui',true,'save',true);
 %% spectroscopy1_zpa_s21
 for ii = 1:numel(qubits)
-	setZDC(qubits{ii},1e4);
+	setZDC(qubits{ii},0);
 end
 setZDC(qubits{1},0);
 spectroscopy1_zpa_s21('qubit','q1',...
-       'biasAmp',[-2e4:5e3:2e4],'driveFreq',[5.8e9:0.1e6:6.4e9],...
-       'gui',false,'save',true);
-setZDC(qubits{1},1e4);
-setZDC(qubits{2},0);
-spectroscopy1_zpa_s21('qubit','q2',...
-       'biasAmp',[-2e4:5e3:2e4],'driveFreq',[5.8e9:0.1e6:6.4e9],...
-       'gui',false,'save',true);
+       'biasAmp',[-1e4:5e3:2e4],'driveFreq',[5.95e9:2e6:6.4e9],...
+       'gui',true,'save',true);
+% setZDC(qubits{1},1e4);
+% setZDC(qubits{2},0);
+% spectroscopy1_zpa_s21('qubit','q2',...
+%        'biasAmp',[-2e4:5e3:2e4],'driveFreq',[5.8e9:0.1e6:6.4e9],...
+%        'gui',false,'save',true);
 % spectroscopy1_zpa_s21('qubit','q2'); % lazy mode
 %%
 spectroscopy111_zpa_s21('biasQubit','q1','biasAmp',[-2e4:5e3:2e4],...

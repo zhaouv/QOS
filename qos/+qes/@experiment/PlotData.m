@@ -7,7 +7,12 @@ function PlotData(obj)
         return;
     end
     if isempty(obj.plotaxes) || ~ishghandle(obj.plotaxes)
-        h = figure('NumberTitle','off','Name',['Experiment: ',obj.name],'Color',[1,1,1]);
+        h = figure('NumberTitle','off','Name',['QOS | Experiment: ',obj.name],'Color',[1,1,1]);
+        warning('off');
+        jf = get(h,'JavaFrame');
+        jf.setFigureIcon(javax.swing.ImageIcon(...
+        im2java(qes.ui.icons.qos1_32by32())));
+        warning('on');
         obj.plotaxes = axes('Parent',h);
     end
     hold(obj.plotaxes,'off');

@@ -3,7 +3,7 @@ function CreateCtrlPanel(obj)
 
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
-    h = findall(0,'tag',['QOS|Experiment|Control Panel',obj.name]);
+    h = findall(0,'tag',['QOS | Experiment | Control Panel',obj.name]);
     if ~isempty(h)
         figure(h);
         set(h,'Visible','on');
@@ -13,7 +13,7 @@ function CreateCtrlPanel(obj)
 
     BkGrndColor = [1,1,1];
     scrsz = get(0,'ScreenSize');
-    MessWinWinSz = [0.35,0.425,0.4,0.20];
+    MessWinWinSz = [0.35,0.425,0.3,0.10];
     rw = 1440/scrsz(3);
     rh = 900/scrsz(4);
     MessWinWinSz(3) = rw*MessWinWinSz(3);
@@ -23,9 +23,14 @@ function CreateCtrlPanel(obj)
     MessWinWinSz(2) = (1 - MessWinWinSz(4))/2;
     
     obj.ctrlpanel = figure('Menubar','none','NumberTitle','off','Units','normalized ','Position',MessWinWinSz,...
-            'Name',['QES | Experiment: ',obj.name,' | Control Panel'],'Color',BkGrndColor,...
+            'Name',['QOS | Experiment: ',obj.name,' | Control Panel'],'Color',BkGrndColor,...
             'tag',['QOS|Experiment|Ctrlpanel',obj.name],'resize','off',...
             'HandleVisibility','callback','CloseRequestFcn',{@CtrlpanelClose});
+    warning('off');
+    jf = get(obj.ctrlpanel,'JavaFrame');
+    jf.setFigureIcon(javax.swing.ImageIcon(...
+        im2java(qes.ui.icons.qos1_32by32())));
+    warning('on');
     handles.obj = obj;
     handles.CtrlpanelWin = obj.ctrlpanel; 
     panel = uipanel('parent',obj.ctrlpanel,'Position',[0.025,0.425,0.95,0.60],...
@@ -52,15 +57,15 @@ function AbortFunc(hObject,eventdata)
     handles = guidata(hObject);
     if handles.obj.running
         choice = questdlg(...
-            'This will reset the experiment objet and erase data, please confirm:',...
-            'Confirm Abort','Yes, go on','No, cancel','No, cancel');
+            'This will stop the experiment objet and erase data, please confirm:',...
+            'Confirm Abort','Yes','Cancel','Cancel');
     else
         choice = questdlg(...
             'Run the experiment, please confirm:',...
-            'Confirm Run','Yes, go on','No, cancel','No, cancel');
+            'Confirm Run','Yes','Cancel','Cancel');
     end
     switch choice
-        case 'Yes, go on'
+        case 'Yes'
             if handles.obj.running
                 handles.obj.abort = true;
                 if handles.obj.paused % abort action only excecuted when experiment is running.

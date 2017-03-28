@@ -598,6 +598,11 @@ else % double click on the current data figure to edit
     obj = get(get(src,'Parent'),'UserData');
     handles = obj.uihandles;
     h = figure('Units','normalized');
+    warning('off');
+    jf = get(h,'JavaFrame');
+    jf.setFigureIcon(javax.swing.ImageIcon(...
+    im2java(qes.ui.icons.qos1_32by32())));
+    warning('on');
     hax_new = copyobj(handles.mainax,h);
     set(hax_new,'Units','normalized','Position',[0.12,0.12,0.8,0.8]);
 end

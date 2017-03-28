@@ -1,7 +1,7 @@
 function varargout = ramsey_df(varargin)
-% ramsey: ramsey oscillation
+% ramsey: ramsey oscillation, detune by detune mw source frequency fc
 % 
-% <_o_> = ramsey('qubit',_c&o_,...
+% <_o_> = ramsey_df('qubit',_c&o_,...
 %       'time',[_i_],'detuning',[_f_],...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
@@ -18,7 +18,7 @@ function varargout = ramsey_df(varargin)
 
 % Yulin Wu, 2016/12/27
 
-    fcn_name = 'data_taking.public.xmon.ramsey'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.ramsey_df'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
