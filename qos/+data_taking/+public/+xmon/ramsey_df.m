@@ -1,5 +1,5 @@
 function varargout = ramsey_df(varargin)
-% ramsey: ramsey oscillation, detune by detune mw source frequency fc
+% ramsey: ramsey oscillation, detune by detuning mw source frequency fc
 % 
 % <_o_> = ramsey_df('qubit',_c&o_,...
 %       'time',[_i_],'detuning',[_f_],...
@@ -27,7 +27,7 @@ function varargout = ramsey_df(varargin)
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     X2 = gate.X2p(q);
-    I = op.physical.op.detune(q);
+    I = gate.I(q);
     R = measure.resonatorReadout_ss(q);
  
     switch args.dataTyp
@@ -38,7 +38,7 @@ function varargout = ramsey_df(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_rabi_amp111','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+            throw(MException('QOS_ramsey_df:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
     function proc = procFactory(delay)
@@ -59,10 +59,11 @@ function varargout = ramsey_df(varargin)
     y_s.offset = y_s.offset;
     y_s.snap_val = R.adDelayStep;
     s1 = sweep(x);
-    s1.vals = args.detuning;
+    s1.vals = -args.detuning;
     s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};
     e = experiment();
+	e.name = 'ramsey_df';
     e.sweeps = [s1,s2];
     e.measurements = R;
     
