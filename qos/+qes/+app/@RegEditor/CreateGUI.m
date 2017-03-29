@@ -193,7 +193,7 @@ function CreateGUI(obj)
             end
         catch ME
             set(obj.guiHandles.regTable,'Data',obj.TableData(obj.nodeName,obj.nodeParent));
-            msgbox(getReport(ME,'extended','hyperlinks','off'));
+            qes.ui.msgbox(getReport(ME,'extended','hyperlinks','off'));
         end
     end
 
@@ -287,7 +287,7 @@ function CreateGUI(obj)
         try
             obj.qs.CreateHw();
         catch ME
-            msgbox(getReport(ME,'extended','hyperlinks','off'));
+            qes.ui.msgbox(getReport(ME,'extended','hyperlinks','off'));
         end
         set(src,'String','Initialization Done');
     end

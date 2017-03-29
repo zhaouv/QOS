@@ -26,21 +26,21 @@ function ExtractLine(obj)
             z = abs(z);
         end
     catch
-        msgbox('Unable to extract data, make sure the selected plot function supports the currents data set and has data exportation functionality.','modal');
+        qes.ui.qes.ui.msgbox('Unable to extract data, make sure the selected plot function supports the currents data set and has data exportation functionality.','modal');
         if ishghandle(h)
             delete(h);
         end
         return;
     end
     if isempty(z)
-        msgbox('Extract line data is for 3D data only.','modal');
+        qes.ui.qes.ui.msgbox('Extract line data is for 3D data only.','modal');
         return;
     end
     if isempty(x) || isempty(y)
-        msgbox('x data or y data empty.','modal');
+        qes.ui.qes.ui.msgbox('x data or y data empty.','modal');
         return;
     elseif any(isnan(x)) || any(isnan(y))
-        msgbox('x data or y data contains empty data(NaN)','modal');
+        qes.ui.qes.ui.msgbox('x data or y data contains empty data(NaN)','modal');
         return;
     end
     choice  = questdlg('Select mode:','','Horizontal','Vertical','Free line','Horizontal');
@@ -59,10 +59,10 @@ function ExtractLine(obj)
         xrange = range(x);
         yrange = range(y);
         if (isempty(choice) || strcmp(choice, 'Horizontal')) && (x_e < min(x)-0.05*xrange || x_e > max(x)+0.05*xrange)
-            msgbox('Out of data range, click within the data range to extract.','modal');
+            qes.ui.qes.ui.msgbox('Out of data range, click within the data range to extract.','modal');
             return;
         elseif y_e < min(y)-0.05*yrange || y_e > max(y)+0.05*yrange
-            msgbox('Out of data range, click within the data range to extract.','modal');
+            qes.ui.qes.ui.msgbox('Out of data range, click within the data range to extract.','modal');
             return;
         end
         if isempty(choice) || strcmp(choice, 'Horizontal')
@@ -70,9 +70,14 @@ function ExtractLine(obj)
             choice  = questdlg('Where to plot horizontal line data?','Plot options','A new plot','Append to the current axes(if exists)','A new plot');
             if ~isempty(choice) && strcmp(choice, 'A new plot')
                 h1 = figure();
+                warning('off');
+                jf = get(h1,'JavaFrame');
+                jf.setFigureIcon(javax.swing.ImageIcon(...
+                im2java(qes.ui.icons.qos1_32by32())));
+                warning('on');
                 ha1 = axes('Parent',h1);
             else
-                msgbox('Raise the axis to add the plot to the front by cliking on it.');
+                qes.ui.qes.ui.msgbox('Raise the axis to add the plot to the front by cliking on it.');
                 pause(5);
                 ha1 = gca();
                 hold(ha1,'on');
@@ -88,9 +93,19 @@ function ExtractLine(obj)
             choice  = questdlg('Where to plot vertical line data?','Plot options','A new plot','Append to the current axes(if exists)','A new plot');
             if ~isempty(choice) && strcmp(choice, 'A new plot')
                 h2 = figure();
+                warning('off');
+                jf = get(h2,'JavaFrame');
+                jf.setFigureIcon(javax.swing.ImageIcon(...
+                im2java(qes.ui.icons.qos1_32by32())));
+                warning('on');
+                warning('off');
+                jf = get(h2,'JavaFrame');
+                jf.setFigureIcon(javax.swing.ImageIcon(...
+                im2java(qes.ui.icons.qos1_32by32())));
+                warning('on');
                 ha2 = axes('Parent',h2);
             else
-                msgbox('Raise the axis to add the plot to the front by cliking on it.');
+                qes.ui.qes.ui.msgbox('Raise the axis to add the plot to the front by cliking on it.');
                 pause(5);
                 ha2 = gca;
                 hold(ha2,'on');

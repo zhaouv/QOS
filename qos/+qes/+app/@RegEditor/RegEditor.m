@@ -27,7 +27,7 @@ classdef (Sealed = true)RegEditor < handle
                 try
                     obj.qs = qes.qSettings.GetInstance(qsRootDir);
                 catch ME
-                    msgbox(['qSettings object can not be created due to:',...
+                    qes.ui.msgbox(['qSettings object can not be created due to:',...
                         getReport(ME,'extended','hyperlinks','off')],'Error!');
                     return;
                 end

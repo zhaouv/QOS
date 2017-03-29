@@ -1,0 +1,11 @@
+function saveJson(fullfilename,fields,value)
+fields = {'ad_boards{1}','numChnls'}
+% Copyright 2016 Yulin Wu, USTC
+% mail4ywu@gmail.com/mail4ywu@icloud.com
+
+    error('save fields in json files is not implemented yet.');
+    
+    error('save history is not implemented yet.');
+
+    
+end

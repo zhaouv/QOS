@@ -17,7 +17,7 @@ function Value = num2strCompact(Value)
             Value = num2str(Value,'%0.5f');
         end
     end
-    Value = regexprep(Value,'.\d*0+e','e');
+    Value = regexprep(Value,'\.*0+e','e');
     Value = regexprep(Value,'(e\+*0+)|(e\+)','e');
     Value = regexprep(Value,'e\-*0+','e-');
     if numel(Value)>1 && Value(1) == '+'

@@ -1,7 +1,7 @@
-function varargout = s21_rAmp(varargin)
-% scan resonator s21 vs frequency and raadout amplitude(iq), no qubit drive
+function varargout = s21_zpa(varargin)
+% scan resonator s21 vs frequency and qubit z dc bias
 % 
-% <_o_> = s21_rAmp('qubit',_c&o_,...
+% <_o_> = s21_zpa('qubit',_c&o_,...
 %       'freq',[_f_],'amp',[_f_],...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -17,31 +17,36 @@ function varargout = s21_rAmp(varargin)
 
 % Yulin Wu, 2017/1/13
 
-    fcn_name = 'data_taking.public.xmon.s21_rAmp'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.s21_zdc'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
     
     args = util.processArgs(varargin,{'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
-    
+
     R = measure.resonatorReadout_ss(q);
     R.state = 1;
     R.swapdata = true;
     R.name = 'iq';
     R.datafcn = @(x)mean(x);
     
-    x = expParam(R,'mw_src_frequency');
-    x.offset = q.r_fc - q.r_freq;
-    x.name = [q.name,' readout frequency'];
-    y = expParam(R,'r_amp');
-    y.name = [q.name,' readout amplitude'];
+    Z = op.zBias4Spectrum(q);
+    
+    x = expParam(Z,'amp');
+    x.name = [q.name,' z pulse bias'];
+    x.callbacks = {@(x_)x_.expobj.Run()};
+    x.deferCallbacks = true;
+    y = expParam(R,'mw_src_frequency');
+    y.offset = q.r_fc - q.r_freq;
+    y.name = [q.name,' readout frequency'];
+    y.callbacks = {@(x_)expParam.RunCallbacks(x)};
     s1 = sweep(x);
-    s1.vals = args.freq;
+    s1.vals = args.amp;
     s2 = sweep(y);
-    s2.vals = args.amp;
+    s2.vals = args.freq;
     e = experiment();
-    e.name = 'S21-readout Amp.';
+    e.name = 's21-zpa';
     e.sweeps = [s1,s2];
     e.measurements = R;
     
