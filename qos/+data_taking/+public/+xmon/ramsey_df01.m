@@ -1,7 +1,7 @@
-function varargout = ramsey_df(varargin)
+function varargout = ramsey_df01(varargin)
 % ramsey: ramsey oscillation, detune by detuning mw source frequency fc
 % 
-% <_o_> = ramsey_df('qubit',_c&o_,...
+% <_o_> = ramsey_df01('qubit',_c&o_,...
 %       'time',[_i_],'detuning',[_f_],...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
@@ -18,7 +18,7 @@ function varargout = ramsey_df(varargin)
 
 % Yulin Wu, 2016/12/27
 
-    fcn_name = 'data_taking.public.xmon.ramsey_df'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.ramsey_df01'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
@@ -38,7 +38,7 @@ function varargout = ramsey_df(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_ramsey_df:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+            throw(MException('QOS_ramsey_df01:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
     function proc = procFactory(delay)
@@ -46,8 +46,8 @@ function varargout = ramsey_df(varargin)
         proc = X2*I*X2;
     end
 
-    x = expParam(X2,'mw_src_frequency');
-    x.offset = q.qr_xy_fc;
+    x = expParam(X2,'f01');
+    x.offset = X2.f01;
     x.name = [q.name,' detunning'];
     y = expParam(@procFactory);
     y.name = [q.name,' time'];
@@ -59,11 +59,11 @@ function varargout = ramsey_df(varargin)
     y_s.offset = y_s.offset;
     y_s.snap_val = R.adDelayStep;
     s1 = sweep(x);
-    s1.vals = -args.detuning;
+    s1.vals = args.detuning;
     s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};
     e = experiment();
-	e.name = 'ramsey_df';
+	e.name = 'ramsey_df01';
     e.sweeps = [s1,s2];
     e.measurements = R;
     
