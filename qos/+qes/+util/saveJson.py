@@ -17,7 +17,7 @@ valuetype=re.compile('^(.*?)(\s*,|\s*)([^\\]\\}\\\'",]*)$')
 
 
 def func1(fullfilename,fields,value):
-    errornum,filelist=func1(fullfilename,fields,value)
+    errornum,filelist=func2(fullfilename,fields,value)
     if errornum==0:
         writefile(filelist,fullfilename)
     return errornum,
@@ -73,7 +73,7 @@ def writefile(strlist,filename):
     for i in strlist:
         for j in i:
             fout.write("%s"%(j))
-    fout.close()#会覆盖原来的内容
+    fout.close()#会覆盖原�?�的内容
 
 
 '''

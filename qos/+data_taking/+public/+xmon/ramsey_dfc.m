@@ -1,7 +1,7 @@
-function varargout = ramsey_df(varargin)
-% ramsey: ramsey oscillation, detune by detune mw source frequency fc
+function varargout = ramsey_dfc(varargin)
+% ramsey: ramsey oscillation, detune by detuning mw source frequency fc
 % 
-% <_o_> = ramsey_df('qubit',_c&o_,...
+% <_o_> = ramsey_dfc('qubit',_c&o_,...
 %       'time',[_i_],'detuning',[_f_],...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
@@ -18,7 +18,7 @@ function varargout = ramsey_df(varargin)
 
 % Yulin Wu, 2016/12/27
 
-    fcn_name = 'data_taking.public.xmon.ramsey_df'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.ramsey_dfc'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
@@ -27,7 +27,7 @@ function varargout = ramsey_df(varargin)
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     X2 = gate.X2p(q);
-    I = op.physical.op.detune(q);
+    I = gate.I(q);
     R = measure.resonatorReadout_ss(q);
  
     switch args.dataTyp
@@ -38,7 +38,7 @@ function varargout = ramsey_df(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_rabi_amp111','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+            throw(MException('QOS_ramsey_dfc:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
     function proc = procFactory(delay)
@@ -46,7 +46,7 @@ function varargout = ramsey_df(varargin)
         proc = X2*I*X2;
     end
 
-    x = expParam(X2,'mw_src_frequency');
+    x = expParam(X2.mw_src{1},'frequency');
     x.offset = q.qr_xy_fc;
     x.name = [q.name,' detunning'];
     y = expParam(@procFactory);
@@ -59,10 +59,11 @@ function varargout = ramsey_df(varargin)
     y_s.offset = y_s.offset;
     y_s.snap_val = R.adDelayStep;
     s1 = sweep(x);
-    s1.vals = args.detuning;
+    s1.vals = -args.detuning;
     s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};
     e = experiment();
+	e.name = 'ramsey_dfc';
     e.sweeps = [s1,s2];
     e.measurements = R;
     

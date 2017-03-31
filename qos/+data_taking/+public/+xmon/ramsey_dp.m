@@ -1,8 +1,9 @@
-function varargout = ramsey_dz(varargin)
-% ramsey_dz: ramsey oscillation, detune by z detune pulse
+function varargout = ramsey_df(varargin)
+% ramsey: ramsey oscillation,..
+% detune by changing the second pi/2 pulse tracking frame
 % 
-% <_o_> = ramsey_dz('qubit',_c&o_,...
-%       'time',[_i_],'detuning',<[_f_]>,...
+% <_o_> = ramsey_dp('qubit',_c&o_,...
+%       'time',[_i_],'detuning',[_f_],...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -16,20 +17,18 @@ function varargout = ramsey_dz(varargin)
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as they form correct pairs.
 
-
 % Yulin Wu, 2016/12/27
 
-    fcn_name = 'data_taking.public.xmon.ramsey_dz'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.ramsey_dp'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'detuning',0,'dataTyp','P',...
-        'gui',false,'notes','','detuning',0,'save',true});
+    args = util.processArgs(varargin,{'dataTyp','P','gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    X2 = gate.X2p(q);
-    I = op.detune(q);
+    X2 = op.XY2p(q);
+    I = gate.I(q);
     R = measure.resonatorReadout_ss(q);
  
     switch args.dataTyp
@@ -40,8 +39,7 @@ function varargout = ramsey_dz(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_ramsey_dz:unrcognizedDataTyp',...
-                'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+            throw(MException('QOS_ramsey_dp:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
     function proc = procFactory(delay)
@@ -49,7 +47,8 @@ function varargout = ramsey_dz(varargin)
         proc = X2*I*X2;
     end
 
-    x = expParam(I,'df');
+    x = expParam(X2,'mw_src_frequency');
+    x.offset = q.qr_xy_fc;
     x.name = [q.name,' detunning'];
     y = expParam(@procFactory);
     y.name = [q.name,' time'];
@@ -65,7 +64,7 @@ function varargout = ramsey_dz(varargin)
     s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};
     e = experiment();
-	e.name = 'ramsey_dz';
+	e.name = 'ramsey_dp';
     e.sweeps = [s1,s2];
     e.measurements = R;
     

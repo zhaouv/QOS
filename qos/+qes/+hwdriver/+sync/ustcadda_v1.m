@@ -238,7 +238,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.ad_list(k).ad.set('mac',s.ad_boards{k}.mac);
             end
             % Ó³ÉäADCµÄÍ¨µÀ
-            for k = 1:length(s.ad_chnl_map);
+            for k = 1:length(s.ad_chnl_map)
                 channel = fieldnames(s.ad_chnl_map{k});
                 channel_info = s.da_chnl_map{k}.(channel{1});
                 % channel_info = regexp(channel_info,' ', 'split');

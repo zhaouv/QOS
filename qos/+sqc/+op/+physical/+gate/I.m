@@ -4,12 +4,21 @@ classdef I < sqc.op.physical.operator
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
+    properties (Dependent = true)
+        ln
+    end
     methods
         function obj = I(qubit)
 			assert(numel(qubit) == 1);
             obj = obj@sqc.op.physical.operator(qubit);
-            obj.logical_op = sym(eye(2));
+            obj.logical_op = sqc.op.logical.gate.I;
 			obj.length = obj.qubits{1}.g_I_ln;
+        end
+        function set.ln(obj,val)
+            obj.length = val;
+        end
+        function val = get.ln(objl)
+            val = obj.length;
         end
     end
     methods (Hidden = true)
