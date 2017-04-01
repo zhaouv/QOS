@@ -1,23 +1,18 @@
 function saveJson(fullfilename,fields,value)
-% fields = {'ad_boards{1}','numChnls'};
-% Copyright 2016 Yulin Wu, USTC
-% mail4ywu@gmail.com/mail4ywu@icloud.com
 
-% {
-%     "class": "sync.ustc_da_v1",
-%     "chnlMap": [1 ,2 ,3 ,4 ,				// rack 1, for jpa iq and readout in iq
-% 											// rack 2, taken as dc channels
-%                       15,16,17,18,19,20,	// rack 3, qubit zpa, first two channels: dc
-%                 21,22,23,24,25,26,27,28,  	// rack 4, qubit mw iq
-%                 29,30,31,32,33,34,35,36,	// rack 5, qubit mw iq
-% 				37,38,39,40 			]  	// rack 6, qubit zpa, right board: power not connected
-% }
-%     error('save fields in json files is not implemented yet.');   
-%     error('save history is not implemented yet.');
+% zhaouv https://zhaouv.github.io/
+
+% not support cell now
+
+% type limit:
+% array must be 1*n or n*1
+% there's only one { in a row
+% there's only one } in a row
+% in last layer there must be some char after : before \n
 if ischar(value)
     value=['s"' value '"'];
 elseif isnumeric(value)
-	if numel(value)==1
+    if numel(value)==1
         value=['n' num2str(value)];
     else
         str='a[';
@@ -26,16 +21,29 @@ elseif isnumeric(value)
         end
         value=[str(1:end-1) ']']; 
     end
+else
+    error('type error');
 end
-
-mod = py.importlib.import_module('+qes.+util.saveJson'); 
+%mod = py.importlib.import_module('python.saveJson');  
+mod = py.importlib.import_module('+qes.+util.saveJson');  
 py.importlib.reload(mod);    
 result=cell(mod.func1(fullfilename,fields,value));
 
 if result{1}== 1
     error('type error');
 end
-if result{1}== 2
-    error('not a last layer');
+%if result{1}== 2
+%    error('not a last layer');
+%end
+%if result{1}== 3
+%    error('not in one row');
+%end
+if result{1}== 4
+    error('index error');
 end
+if result{1}== 5
+    error('not found');
+end
+
+
 end
