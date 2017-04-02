@@ -1,4 +1,4 @@
-function saveJson(fullfilename,fields,value)
+function saveJson(fullfilename,fields,value,formatedArray)
 
 % zhaouv https://zhaouv.github.io/
 
@@ -9,6 +9,16 @@ function saveJson(fullfilename,fields,value)
 % there's only one { in a row
 % there's only one } in a row
 % in last layer there must be some char after : before \n
+
+% key re 'key'\s*:    'key _'
+% {\n  }\n
+% 'aaaa{1}' -> []   or formated
+% :\s\n ok
+% cell(1*n n*1)->[1*n]
+%
+if nargin == 3
+	formatedArray = false;
+end
 if ischar(value)
     value=['s"' value '"'];
 elseif isnumeric(value)
