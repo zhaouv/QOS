@@ -49,7 +49,7 @@ function varargout = spin_echo(varargin)
     e = experiment();
     e.sweeps = s1;
     e.measurements = R;
-    
+    e.name = 'spin_echo';
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

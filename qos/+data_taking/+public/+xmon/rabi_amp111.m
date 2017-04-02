@@ -58,7 +58,8 @@ switch args.driveTyp
 		XY = @procFactory;
 	otherwise
 		throw(MException('QOS_rabi_amp111:illegalDriverTyp',...
-			sprintf('the given drive type %s is not one of the allowed drive types: X, X/2, -X/2, Y, Y/2, -Y/2', args.driveTyp)));
+			sprintf('the given drive type %s is not one of the allowed drive types: X, X/2, -X/2, Y, Y/2, -Y/2',...
+			args.driveTyp)));
 end
 switch args.driveTyp
 	case {'X','Y'}
@@ -84,7 +85,9 @@ switch args.dataTyp
         R.name = '|S21|';
         R.datafcn = @(x)mean(abs(x));
     otherwise
-        throw(MException('QOS_rabi_amp111','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+        throw(MException('QOS_rabi_amp111',...
+			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
+			args.dataTyp));
 end
 
 switch args.driveTyp
@@ -112,7 +115,7 @@ s2.vals = args.xyDriveAmp;
 e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
-
+e.name = 'rabi_amp111';
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;
