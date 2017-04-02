@@ -1,8 +1,8 @@
 function varargout = ramsey_dfc(varargin)
-% ramsey: ramsey oscillation, detune by detuning mw source frequency fc
+% ramsey: ramsey oscillation, detune by detuning mw source frequency fc(carrier frequency)
 % 
 % <_o_> = ramsey_dfc('qubit',_c&o_,...
-%       'time',[_i_],'detuning',[_f_],...
+%       'time',[_i_],'detuning',<[_f_]>,...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -38,7 +38,8 @@ function varargout = ramsey_dfc(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_ramsey_dfc:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+            throw(MException('QOS_ramsey_dfc:unrcognizedDataTyp',。。。
+			'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
     function proc = procFactory(delay)
@@ -54,8 +55,7 @@ function varargout = ramsey_dfc(varargin)
     y.callbacks ={@(x_) x_.expobj.Run()};
 
     y_s = expParam(R,'delay');
-    y_s.offset = 2*X2.length;
-%     y_s.offset = 2*X2.length+3*X2.gate_buffer;
+	y_s.offset = 2*X2.length+3*X2.gate_buffer;
     y_s.offset = y_s.offset;
     y_s.snap_val = R.adDelayStep;
     s1 = sweep(x);

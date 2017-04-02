@@ -1,9 +1,8 @@
-function varargout = ramsey_df01(varargin)
-% ramsey: ramsey oscillation, detune by detuning iq frequency(sideband frequency)
+function varargout = APE(varargin)
+% measure amplified phase error with ramsey measurement
 % 
-% <_o_> = ramsey_df01('qubit',_c&o_,...
-%       'time',[_i_],'detuning',<[_f_]>,...
-%       'dataTyp',<'_c_'>,...   % S21 or P
+% <_o_> = APE('qubit',_c&o_,...
+%       'phase',<[_f_]>,'numI',<_i_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -18,16 +17,15 @@ function varargout = ramsey_df01(varargin)
 
 % Yulin Wu, 2016/12/27
 
-    fcn_name = 'data_taking.public.xmon.ramsey_df01'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.APE'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'dataTyp','P','detuning',0,'gui',false,'notes','','save',true});
+    args = util.processArgs(varargin,{'phase',[-pi/2:pi/20:pi/2],'gui',false,'notes','','phase',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    X2 = gate.X2p(q);
-    I = gate.I(q);
+    X2 = op.XY2p(q);
     R = measure.resonatorReadout_ss(q);
  
     switch args.dataTyp
@@ -38,7 +36,8 @@ function varargout = ramsey_df01(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_ramsey_df01:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+            throw(MException('QOS_APE:unrcognizedDataTyp',...
+				'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
     function proc = procFactory(delay)
@@ -46,23 +45,22 @@ function varargout = ramsey_df01(varargin)
         proc = X2*I*X2;
     end
 
-    x = expParam(X2,'f01');
-    x.offset = X2.f01;
-    x.name = [q.name,' detunning'];
+    x = expParam(X2,'phase');
+    x.name = [q.name,' 2nd X/2 phase'];
     y = expParam(@procFactory);
     y.name = [q.name,' time'];
     y.callbacks ={@(x_) x_.expobj.Run()};
 
     y_s = expParam(R,'delay');
-	y_s.offset = 2*X2.length+3*X2.gate_buffer;
-    y_s.offset = y_s.offset;
+    y_s.offset = 2*X2.length;
+%     y_s.offset = 2*X2.length+3*X2.gate_buffer;
     y_s.snap_val = R.adDelayStep;
     s1 = sweep(x);
-    s1.vals = args.detuning;
+    s1.vals = args.phase;
     s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};
     e = experiment();
-	e.name = 'ramsey_df01';
+	e.name = 'APE';
     e.sweeps = [s1,s2];
     e.measurements = R;
     

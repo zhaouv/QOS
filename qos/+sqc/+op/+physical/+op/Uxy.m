@@ -11,7 +11,7 @@ classdef Uxy < sqc.op.physical.operator
         function obj = Uxy(U)
 			% todo..
 			% check U
-			error('this class is not ready');
+			error('todo...');
             obj = obj@sqc.op.physical.operator(qubit);
         end
     end

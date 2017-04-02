@@ -10,7 +10,7 @@ classdef XY < sqc.op.physical.gate.X
         phase % defines the rotation axis
     end
     methods
-        function obj = Rxy(qubit, phase)
+        function obj = XY(qubit, phase)
             obj = obj@sqc.op.physical.gate.X(qubit);
 			obj.phase = phase;
         end
