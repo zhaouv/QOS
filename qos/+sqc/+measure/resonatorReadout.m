@@ -218,7 +218,7 @@ classdef resonatorReadout < qes.measurement.prob
             obj.r_amp = val;
         end
 		function set.delay(obj,val)
-            % as the awg only knows the da output delay step, thus here it is necessary to ceil the 
+            % as the awg only knows the da output delay step, here it is necessary to ceil the 
             % readout waveform output delay to a multiple of adDelayStep
 			obj.delay = obj.adDelayStep*ceil((val)/obj.adDelayStep);
             if ~isempty(obj.qubits{1}.r_jpa)

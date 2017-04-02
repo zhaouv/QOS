@@ -15,53 +15,36 @@ function varargout = APE(varargin)
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as they form correct pairs.
 
-% Yulin Wu, 2016/12/27
+% Yulin Wu, 2017/4/1
 
     fcn_name = 'data_taking.public.xmon.APE'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'phase',[-pi/2:pi/20:pi/2],'gui',false,'notes','','phase',0,'save',true});
+    args = util.processArgs(varargin,{'phase',[-pi/2:pi/40:pi/2],...
+		'numI',5,'gui',false,'notes','','phase',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    X2 = op.XY2p(q);
-    R = measure.resonatorReadout_ss(q);
- 
-    switch args.dataTyp
-        case 'P'
-            % pass
-        case 'S21'
-            R.swapdata = true;
-            R.name = 'iq';
-            R.datafcn = @(x)mean(abs(x));
-        otherwise
-            throw(MException('QOS_APE:unrcognizedDataTyp',...
-				'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
+    X2p = op.X2p(q);
+	X2m = gate.X2m(q);
+	XY2 = op.XY2p(q,0);
+	I = (X2m*X2p)^args.numI;
+    function proc = procFactory(phase)
+		X2.phase = phase;
+        proc = XY2*I*X2p;
     end
+	R = measure.resonatorReadout_ss(q);
+	R.delay = 2*X2p.length+I.length+3*X2p.gate_buffer;
 
-    function proc = procFactory(delay)
-        I.ln = delay;
-        proc = X2*I*X2;
-    end
-
-    x = expParam(X2,'phase');
-    x.name = [q.name,' 2nd X/2 phase'];
-    y = expParam(@procFactory);
-    y.name = [q.name,' time'];
-    y.callbacks ={@(x_) x_.expobj.Run()};
-
-    y_s = expParam(R,'delay');
-    y_s.offset = 2*X2.length;
-%     y_s.offset = 2*X2.length+3*X2.gate_buffer;
-    y_s.snap_val = R.adDelayStep;
+    x = expParam(@procFactory);
+    x.name = [q.name,' phase(rad)'];
+    x.callbacks ={@(x_) x_.expobj.Run()};
     s1 = sweep(x);
     s1.vals = args.phase;
-    s2 = sweep({y,y_s});
-    s2.vals = {args.time,args.time};
     e = experiment();
-	e.name = 'APE';
-    e.sweeps = [s1,s2];
+	e.name = 'Amplified Phase Error';
+    e.sweeps = s1;
     e.measurements = R;
     
     if ~args.gui
