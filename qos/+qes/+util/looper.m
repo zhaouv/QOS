@@ -1,5 +1,5 @@
 classdef looper < qes.util.looper_
-    % looper of arrays or generators
+    % a simple wrapper of looper_ with varargin input arguments
     % example:
 	% >>lo = looper([1,2,3,4],{'a','b'});
 	% >>ai = lo()

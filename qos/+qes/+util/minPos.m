@@ -1,7 +1,6 @@
 function d = minPos(l,c,r)
-% l, c, r are the values of a parabola at -1, 0, 1, return the minmum
-% position of this parabola.
-% It is bounded by -1 and 1.
+% returns the minmum position of this parabola, bounded by -1 and 1.
+% l, c, r are the values of a parabola at -1, 0, 1.
 
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com

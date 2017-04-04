@@ -1,6 +1,7 @@
 classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
     % joint readout
-	% obj.data(ii) is the probability of iith(count from left to right) state in
+	% data: 1 by 2^(number of qubits)
+	% obj.data(n) is the probability of nth(count from left to right) state in
 	% {|000...00>,|000...01>,...,|111...10>,|111...11>}
 	% qubits labeled as |qn,qn-1,...,q2,q1>
     
