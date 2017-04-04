@@ -42,7 +42,7 @@ function varargout = xyGateAmpTuner(varargin)
 	rP = range(P);
 	if rP < 0.3
 		throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
-				'visibility too low, at least 0.3 for xyGateAmpTuner to work, %0.2f measured', rP);
+				'visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', rP);
 	elseif rP < 5/sqrt(q.r_avg)
 		throw(MException('QOS_xyGateAmpTuner:rAvgTooLow',...
 				'readout average number %d too small.', q.r_avg);
