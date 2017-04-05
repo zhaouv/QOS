@@ -35,14 +35,14 @@ function varargout = xyGateAmpTuner(varargin)
 				sprintf('gate %s is not supported, supported types are %s',args.gateTyp,...
 				'X, Y X/2 -X/2 X2m X2p Y/2 -Y/2 Y2m Y2p')));
 	end
-	amps = linspace(0,da.vpp/2,NUM_RABI_SAMPLING_PTS);
+	amps = linspace(0,(1-da.dynamicReserve)*da.vpp/2,NUM_RABI_SAMPLING_PTS);
 	e = rabi_amp1('qubit',q,'bias',0,'biasLonger',0,'xyDriveAmp',amps,...
 		'detuning',0,'driveTyp',args.gateTyp,'gui',false,'save',false);
 	P = e.data{1};
 	rP = range(P);
 	if rP < 0.3
 		throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
-				'visibility too low, at least 0.3 for xyGateAmpTuner to work, %0.2f measured', rP);
+				'visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', rP);
 	elseif rP < 5/sqrt(q.r_avg)
 		throw(MException('QOS_xyGateAmpTuner:rAvgTooLow',...
 				'readout average number %d too small.', q.r_avg);

@@ -1,5 +1,6 @@
 classdef resonatorReadout < qes.measurement.prob
-    % measure state |1> probabilty, a resonator readout multiple qubits
+    % a resonator readout multiple qubits
+	% data: 1 by 2^(number of qubits)
     
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
@@ -218,7 +219,7 @@ classdef resonatorReadout < qes.measurement.prob
             obj.r_amp = val;
         end
 		function set.delay(obj,val)
-            % as the awg only knows the da output delay step, thus here it is necessary to ceil the 
+            % as the awg only knows the da output delay step, here it is necessary to ceil the 
             % readout waveform output delay to a multiple of adDelayStep
 			obj.delay = obj.adDelayStep*ceil((val)/obj.adDelayStep);
             if ~isempty(obj.qubits{1}.r_jpa)

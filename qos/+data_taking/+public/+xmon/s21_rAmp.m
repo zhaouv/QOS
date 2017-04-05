@@ -26,7 +26,6 @@ function varargout = s21_rAmp(varargin)
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
     R = measure.resonatorReadout_ss(q);
-    R.state = 1;
     R.swapdata = true;
     R.name = 'iq';
     R.datafcn = @(x)mean(x);

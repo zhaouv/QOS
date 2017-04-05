@@ -1,5 +1,5 @@
 classdef resonatorReadout_ss < sqc.measure.resonatorReadout
-    % return probability of a single state
+    % resonator readout multiple qubits, return probability of a single state
     
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com

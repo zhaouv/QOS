@@ -1,5 +1,5 @@
 function b = ismember(A,B)
-    % check if A is a member of cell B, numbers, strings or any objects with an eq methods
+    % check if A is a member of cell array B, numbers, strings or any objects with an eq methods
     % b = ismember(anObject, {'hello', 3, anotherObject, 'world'});
     
 % Copyright 2016 Yulin Wu, USTC
@@ -25,10 +25,14 @@ function b = ismember(A,B)
         end
     else
         for ii  = 1:numel(B)
-            if B{ii} == A
-                b = true;
-                break;
-            end
+			try
+				if B{ii} == A
+					b = true;
+					break;
+				end
+			catch % no eq method, not comparable
+				% pass
+			end
         end
     end
     

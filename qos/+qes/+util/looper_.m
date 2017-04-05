@@ -25,6 +25,7 @@ classdef looper_ < handle
     end
 	methods
 		function obj = looper_(arrays)
+			% arrays: cell array of generators or arrays
 			obj.numGenerators = numel(arrays);
 			for ii = 1:obj.numGenerators
 				if ~isa(arrays{ii},'qes.util.generator')
@@ -32,7 +33,7 @@ classdef looper_ < handle
 				end
 				if arrays{ii}.numElements == 0
 					throw(MException('qes_util_looper_:nullGenerator',...
-						'null generators are not allowed in looper_.'));
+						'null generators are not allowed.'));
 				end
             end
 			obj.generators = arrays;
