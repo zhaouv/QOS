@@ -193,7 +193,7 @@ function CreateGUI(obj)
             end
         catch ME
             set(obj.guiHandles.regTable,'Data',obj.TableData(obj.nodeName,obj.nodeParent));
-            qes.ui.msgbox(getReport(ME,'extended','hyperlinks','off'));
+            qes.ui.msgbox(getReport(ME,'extended','hyperlinks','off'),'Saving failed.');
         end
     end
 
