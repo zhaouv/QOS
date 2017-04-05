@@ -1,7 +1,7 @@
-function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
+function varargout = s21_BiasPwrpPwrs_DAC(varargin)
 % [s21] vs [pump frequency], [signal frequency] with network analyser
 % 
-% <_o_> = s21_BiasPumpPwrPumpFreq_networkAnalyzer('jpaName',_c&o_,...
+% <_o_> = s21_BiasPwrpPwrs_DAC('jpaName',_c&o_,...
 %       'startFreq',_f_,'stopFreq',_f_,...
 %       'numFreqPts',_i_,'avgcounts',_i_,...
 %       'NAPower',_f_,'bandwidth',_f_,...
@@ -21,8 +21,10 @@ function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
 
 % Yulin Wu, 2017/2/14
 
-    fcn_name = 'data_taking.public.jpa.s21_BiasPumpPwrPumpFreq_networkAnalyzer'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.jpa.s21_BiasPwrpPwrs_DAC'; % this and args will be saved with data
     import qes.*
+	
+	error('todo...');
     
     args = util.processArgs(varargin,{'gui',false,'notes','','save',true});
     jpa = data_taking.public.util.getJPAs(args,{'jpaName'});
@@ -31,13 +33,13 @@ function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
                     'name',jpa.channels.signal_i.instru);
 	% needs checking here because na could be a DAC
     if ~isa(na,'qes.hwdriver.sync.networkAnalyzer') && ~isa(na,'qes.hwdriver.async.networkAnalyzer')
-        throw(MException('s21_BiasPumpPwrPumpFreq_networkAnalyzer:inValidSettings',...
+        throw(MException('s21_BiasPwrpPwrs_DAC:inValidSettings',...
               sprintf('the signal source %s is not a network analyzer.',jpa.channels.signal_i.instru)));
     end
     biasSrc = qHandle.FindByClassProp('qes.hwdriver.hardware','name',jpa.channels.bias.instru);
 	% needs checking here because biasSrc could be a DAC
 	if ~isa(biasSrc,'qes.hwdriver.sync.dcSource') && ~isa(na,'qes.hwdriver.async.dcSource')
-        throw(MException('s21_BiasPumpPwrPumpFreq_networkAnalyzer:inValidSettings',...
+        throw(MException('s21_BiasPwrpPwrs_DAC:inValidSettings',...
               sprintf('the bias source %s is not a dc source.',jpa.channels.bias.instru)));
     end
 	biasSrc = biasSrc.GetChnl(jpa.channels.bias.chnl);
