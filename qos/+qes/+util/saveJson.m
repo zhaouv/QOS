@@ -2,37 +2,51 @@ function saveJson(fullfilename,fields,value,formatedArray)
 
 % zhaouv https://zhaouv.github.io/
 
-% not support cell now
-
 % type limit:
-% array must be 1*n or n*1
-% there's only one { in a row
-% there's only one } in a row
-% in last layer there must be some char after : before \n
+% : must be after field with no \n  
 
-% key re 'key'\s*:    'key _'
-% {\n  }\n
-% 'aaaa{1}' -> []   or formated
-% :\s\n ok
-% cell(1*n n*1)->[1*n]
+% format:
+% array p*q*..=n num->[1*n num]
+% formated -> []
+% cell(p*q*..=n string)->[1*n string]
 %
 if nargin == 3
-	formatedArray = false;
+    formatedArray = false;
 end
-if ischar(value)
-    value=['s"' value '"'];
-elseif isnumeric(value)
-    if numel(value)==1
-        value=['n' num2str(value)];
-    else
-        str='a[';
-        for i=1:numel(value)
-            str=[str num2str(value(i)) ','];
+if ~formatedArray
+    if ischar(value)
+        value=['s"' value '"'];
+    elseif isnumeric(value)
+        if numel(value)==1
+            value=['n' num2str(value)];
+        else
+            str='a[';
+            for i=1:numel(value)
+                str=[str num2str(value(i)) ','];
+            end
+            value=[str(1:end-1) ']']; 
         end
-        value=[str(1:end-1) ']']; 
+    elseif iscell(value)
+        if numel(value)==1
+            if ~ischar(value{1})
+                error('not string in cell')
+            end
+            value=['a["' value{1} '"]'];
+        else
+            str='a[';
+            for i=1:numel(value)
+                if ~ischar(value{i})
+                    error('not string in cell')
+                end
+                str=[str '"' value{i} '",'];
+            end
+            value=[str(1:end-1) ']']; 
+        end
+	else
+        error('type error');
     end
 else
-    error('type error');
+    value=['a[' value ']'];
 end
 %mod = py.importlib.import_module('python.saveJson');  
 mod = py.importlib.import_module('+qes.+util.saveJson');  
