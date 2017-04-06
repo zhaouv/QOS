@@ -17,7 +17,6 @@ classdef (Sealed = true)RegEditor < handle
         function obj = RegEditor()
             try
                 obj.qs = qes.qSettings.GetInstance();
- 
             catch
                 qsRootDir = uigetdir(pwd,'Select the registry directory:');
                 if isempty(qsRootDir)

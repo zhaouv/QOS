@@ -10,12 +10,20 @@ function saveJson(fullfilename,fields,value,formatedArray)
 % formated -> []
 % cell(p*q*..=n string)->[1*n string]
 %
+
+if ~qes.util.endsWith(fullfilename,'.key')
+    fullfilename = [fullfilename,'.key'];
+end
 if nargin == 3
     formatedArray = false;
 end
 if ~formatedArray
     if ischar(value)
-        value=['s"' value '"'];
+		if ~isempty(value) && value(1)=='['
+			value=['a' value];
+		else 
+			value=['s"' value '"'];
+		end
     elseif isnumeric(value)
         if numel(value)==1
             value=['n' num2str(value)];
@@ -27,21 +35,19 @@ if ~formatedArray
             value=[str(1:end-1) ']']; 
         end
     elseif iscell(value)
-        if numel(value)==1
-            if ~ischar(value{1})
-                error('not string in cell')
-            end
-            value=['a["' value{1} '"]'];
-        else
-            str='a[';
+        str='a[';
             for i=1:numel(value)
-                if ~ischar(value{i})
-                    error('not string in cell')
+                if ~ischar(value{i}) && ~isnumeric(value{i})
+                    error('not string or numeric in cell')
                 end
-                str=[str '"' value{i} '",'];
+                if isnumeric(value{i})
+                    value{i} = qes.util.num2strCompact(value{i});
+                else
+                    value{i}=['"' value{i} '"'];
+                end
+                str=[str  value{i} ','];
             end
             value=[str(1:end-1) ']']; 
-        end
 	else
         error('type error');
     end
