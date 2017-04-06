@@ -84,7 +84,8 @@ def func2(filelists,fields,value):
         if '}' in filelist[index][0]:
             out_numketbra-=1
         field_str=filelist[index][0].split('{')[0]
-        if (field in field_str) and out_numketbra==1 :# find key
+        #(field in field_str)
+        if re.match('\\s*"'+field+'"\\s*:', field_str) and out_numketbra==1 :# find key
             if num!=0:
                 numketbra=0
                 index0=index
@@ -102,10 +103,10 @@ def func2(filelists,fields,value):
                         sa,sb=filelist[index1][0].split('}')
                         leftlists.append(filelist[0:index0])
                         leftlists.append([[sa0,'']])
-                        nextfilelists.append([['{'+sb0],[filelist[index0][1]]])
+                        nextfilelists.append([['{'+sb0,filelist[index0][1]]])
                         nextfilelists.append(filelist[index0+1:index1])
                         nextfilelists.append([[sa+'}','']])
-                        rightlists.append([[sb],[filelist[index1][1]]])
+                        rightlists.append([[sb,filelist[index1][1]]])
                         rightlists.append(filelist[index1+1:])
                         #recursion
                         errornum,filelists=func2(nextfilelists,fields,value)
@@ -129,10 +130,10 @@ def func2(filelists,fields,value):
                         sa,sb=filelist[index1][0].split('}')
                         leftlists.append(filelist[0:index0])
                         leftlists.append([[sa0,'']])
-                        nextfilelists.append([['{'+sb0],[filelist[index0][1]]])
+                        nextfilelists.append([['{'+sb0,filelist[index0][1]]])
                         nextfilelists.append(filelist[index0+1:index1])
                         nextfilelists.append([[sa+'}','']])
-                        rightlists.append([[sb],[filelist[index1][1]]])
+                        rightlists.append([[sb,filelist[index1][1]]])
                         rightlists.append(filelist[index1+1:])
                         #recursion
                         errornum,filelists=func2(nextfilelists,fields,value)
@@ -151,13 +152,17 @@ def func3(filelist,field,value):
         if '}' in filelist[index][0]:
             out_numketbra-=1
         field_str=filelist[index][0].split('{')[0]
-        if (field in field_str) and out_numketbra==1 :
+        if re.match('\\s*"'+field+'"\\s*:', field_str) and out_numketbra==1 :
             keystr,valuestr=keyvalue.match(filelist[index][0]).groups()
+            while(valuestr=='' or re.match('^\s*$',valuestr)):
+                keystr=''
+                index+=1
+                valuestr=filelist[index][0]
             vs,va,vb=valuetype.match(valuestr).groups()
-            if value[0] =='s' and not valuestr[0] in '\'\"':#string
+            if value[0] =='s' and not va[0] in '\'\"':#string
                 return 1.0,[]#type error
             if value[0] == 'a':#array
-                if not valuestr[0] == '[':
+                if not va[0] == '[':
                     return 1.0,[]
                 if not va[-1] == ']':
                     filelist[index][0]=keystr+vs+value[1:]
@@ -173,9 +178,7 @@ def func3(filelist,field,value):
                             return 0.0,filelist
                         vs,va,vb=re.match('^(\s*)(.*?)(\s*)$', filelist[index1][0]).groups()
                         filelist[index1][0]=vs+vb
-            if value[0] == 'c' and not valuestr[0] == '{':#cell
-                return 1.0,[]
-            if value[0] == 'n' and valuestr[0] in '\'\"[{':#number
+            if value[0] == 'n' and va[0] in '\'\"[{':#number
                 return 1.0,[]
             filelist[index][0]=keystr+vs+value[1:]+vb
             return 0.0,filelist #succeed
@@ -184,6 +187,7 @@ def func3(filelist,field,value):
 #read file and turn it into list of ['string','note']
 def readfile(filename):
     fin = open(filename, "r")
+    filelist_=[]
     filelist=fin.readlines()
     for index in range(len(filelist)):
         if linenotes.match(filelist[index]):
@@ -191,22 +195,37 @@ def readfile(filename):
             filelist[index]=[before,note]
         else:
             filelist[index]=[filelist[index],'']
+    for i in filelist:
+        a=i[0].split('{')
+        for j in a[:-1]:
+            filelist_.append([j,''])
+            filelist_.append(['\n{\n',''])           
+        filelist_.append([a[-1],i[1]])
+    filelist=[]
+    for i in filelist_:
+        a=i[0].split('}')
+        for j in a[:-1]:
+            filelist.append([j,''])
+            filelist.append(['\n}\n',''])            
+        filelist.append([a[-1],i[1]])
     return filelist
 
 def writefile(strlists,filename):
     fout = open(filename, 'w')
+    fstr=''
     for strlist in strlists:
         for i in strlist:
-            for j in i:
-                fout.write("%s"%(j))
+            fstr+=i[0]
+            fstr+=i[1]
+    fout.write(fstr.replace('\n{\n','{').replace('\n}\n','}'))
     fout.close()
 
 
 #filelist=readfile("aaa.txt")
-#errornum,filelists=func2([filelist],("class2",),'s"asrgerg"')
+#errornum,filelists=func2([filelist],("da_chnl_map{3}","ch3"),'s"asedssa"')
 #errornum,filelists=func2([filelist],("layer2","carray"),'a[3,4,1]')
-#func1("aaa.txt",("cname",),'s"aseda"')
-#func1("aaa.txt",("layer2","carray"),'a[3,5,5]')
+#func1("aaa.txt",("channels","xy_q","instru"),'s"safdf"')
+#func1("aaa.txt",("da_chnl_map{3}","ch3"),'s"asyrsa"')
 #func1("aaa.txt",("layer2","layer3","cname"),'s"safdf"')
 #func1("aaa.txt",("chnlMap",),'a[2,2,3,4]')
 #func1("aaa.txt",('da_boards{2}','name'),'s"testn"')
