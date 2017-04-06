@@ -24,8 +24,19 @@ function saveSettings(spath, field,value)
 %     end
     
     settings_exists = false;
+    isJson = false;
     try
-        old_value = qes.util.loadSettings(spath, field);
+        for ii = 1:numel(field)
+            if ~isempty(regexp(field{ii},'{\d+}', 'once'))
+                isJson = true;
+                break;
+            end
+        end
+        if isJson
+            old_value = [];
+        else
+            old_value = qes.util.loadSettings(spath, field);
+        end
         settings_exists = true;
     catch ME
         if strcmp(ME.identifier,'loadSettings:invalidInput')
@@ -63,7 +74,8 @@ function saveSettings(spath, field,value)
         if fileinfo(ii).isdir || length(fileinfo(ii).name) < 5 || ~strcmp(fileinfo(ii).name(end-2:end),'key')
             continue;
         end
-        if strcmp(fileinfo(ii).name(1:end-4),field{1})
+        fname = fileinfo(ii).name(1:end-4);
+        if length(field{1}) >= length(fname) && strcmp(fname,field{1}(1:length(fname)))
             qes.util.saveJson(fullfile(spath,fileinfo(ii).name),field,value);
         elseif numFields == 1
             ln_field = numel(field{1});

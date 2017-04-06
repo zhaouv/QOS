@@ -6,7 +6,7 @@ classdef voltMeter < qes.hwdriver.sync.instrument
 
     properties
 		range
-		numAvg　% number of averages
+		numAvg % number of averages
     end
 	properties (SetAccess = private)
 		voltage

@@ -134,6 +134,9 @@ function CreateGUI(obj)
         'FontSize',10,'FontUnits','points',...
         'Units','characters','Position',pos,'Callback',{@InitializeCallback},...
         'Tooltip','Create hardware objects.','Enable','off');
+	if obj.qs.hwCreated
+		set(obj.guiHandles.iniBtn,'String','Initialization Done');
+	end
     
 
     obj.guiHandles.regTable = uitable('Parent',obj.guiHandles.reWin,...
@@ -193,7 +196,7 @@ function CreateGUI(obj)
             end
         catch ME
             set(obj.guiHandles.regTable,'Data',obj.TableData(obj.nodeName,obj.nodeParent));
-            qes.ui.msgbox(getReport(ME,'extended','hyperlinks','off'));
+            qes.ui.msgbox(getReport(ME,'extended','hyperlinks','off'),'Saving failed.');
         end
     end
 

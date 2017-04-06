@@ -4,11 +4,13 @@
 import data_taking.public.util.*
 import data_taking.public.xmon.*
 qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-dips = [7.04343, 7.00426, 6.9902, 6.96171,6.9199,6.88215,6.833590,6.79613,6.75390,6.70932]*1e9; % by qubit index
+dips = [7.04343, 7.00426, 6.9902, 6.96171,6.9199,6.88215,6.833590,6.79613,6.75390,6.70932]*1e9-200e6; % by qubit index
 scanRange = 5e6; % fine scan each qubit dips
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
-s21_rAmp('qubit','q1','freq',[dips(4)-1e6:0.05e6:dips(4)+1e6],'amp',[5000],...  % logspace(log10(1000),log10(32768),25)
+for ii = 1:10
+s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-3e6:0.025e6:dips(ii)+1e6],'amp',[logspace(log10(1000),log10(32768),30)],...  % logspace(log10(1000),log10(32768),25)
       'notes','attenuation:26dB','gui',true,'save',true);
+end
 %%
 s21_zdc('qubit', 'q4',...
       'freq',[dips(4)-3.5e6:0.1e6:dips(4)+1e6],'amp',[-3e4:1.5e3:3e4],...

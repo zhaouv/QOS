@@ -70,7 +70,7 @@ def func2(filelists,fields,value):
     
     #last layer  
     if len(fields)==0:  
-        errornum,filelist=func3(filelist,field,value)
+        errornum,filelist=func3(filelist,field,num,value)
         leftlists.extend([filelist])
         leftlists.extend(rightlists)
         return errornum,leftlists
@@ -143,7 +143,7 @@ def func2(filelists,fields,value):
     return 5.0,[] #not found key
   
 #Recursive endpoint : lastlayer  
-def func3(filelist,field,value):
+def func3(filelist,field,num,value):
     out_numketbra=0;
     for index in range(len(filelist)):
         #out_brace-matching
@@ -159,8 +159,15 @@ def func3(filelist,field,value):
                 index+=1
                 valuestr=filelist[index][0]
             vs,va,vb=valuetype.match(valuestr).groups()
-            if value[0] =='s' and not va[0] in '\'\"':#string
-                return 1.0,[]#type error
+#            if value[0] =='s' and not va[0] in '\'\"':#string
+#                return 1.0,[]#type error
+            if value[0] =='s' :#string
+                if not va[0] in '\'\"':
+                    if va[0] in '[{':
+                        return 1.0,[]#type error
+                    else :
+                        float(value[2:-1])#if is not a number,will throw a ValueError
+                        value='n'+value[2:-1]
             if value[0] == 'a':#array
                 if not va[0] == '[':
                     return 1.0,[]
@@ -208,7 +215,14 @@ def readfile(filename):
             filelist.append([j,''])
             filelist.append(['\n}\n',''])            
         filelist.append([a[-1],i[1]])
-    return filelist
+    filelist_=[]
+    for i in filelist:
+        a=i[0].split(',')
+        for j in a[:-1]:
+            filelist_.append([j,''])
+            filelist_.append(['\n,\n',''])            
+        filelist_.append([a[-1],i[1]])
+    return filelist_
 
 def writefile(strlists,filename):
     fout = open(filename, 'w')
@@ -217,7 +231,7 @@ def writefile(strlists,filename):
         for i in strlist:
             fstr+=i[0]
             fstr+=i[1]
-    fout.write(fstr.replace('\n{\n','{').replace('\n}\n','}'))
+    fout.write(fstr.replace('\n{\n','{').replace('\n}\n','}').replace('\n,\n',','))
     fout.close()
 
 
