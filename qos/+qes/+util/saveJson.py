@@ -21,7 +21,7 @@ import re
 # some regular expression used later 
 linenotes=re.compile(r'^([^/]*)(//[^\n]*\n)$')
     #split row -> 'string'    '//notestr\n'
-fieldnum=re.compile(r'^([^\{^\}]*?)\{(\d*)\}$')
+fieldnum=re.compile(r'^([^\{^\}]*?)(\{|\()(\d*)(\}|\))$')
     #split 'da_boards{2}' -> 'da_boards'   '2'
 keyvalue=re.compile(r'^([^:]*:\s*)([^:]*)$')
     #split '    "class": "sync.ustc_da_v1",  \n' -> '    "class": '   '"sync.ustc_da_v1",  \n'
@@ -59,7 +59,7 @@ def func2(filelists,fields,value):
     field=fields[0]
     fields=fields[1:]
     if fieldnum.match(field):
-        field,num=fieldnum.match(field).groups()
+        field,s_temp1,num,s_temp2=fieldnum.match(field).groups()
         num=int(num)
     else:
         num=0
@@ -154,6 +154,12 @@ def func3(filelist,field,num,value):
         field_str=filelist[index][0].split('{')[0]
         if re.match('\\s*"'+field+'"\\s*:', field_str) and out_numketbra==1 :
             keystr,valuestr=keyvalue.match(filelist[index][0]).groups()
+            while(num>0):
+                keystr=''
+                num = num-1 if '[' in valuestr else num
+                num = num-1 if ',' in valuestr else num
+                index+=1
+                valuestr=filelist[index][0]
             while(valuestr=='' or re.match('^\s*$',valuestr)):
                 keystr=''
                 index+=1
@@ -172,7 +178,7 @@ def func3(filelist,field,num,value):
                 if not va[0] == '[':
                     return 1.0,[]
                 if not va[-1] == ']':
-                    filelist[index][0]=keystr+vs+value[1:]
+                    filelist[index][0]=value[1:]
                     numketbra=1;
                     for index1 in range(index+1,len(filelist)):
                         if '[' in filelist[index1][0]:
@@ -180,11 +186,13 @@ def func3(filelist,field,num,value):
                         if ']' in filelist[index1][0]:
                             numketbra-=1
                         if numketbra==0:
-                            sa,sb=filelist[index1][0].split(']')
-                            filelist[index1][0]=sb
+                            filelist[index1][0]=''
                             return 0.0,filelist
                         vs,va,vb=re.match('^(\s*)(.*?)(\s*)$', filelist[index1][0]).groups()
-                        filelist[index1][0]=vs+vb
+                        if filelist[index1][0] in ['\n,\n','\n[\n']:
+                            filelist[index1][0]=''
+                        else:
+                            filelist[index1][0]=vs+vb
             if value[0] == 'n' and va[0] in '\'\"[{':#number
                 return 1.0,[]
             filelist[index][0]=keystr+vs+value[1:]+vb
@@ -202,28 +210,13 @@ def readfile(filename):
             filelist[index]=[before,note]
         else:
             filelist[index]=[filelist[index],'']
-    for i in filelist:
-        a=i[0].split('{')
-        for j in a[:-1]:
-            filelist_.append([j,''])
-            filelist_.append(['\n{\n',''])           
-        filelist_.append([a[-1],i[1]])
-    filelist=[]
-    for i in filelist_:
-        a=i[0].split('}')
-        for j in a[:-1]:
-            filelist.append([j,''])
-            filelist.append(['\n}\n',''])            
-        filelist.append([a[-1],i[1]])
-    filelist_=[]
-    for i in filelist:
-        a=i[0].split(',')
-        for j in a[:-1]:
-            filelist_.append([j,''])
-            filelist_.append(['\n,\n',''])            
-        filelist_.append([a[-1],i[1]])
-    return filelist_
-
+    filelist=prefilelist(filelist,'{')
+    filelist=prefilelist(filelist,'}')
+    filelist=prefilelist(filelist,'[')
+    filelist=prefilelist(filelist,']')
+    filelist=prefilelist(filelist,',')
+    return filelist
+        
 def writefile(strlists,filename):
     fout = open(filename, 'w')
     fstr=''
@@ -231,15 +224,30 @@ def writefile(strlists,filename):
         for i in strlist:
             fstr+=i[0]
             fstr+=i[1]
-    fout.write(fstr.replace('\n{\n','{').replace('\n}\n','}').replace('\n,\n',','))
+    fstr=fstr.replace('\n{\n','{')
+    fstr=fstr.replace('\n}\n','}')
+    fstr=fstr.replace('\n[\n','[')
+    fstr=fstr.replace('\n]\n',']')
+    fstr=fstr.replace('\n,\n',',')
+    fout.write(fstr)
     fout.close()
 
-
+def prefilelist(filelist,achar):
+    filelist_=[]
+    for i in filelist:
+        a=i[0].split(achar)
+        for j in a[:-1]:
+            filelist_.append([j,''])
+            filelist_.append(['\n'+achar+'\n',''])            
+        filelist_.append([a[-1],i[1]])
+    return filelist_
+    
 #filelist=readfile("aaa.txt")
 #errornum,filelists=func2([filelist],("da_chnl_map{3}","ch3"),'s"asedssa"')
 #errornum,filelists=func2([filelist],("layer2","carray"),'a[3,4,1]')
 #func1("aaa.txt",("channels","xy_q","instru"),'s"safdf"')
-#func1("aaa.txt",("da_chnl_map{3}","ch3"),'s"asyrsa"')
+#func1("aaa.txt",("da_chnl_map{3}","ch3"),'a[1,22,3]')
+func1("aaa.txt",("da_chnl_map{3}","ch3(2)"),'n25')
 #func1("aaa.txt",("layer2","layer3","cname"),'s"safdf"')
 #func1("aaa.txt",("chnlMap",),'a[2,2,3,4]')
 #func1("aaa.txt",('da_boards{2}','name'),'s"testn"')
