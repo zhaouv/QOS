@@ -7,6 +7,9 @@ function Value = num2strCompact(Value)
 % Copyright 2016 Yulin Wu, USTC, China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
+    if isempty(Value)
+        Value = '';
+    end
     if abs(Value) > 1e3 ||...
             (abs(Value) < 1e-3 && round(Value) ~= Value)
         Value = num2str(Value,'%0.5e');
@@ -22,5 +25,10 @@ function Value = num2strCompact(Value)
     Value = regexprep(Value,'e\-*0+','e-');
     if numel(Value)>1 && Value(1) == '+'
         Value(1) = [];
+    end
+    if ~isempty(regexp(Value,'\.\d+', 'once'))
+        while numel(Value) && strcmp(Value(end),'0')
+            Value(end) = [];
+        end
     end
 end

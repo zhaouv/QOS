@@ -27,7 +27,7 @@ function saveSettings(spath, field,value)
     isJson = false;
     try
         for ii = 1:numel(field)
-            if ~isempty(regexp(field{ii},'{\d+}', 'once'))
+            if ~isempty(regexp(field{ii},'{\d+}', 'once')) || ~isempty(strfind(field{ii},'.'))
                 isJson = true;
                 break;
             end
@@ -76,7 +76,11 @@ function saveSettings(spath, field,value)
         end
         fname = fileinfo(ii).name(1:end-4);
         if length(field{1}) >= length(fname) && strcmp(fname,field{1}(1:length(fname)))
-            qes.util.saveJson(fullfile(spath,fileinfo(ii).name),field,value);
+            field_ = {};
+            for uu = 1:numel(field)
+                field_ = [field_, strsplit(field{uu},'.')];
+            end
+            qes.util.saveJson(fullfile(spath,fileinfo(ii).name),field_,value);
         elseif numFields == 1
             ln_field = numel(field{1});
             if length(fileinfo(ii).name)-3 >= ln_field &&...
@@ -107,19 +111,19 @@ function saveSettings(spath, field,value)
                         % only the caller knows how much number of digits to
                         % use in converting to char string.
                         if ~isnumeric(value)
-                            try
-                                if isnan(str2double(value))
-                                    if ischar(value)
-                                        error('saveSettings:invalidInput',...
-                                            'value type of the current settings field is numeric, %s given.', value);
-                                    else
-                                        error('saveSettings:invalidInput',...
-                                            'value type of the current settings field is numeric, %s given.', class(value));
-                                    end
-                                end
-                            catch
+                            if ~ischar(value)
                                 error('saveSettings:invalidInput',...
-                                    'value type of the current settings field is numeric, %s given.', class(value));
+                                	'value type of the current settings field is numeric, %s given.', class(value));
+                            else
+                                value = regexprep(value,'\s+','');
+                                value = regexprep(value,',\.',',0\.');
+                                value = regexprep(value,'\[\.','[0\.');
+                                if isnan(str2double(value)) &&...
+                                	isempty(regexp(value,'[(\d+(\.\d+){0,1},)*(\d+(\.\d+){0,1}])', 'once'))
+                                    error('saveSettings:invalidInput',...
+                                         'value type of the current settings field is numeric, %s given.', value);
+                                end
+                                value = regexprep(value,'[\[\]]','');
                             end
                         end
                         if ~ischar(value) % if not converted to char string already by caller.

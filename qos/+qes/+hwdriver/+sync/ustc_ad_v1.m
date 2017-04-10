@@ -63,7 +63,7 @@ classdef ustc_ad_v1 < qes.hwdriver.hardware
             val = obj.ustcaddaObj.adDelayStep;
         end
         function [I,Q] = Run(obj,N)
-            obj.ustcaddaObj.runReps = N;
+            obj.ustcaddaObj.runReps = N; % this only takes ~70us, the next line takes ~300ms
             [I,Q] = obj.ustcaddaObj.Run(true);
         end
 		

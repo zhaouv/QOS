@@ -47,10 +47,11 @@ x = expParam(Z,'amp');
 x.name = [biasQubit.name,' z bias amplitude'];
 x.callbacks ={@(x_) x_.expobj.Run()};
 x.deferCallbacks = true;
-y = expParam(X,'mw_src_frequency');
+y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.callbacks ={@(x_) x_.expobj.Run();@(x_)expParam.RunCallbacks(x)};
+y.auxpara = X;
+y.callbacks ={@(x_)expParam.RunCallbacks(x),@(x_)x_.auxpara.Run()};
 
 s1 = sweep(x);
 s1.vals = args.biasAmp;

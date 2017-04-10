@@ -104,9 +104,9 @@ classdef (Abstract = true) measurement < qes.qHandle
             end
         end
         function Run(obj)
-            if ~obj.IsValid()
-                error('measurement:RunError','The object itself not valid or some of its handle class properties not valid.');
-            end
+%             if ~obj.IsValid()
+%                 error('measurement:RunError','The object itself not valid or some of its handle class properties not valid.');
+%             end
             obj.data = [];
             obj.extradata = [];
             obj.dataready = false;

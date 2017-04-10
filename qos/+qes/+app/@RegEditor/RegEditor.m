@@ -19,9 +19,8 @@ classdef (Sealed = true)RegEditor < handle
                 obj.qs = qes.qSettings.GetInstance();
             catch
                 qsRootDir = uigetdir(pwd,'Select the registry directory:');
-                if isempty(qsRootDir)
-                    throw(MException('QOS_RegEditor:createQSettingsError',...
-                            'registry directory not selected.'));
+                if ~ischar(qsRootDir)
+                    return;
                 end
                 try
                     obj.qs = qes.qSettings.GetInstance(qsRootDir);

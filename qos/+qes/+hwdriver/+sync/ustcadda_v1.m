@@ -302,7 +302,18 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         
         function [I,Q] = Run(obj,isSample)
             I=0;Q=0;ret = -1;
-            obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
+            
+            
+            % obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
+			%                                                       ||
+			%                                                       ||
+			%                                                      \||/
+			%                                                       \/
+			obj.da_list(obj.da_master_index).da.SetTrigCount(2*obj.runReps);
+            
+            
+            
+			
             obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
             % 停止除连续波形外的通道，启动触发通道
@@ -312,8 +323,11 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.SetTrigDelay(obj.da_list(k).da_trig_delay);
             end
             % 检查是否成功写入完毕
+            
             for k=1:obj.numDABoards
+%                 tic
                 isSuccessed = obj.da_list(k).da.CheckStatus();
+%                 toc
                 if(isSuccessed ~= 1)
                     error('ustcadda_v1:Run','There were some task failed!');
                 end
