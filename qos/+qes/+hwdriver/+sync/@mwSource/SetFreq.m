@@ -5,7 +5,7 @@ function SetFreq(obj,val,chnl)
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    if val < obj.freqlimits(1) || val > obj.freqlimits(2)
+    if val < obj.freqlimits(chnl,1) || val > obj.freqlimits(chnl,2)
         error('mwSource:OutOfLimit','Frequency value out of limits.');
     end
 
@@ -18,6 +18,9 @@ function SetFreq(obj,val,chnl)
         case {'rohde&schwarz sma100', 'r&s sma100','rssma100'}
             fprintf(obj.interfaceobj,[':SOUR:FREQ ',num2str(val(1),'%0.3f'),'Hz']);
             obj.frequency(chnl) = val;
+		case {'sc5511a'}
+			obj.interfaceobj.setFrequency(val,chnl);
+			obj.frequency(chnl) = val;
         otherwise
             error('MWSource:SetError', ['Unsupported instrument: ',TYP]);
     end

@@ -4,9 +4,9 @@ classdef mwSource < qes.hwdriver.sync.instrument & qes.hwdriver.multiChnl
 % Copyright 2015 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    properties % (AbortSet = true) do not use AbortSet
-        on          % true/false, output on/off
-    end
+%    properties % (AbortSet = true) do not use AbortSet
+%        on          % true/false, output on/off
+%    end
     properties % (SetAccess = immutable)
         freqlimits
         powerlimits
@@ -27,16 +27,15 @@ classdef mwSource < qes.hwdriver.sync.instrument & qes.hwdriver.multiChnl
             if ~isempty(ErrMsg)
                 error('mwSource:InstSetError',[obj.name, ': %s'], ErrMsg);
             end
-            obj.chnlProps = {'frequency','power'};
+            obj.chnlProps = {'frequency','power','on'};
             obj.chnlPropSetMothds = {@(obj,f,chnl)SetFreq(obj,f,chnl),...
-                                      @(obj,p,chnl)SetPower(obj,p,chnl)};
+                                      @(obj,p,chnl)SetPower(obj,p,chnl),...
+									  @(obj,onoff,chnl)SetOnOff(obj,onoff,chnl)};
             obj.chnlPropGetMothds = {@(obj,chnl)GetFreq(obj,chnl),...
-                                      @(obj,chnl)GetPower(obj,chnl)};
+                                      @(obj,chnl)GetPower(obj,chnl),...
+									  @(obj,chnl)GetOnOff(obj,chnl)};
         end
         [varargout] = InitializeInstr(obj)
-%        [Freq, Power]=GetFreqPwer(obj)
-        SetOnOff(obj,OnOrOff)
-        onstatus = GetOnOff(obj)
     end
     methods (Static)
         obj = GetInstance(name,interfaceobj,drivertype)
@@ -68,35 +67,41 @@ classdef mwSource < qes.hwdriver.sync.instrument & qes.hwdriver.multiChnl
 %         function power = get.power(obj)
 %             [~, power] = GetFreqPwer(obj);
 %         end
-        function set.on(obj,val)
-            if isempty(val)
-                error('mwSource:SetOnOff', 'value of ''on'' must be a bolean.');
-            end
-            if ~islogical(val)
-                if val == 0 || val == 1
-                    val = logical(val);
-                else
-                    error('mwSource:SetOnOff', 'value of ''on'' must be a bolean.');
-                end
-            end
-            obj.SetOnOff(val);
-            obj.on = val;
-        end
-        function val = get.on(obj)
-            val = GetOnOff(obj);
-        end
+%        function set.on(obj,val)
+%            if isempty(val)
+%                error('mwSource:SetOnOff', 'value of ''on'' must be a bolean.');
+%            end
+%            if ~islogical(val)
+%                if val == 0 || val == 1
+%                    val = logical(val);
+%                else
+%                    error('mwSource:SetOnOff', 'value of ''on'' must be a bolean.');
+%                end
+%            end
+%            obj.SetOnOff(val);
+%            obj.on = val;
+%        end
+%        function val = get.on(obj)
+%            val = GetOnOff(obj);
+%        end
         function On(obj)
             % set on, this method is introduced for functional
             % programming.
-            obj.on = true;
+			for ii = 1:obj.numChnls
+				obj.SetOnOff(true,ii);
+			end
         end
         function Off(obj)
             % set off, this method is introduced for functional
             % programming.
-            obj.on = false;
+            for ii = 1:obj.numChnls
+				obj.SetOnOff(false,ii);
+			end
         end
         function delete(obj)
-            obj.on = false;
+            for ii = 1:obj.numChnls
+				obj.SetOnOff(false,ii);
+			end
         end
     end
     methods (Hidden = true)
@@ -104,5 +109,7 @@ classdef mwSource < qes.hwdriver.sync.instrument & qes.hwdriver.multiChnl
         SetFreq(obj,val,chnl)
         power = GetPower(obj,chnl)
         frequency = GetFreq(obj,chnl)
+		SetOnOff(obj,OnOrOff,chnl)
+        onstatus = GetOnOff(obj,chnl)
     end
 end
