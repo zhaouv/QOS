@@ -1,4 +1,4 @@
-function On = GetOnOff(obj)
+function On = GetOnOff(obj,chnl)
    % query instrument output status
 
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
@@ -15,6 +15,8 @@ function On = GetOnOff(obj)
             else
                 On = false;
             end
+		case {'sc5511a'}
+			On = obj.interfaceobj.getOnOff(chnl);
         otherwise
              error('DCSource:GetOnOff', ['Unsupported instrument: ',TYP]);
     end
