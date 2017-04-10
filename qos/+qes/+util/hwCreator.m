@@ -74,6 +74,8 @@ function hwobj = hwCreator(s)
                     case {'sync.ustc_da_v1','sync.ustc_dc_v1','aync.ustc_da_v1','aync.ustc_dc_v1'}
                         interfaceobj = feval(str2func(['@(chnlMap)qes.hwdriver.', s.interface.class,'(chnlMap)']),...
                             s.interface.chnlMap);
+                    case {'sync.signalCore5511a'}
+                        interfaceobj = feval(str2func(['@qes.hwdriver.', s.interface.class, '.GetInstance']));
                     otherwise
                         error('HardwareCreator:UnrecognizedHaredwareSettings','unrecognized ''interface'' class ''%s''', s.interface.class);
                 end

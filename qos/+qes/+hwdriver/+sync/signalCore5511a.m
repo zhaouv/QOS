@@ -1,5 +1,6 @@
 classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
 	
+<<<<<<< HEAD
 	properties (Dependent = private)
         numChnls
     end
@@ -59,9 +60,9 @@ classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinter
 			QS = qes.qSettings.GetInstance();
             s = QS.loadHwSettings('signalCore5511a_bknd');
 			obj.chnlName = s.chnlName;
-			if(~libisloaded(signalCore5511a.driver))
-                driverfilename = [signalCore5511a.driver,'.dll'];
-                loadlibrary(driverfilename,signalCore5511a.driverh);
+			if(~libisloaded(obj.driver))
+                driverfilename = [obj.driver,'.dll'];
+                loadlibrary(driverfilename,obj.driverh);
             end
 			for ii = 1:numel(obj.chnlName)
 				devicehandle = calllib('sc5511a','sc5511a_open_device',obj.chnlName{ii}); 
@@ -76,6 +77,7 @@ classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinter
 			
 			obj.cmdList = {'*IDN?'};
 			obj.ansList = {'SIGNALCORE,SC5511A,170410,1.0'};
+            obj.fcnList = {{}};
         end
     end
     
