@@ -18,6 +18,8 @@ function varargout = ramsey_dfc(varargin)
 
 % Yulin Wu, 2016/12/27
 
+    error('obsolete');
+
     fcn_name = 'data_taking.public.xmon.ramsey_dfc'; % this and args will be saved with data
     import qes.*
     import sqc.*
@@ -38,7 +40,7 @@ function varargout = ramsey_dfc(varargin)
             R.name = 'iq';
             R.datafcn = @(x)mean(abs(x));
         otherwise
-            throw(MException('QOS_ramsey_dfc:unrcognizedDataTyp',。。。
+            throw(MException('QOS_ramsey_dfc:unrcognizedDataTyp',...
 			'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
@@ -50,9 +52,12 @@ function varargout = ramsey_dfc(varargin)
     x = expParam(X2.mw_src{1},'frequency');
     x.offset = q.qr_xy_fc;
     x.name = [q.name,' detunning'];
+    x.deferCallbacks = true;
+    
     y = expParam(@procFactory);
     y.name = [q.name,' time'];
-    y.callbacks ={@(x_) x_.expobj.Run()};
+    y.callbacks ={@(x_) x_.expobj.Run(),...
+        @(x_)expParam.RunCallbacks(x)};
 
     y_s = expParam(R,'delay');
 	y_s.offset = 2*X2.length+3*X2.gate_buffer;

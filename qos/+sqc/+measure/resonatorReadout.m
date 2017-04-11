@@ -33,6 +33,8 @@ classdef resonatorReadout < qes.measurement.prob
 		
 		r_wv
 		jpa_pump_wv
+        
+        stateNames
     end
     methods
         function obj = resonatorReadout(qubits)
@@ -116,12 +118,12 @@ classdef resonatorReadout < qes.measurement.prob
             iq_obj.freq = demod_freq;
             iq_obj.startidx = qubits{1}.r_truncatePts(1)+1;
             iq_obj.endidx = ad.recordLength-qubits{1}.r_truncatePts(2);
-            prob_obj = sqc.measure.prob_iq_ustc_ad_j(iq_obj);
-            prob_obj.qubits = qubits;
+            
+            prob_obj = sqc.measure.prob_iq_ustc_ad_j(iq_obj,qubits);
             obj = obj@qes.measurement.prob(prob_obj);
             obj.n = prob_obj.n;
             obj.qubits = qubits;
-
+            obj.stateNames = prob_obj.stateNames;
 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',qubits{1}.channels.r_mw.instru);
             if isempty(uSrc)
                 throw(MException('QOS_resonatorReadout:hwNotFound',...

@@ -32,6 +32,7 @@ function varargout = ramsey_df01(varargin)
  
     switch args.dataTyp
         case 'P'
+            R.state = 2;
             % pass
         case 'S21'
             R.swapdata = true;

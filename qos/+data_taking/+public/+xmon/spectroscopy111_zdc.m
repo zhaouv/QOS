@@ -39,6 +39,7 @@ end
 X = op.mwDrive4Spectrum(driveQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
+R.state = 1;
 Z = op.zBias4Spectrum(biasQubit);
 
 x = expParam(Z.zdc_src{1},'dcval');

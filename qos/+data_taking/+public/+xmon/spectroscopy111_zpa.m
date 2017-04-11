@@ -38,18 +38,23 @@ end
 
 X = op.mwDrive4Spectrum(driveQubit);
 X.Run();
-R = measure.resonatorReadout(readoutQubit);
+R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
+R.state = 2;
 Z = op.zBias4Spectrum(biasQubit);
 
 x = expParam(Z,'amp');
 x.name = [biasQubit.name,' z bias amplitude'];
 x.callbacks ={@(x_) x_.expobj.Run()};
-y = expParam(X,'mw_src{1}.frequency');
+x.deferCallbacks = true;
+y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
+y.auxpara = X;
+y.callbacks ={@(x_)expParam.RunCallbacks(x),@(x_)x_.auxpara.Run()};
+
 s1 = sweep(x);
-s1.vals = args.bias;
+s1.vals = args.biasAmp;
 s2 = sweep(y);
 s2.vals = args.driveFreq;
 e = experiment();

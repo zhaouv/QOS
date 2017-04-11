@@ -4,9 +4,11 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
     properties
-        qubits % qubit objects or qubit names
         n
         threeStates = false; % {|0>, |1>} system or {|0>, |1>, |2>} system
+    end
+    properties (SetAccess = private)
+        qubits % qubit objects or qubit names
     end
     properties (SetAccess = private, GetAccess = protected)
         num_qs
@@ -19,10 +21,11 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
 %        polarity % r_iq2prob_01polarity
     end
     methods
-        function obj = prob_iq_ustc_ad(iq_ustc_ad_obj)
+        function obj = prob_iq_ustc_ad(iq_ustc_ad_obj,qs)
             obj = obj@qes.measurement.prob(iq_ustc_ad_obj);
             obj.n = iq_ustc_ad_obj.n;
             obj.numericscalardata = false;
+            obj.qubits = qs;
         end
         function set.qubits(obj,val)
             if ~iscell(val) && ischar(val)
