@@ -26,7 +26,7 @@ function Value = num2strCompact(Value)
     if numel(Value)>1 && Value(1) == '+'
         Value(1) = [];
     end
-    if ~isempty(regexp(Value,'\.\d+', 'once'))
+    if ~isempty(regexp(Value,'\.\d+', 'once')) && isempty(regexp(Value,'[eE]', 'once'))
         while numel(Value) && strcmp(Value(end),'0')
             Value(end) = [];
         end

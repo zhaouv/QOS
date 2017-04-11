@@ -41,7 +41,7 @@ function [varargout] = T1(Data, SweepVals,ParamNames,MainParam,MeasurementName,A
             if isempty(Data{ii,jj})
                 Data{ii,jj} = NaN;  % fill empties with NaNs
             else
-                Data{ii,jj} = Data{ii,jj}(2) - Data{ii,jj}(1);
+                Data{ii,jj} = Data{ii,jj}(1) - Data{ii,jj}(2);
             end
         end
     end

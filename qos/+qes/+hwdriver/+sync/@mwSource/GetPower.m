@@ -12,7 +12,8 @@ function Power = GetPower(obj,chnl)
                 'anritsu_mg3692c'}
             % Frequency = str2double(query(obj.interfaceobj,':SOUR:FREQ?'));
             Power = str2double(query(obj.interfaceobj, ':SOUR:POW?'));
-        case {}
+        case {'sc5511a'}
+			Power = obj.interfaceobj.getPower(chnl);
         otherwise
              error('MWSource:QueryError', ['Unsupported instrument: ',TYP]);
     end

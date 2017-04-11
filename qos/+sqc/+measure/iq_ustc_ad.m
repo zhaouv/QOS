@@ -82,8 +82,7 @@ classdef iq_ustc_ad < qes.measurement.iq
 %             tic
             IQ = obj.Run_BothChnl(Vi,Vq);
 %             toc
-
-            
+ 
             obj.data = mean(IQ);
             obj.extradata = IQ;
             obj.dataready = true;

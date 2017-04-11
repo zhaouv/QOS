@@ -40,7 +40,7 @@ R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 R.swapdata = true;
 R.name = 'iq';
-R.datafcn = @(x)mean(x);
+R.datafcn = @(x)mean(abs(x));
 Z = op.zBias4Spectrum(biasQubit);
 
 x = expParam(Z,'amp');

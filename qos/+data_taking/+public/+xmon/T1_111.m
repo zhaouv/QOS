@@ -31,16 +31,21 @@ args = util.processArgs(varargin,{'biasAmp',0,'gui',false,'notes',''});
     data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
 
 X = gate.X(driveQubit);
+I = gate.I(biasQubit);
+I.ln = X.length;
 Z = op.zBias4Spectrum(biasQubit);
-Z.delay = X.length;
+function proc = procFactory(delay)
+	Z.ln = delay;
+	proc = Z*I;
+end
 R = measure.rReadout4T1(readoutQubit,X.mw_src{1});
 
 x = expParam(Z,'amp');
 x.name = [biasQubit.name,' z bias amplitude'];
-y = expParam(Z,'ln');
+y = expParam(@procFactory);
 y.name = [driveQubit.name,' decay time(da sampling interval)'];
 y.auxpara = X;
-y.callbacks ={ @(x_) x_.expobj.Run(); @(x_) x_.auxpara.Run()};
+y.callbacks ={@(x_) x_.expobj.Run(); @(x_) x_.auxpara.Run()};
 y_s = expParam(R,'delay');
 y_s.offset = X.length;
 s1 = sweep(x);

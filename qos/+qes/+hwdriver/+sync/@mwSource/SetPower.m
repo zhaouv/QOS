@@ -5,7 +5,7 @@ function SetPower(obj,val,chnl)
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    if val < obj.powerlimits(1) || val > obj.powerlimits(2)
+    if val < obj.powerlimits(chnl,1) || val > obj.powerlimits(chnl,2)
         error('mwSource:OutOfLimit',[obj.name, ': Power value out of limits!']);
     end
             
@@ -18,6 +18,9 @@ function SetPower(obj,val,chnl)
         case {'rohde&schwarz sma100', 'r&s sma100','rssma100'}
             fprintf(obj.interfaceobj,[':SOUR:POW ',num2str(val(1),'%0.2f')]);
             obj.power(chnl) = val;
+		case {'sc5511a'}
+			obj.interfaceobj.setPower(val,chnl);
+			obj.power(chnl) = val;
         otherwise
              error('MWSource:SetError', ['Unsupported instrument: ',TYP]);
     end

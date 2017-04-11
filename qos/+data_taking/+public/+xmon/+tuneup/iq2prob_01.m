@@ -41,14 +41,14 @@ function varargout = iq2prob_01(varargin)
         R.Run();
         iq_raw_1(ii,:) = R.extradata;
     end
-    iq_raw_1 = iq_raw_1(:)';
+    iq_raw_1 = iq_raw_1(:).';
 
     iq_raw_0 = NaN*ones(num_reps,q.r_avg);
     for ii = 1:num_reps
         R.Run();
         iq_raw_0(ii,:) = R.extradata;
     end
-    iq_raw_0 = iq_raw_0(:)';
+    iq_raw_0 = iq_raw_0(:).';
 
     [center0, center1] =... 
 		data_taking.public.dataproc.iq2prob_centers(iq_raw_0,iq_raw_1,~args.gui);

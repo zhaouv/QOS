@@ -240,7 +240,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % Ó³ÉäADCµÄÍ¨µÀ
             for k = 1:length(s.ad_chnl_map)
                 channel = fieldnames(s.ad_chnl_map{k});
-                channel_info = s.da_chnl_map{k}.(channel{1});
+                channel_info = s.ad_chnl_map{k}.(channel{1});
                 % channel_info = regexp(channel_info,' ', 'split');
 				channel_info = regexp(channel_info,'\s+', 'split'); % Yulin Wu
                 ad_name = channel_info{1};
@@ -304,12 +304,12 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             I=0;Q=0;ret = -1;
             
             
-            % obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
+             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
 			%                                                       ||
 			%                                                       ||
 			%                                                      \||/
 			%                                                       \/
-			obj.da_list(obj.da_master_index).da.SetTrigCount(2*obj.runReps);
+			% obj.da_list(obj.da_master_index).da.SetTrigCount(2*obj.runReps);
             
             
             

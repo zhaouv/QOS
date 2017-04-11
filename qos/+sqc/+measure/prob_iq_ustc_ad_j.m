@@ -7,10 +7,17 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
     
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
-
+    
+    properties (SetAccess = private)
+        stateNames
+    end
     methods
-        function obj = prob_iq_ustc_ad_j(iq_ustc_ad_obj)
-            obj = obj@sqc.measure.prob_iq_ustc_ad(iq_ustc_ad_obj);
+        function obj = prob_iq_ustc_ad_j(iq_ustc_ad_obj,qs)
+            obj = obj@sqc.measure.prob_iq_ustc_ad(iq_ustc_ad_obj,qs);
+            obj.stateNames = cell(1,2^obj.num_qs);
+            for ii = 0:2^obj.num_qs-1
+                obj.stateNames{ii+1} = sprintf('|%s>',dec2bin(ii,obj.num_qs));
+            end
         end
         function Run(obj)
 			if obj.threeStates
