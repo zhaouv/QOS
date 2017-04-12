@@ -44,7 +44,7 @@ classdef processTomography < qes.measurement.measurement
             Run@qes.measurement.measurement(obj);
 			numTomoQs = numel(obj.tomoQubits);
 			lpr = qes.util.looper_(obj.statePrepGates);
-			data = nan*ones(2^numTomoQs,3^numTomoQs,2^numTomoQs);
+			data = NaN*ones(2^numTomoQs,3^numTomoQs,2^numTomoQs);
 			numShots = 2^numTomoQs;
 			idx = 0;
 			while true
