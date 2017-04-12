@@ -1,5 +1,5 @@
 function varargout = s21_zpa(varargin)
-% scan resonator s21 vs frequency and qubit z dc bias
+% scan resonator s21 vs frequency and qubit z pulse bias
 % 
 % <_o_> = s21_zpa('qubit',_c&o_,...
 %       'freq',[_f_],'amp',[_f_],...
