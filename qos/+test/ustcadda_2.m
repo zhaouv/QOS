@@ -30,15 +30,32 @@ ustcaddaObj.Run(false);
 %% test da -> ad
 clc
 wvLn = 4e3; % 2us
-wvData = 65535*ones(1,wvLn);
+wvData = 32768+1000*ones(1,wvLn);
 ustcaddaObj.runReps = 1000;
-ustcaddaObj.SendWave(1,wvData); % 620
-ustcaddaObj.SendWave(2,wvData); % 750
-ustcaddaObj.SendWave(3,wvData); % 620
-ustcaddaObj.SendWave(4,wvData); % 750
+% ustcaddaObj.setDAChnlOutputDelay(1,100);
+% ustcaddaObj.setDAChnlOutputDelay(2,100);
+% ustcaddaObj.setDAChnlOutputDelay(3,100);
+% ustcaddaObj.setDAChnlOutputDelay(4,100);
+ustcaddaObj.SendWave(15,wvData); % 620
+% ustcaddaObj.SendWave(2,wvData); % 750
+% ustcaddaObj.SendWave(3,wvData); % 620
+% ustcaddaObj.SendWave(4,wvData); % 750
 tic
 data = ustcaddaObj.Run(true);
 toc
+%%
+ustcaddaObj.runReps = 10;
+for ii = 0:50:8e3
+    clc;
+    disp(sprintf('waveform code: %d',ii));
+    
+    wvData = (32768+ii)*ones(1,100);
+    
+    ustcaddaObj.SendWave(15,wvData); 
+    ustcaddaObj.SendWave(21,wvData); 
+    
+    data = ustcaddaObj.Run(true);
+end
 %%
 N = 10;
 runReps = ceil(logspace(1,4,30));

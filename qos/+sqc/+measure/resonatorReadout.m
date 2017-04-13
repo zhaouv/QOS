@@ -231,6 +231,7 @@ classdef resonatorReadout < qes.measurement.prob
         function Run(obj)
             obj.GenWave();
             obj.Prep();
+            Run@qes.measurement.prob(obj); % important
             wvObj = obj.r_wv;
             wvObj.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
 % 			obj.r_wv.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);

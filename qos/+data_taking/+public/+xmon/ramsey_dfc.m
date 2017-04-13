@@ -71,7 +71,7 @@ function varargout = ramsey_dfc(varargin)
 	e.name = 'ramsey_dfc';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    
+    e.datafileprefix = sprintf('%s', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

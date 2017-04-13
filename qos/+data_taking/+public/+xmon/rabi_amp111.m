@@ -117,6 +117,7 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.name = 'rabi_amp111';
+e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;
