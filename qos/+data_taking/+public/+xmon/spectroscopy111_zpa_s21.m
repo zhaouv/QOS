@@ -60,6 +60,11 @@ s2.vals = args.driveFreq;
 e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
+if length(s1.vals)>1% add by GM, 20170413
+    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
+elseif length(s1.vals)==1
+    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
+end
 
 if ~args.gui
     e.showctrlpanel = false;
