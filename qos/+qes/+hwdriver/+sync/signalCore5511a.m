@@ -1,15 +1,12 @@
 classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
-	
-<<<<<<< HEAD
-	properties (Dependent = private)
+	properties (Dependent = true) % 20170414
         numChnls
     end
 	properties (SetAccess = private)
-        numChnls
 		freqlimits
         powerlimits
     end
-    properties (SetAccess = private, getAccess = private) % Yulin Wu
+    properties (SetAccess = private, GetAccess = private) % Yulin Wu
 		chnlName
     end
 	
@@ -50,7 +47,7 @@ classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinter
 		end
 		function val = getOnOff(obj, chnl)
 			devicehandle = calllib('sc5511a','sc5511a_open_device',obj.chnlName{chnl}); 
-			[~,~,s]=calllib('sc5511a','sc5511a_get_device_status',devicehandle,{})
+			[~,~,s]=calllib('sc5511a','sc5511a_get_device_status',devicehandle,{});
 			val = s.operate_status.rf1_out_enable;
 			calllib('sc5511a','sc5511a_close_device',devicehandle); 
 		end
