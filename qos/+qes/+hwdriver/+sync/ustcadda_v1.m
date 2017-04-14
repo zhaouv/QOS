@@ -7,7 +7,7 @@
 classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
     properties
         runReps = 1             %run repetition
-        adRecordLength = 1           %ĞèÒªÔÚRunÇ°ÉèÖÃ !!!!!     % daRecordLength
+        adRecordLength = 1           %éœ€è¦åœ¨Runå‰è®¾ç½® !!!!!     % daRecordLength
     end
     
     properties (SetAccess = private)
@@ -99,20 +99,20 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             end
         end
         function seq = GenerateTrigSeq(count,delay)
-            % ¶àÊä³ö1~7¸ö¶àÓàµÄ0
+            % å¤šè¾“å‡º1~7ä¸ªå¤šä½™çš„0
             if(mod(count,8) ~= 0)
                 count = (floor(count/8)+1);
             else
                 count = count/8;
             end
-            % ¹²2¸öĞòÁĞÊı¾İ,µ«ÊÇ±ØĞë×é³É512bitÎ»¿íµÄÊı¾İ
+            % å…±2ä¸ªåºåˆ—æ•°æ®,ä½†æ˜¯å¿…é¡»ç»„æˆ512bitä½å®½çš„æ•°æ®
             seq  = zeros(1,16384);
-            %first sequence,»á²úÉú16nsÑÓÊ±£¬ÓÃÓÚ´¥·¢Æô¶¯Êä³ö¡£
-            function_ctrl = 64;   %53-63Î»
-            trigger_ctrl  = 0;      %48-55Î»
-            counter_ctrl  = 0;      %32-47Î»£¬¼ÆÊ±¼ÆÊıÆ÷
-            length_wave   = 2;      %16-31Î»,Êä³ö²¨ĞÎ³¤¶È
-            address_wave  = 0;  %0    %0-15²¨ĞÎÆğÊ¼µØÖ·
+            %first sequence,ä¼šäº§ç”Ÿ16nså»¶æ—¶ï¼Œç”¨äºè§¦å‘å¯åŠ¨è¾“å‡ºã€‚
+            function_ctrl = 64;   %53-63ä½
+            trigger_ctrl  = 0;      %48-55ä½
+            counter_ctrl  = 0;      %32-47ä½ï¼Œè®¡æ—¶è®¡æ•°å™¨
+            length_wave   = 2;      %16-31ä½,è¾“å‡ºæ³¢å½¢é•¿åº¦
+            address_wave  = 0;  %0    %0-15æ³¢å½¢èµ·å§‹åœ°å€
             for  k = 1:2:4096 
                 seq(4*k-3) = counter_ctrl;
                 seq(4*k-2) = function_ctrl*256 + trigger_ctrl;
@@ -121,16 +121,16 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             end
 
             if(delay ~= 0)
-                function_ctrl = 32;     %53-63Î»£¬¼ÆÊ±Êä³ö¼ÓÍ£Ö¹±êÊ¶
-                counter_ctrl  = delay-1;%32-47Î»£¬¼ÆÊ±¼ÆÊıÆ÷
+                function_ctrl = 32;     %53-63ä½ï¼Œè®¡æ—¶è¾“å‡ºåŠ åœæ­¢æ ‡è¯†
+                counter_ctrl  = delay-1;%32-47ä½ï¼Œè®¡æ—¶è®¡æ•°å™¨
             else
-                function_ctrl = 0;      %±£³ÖÊä³ö
+                function_ctrl = 0;      %ä¿æŒè¾“å‡º
                 counter_ctrl  = 0;
             end
             
-            trigger_ctrl = 0;       %48-55Î»
-            length_wave  = count;   %16-31Î»,Êä³ö²¨ĞÎ³¤¶È
-            address_wave = count;   %0-15²¨ĞÎÆğÊ¼µØÖ·£¬¼Ó1ÊÇÎªÁËÌø¹ı¶àÓàµÄ±£³ÖÂë
+            trigger_ctrl = 0;       %48-55ä½
+            length_wave  = count;   %16-31ä½,è¾“å‡ºæ³¢å½¢é•¿åº¦
+            address_wave = count;   %0-15æ³¢å½¢èµ·å§‹åœ°å€ï¼ŒåŠ 1æ˜¯ä¸ºäº†è·³è¿‡å¤šä½™çš„ä¿æŒç 
             for k = 2:2:4096
                 seq(4*k-3) = counter_ctrl;
                 seq(4*k-2) = function_ctrl*256 + trigger_ctrl;
@@ -160,7 +160,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.Close();
             QS = qes.qSettings.GetInstance();
             s = QS.loadHwSettings('ustcadda');
-            % ÅäÖÃADDA
+            % é…ç½®ADDA
             
             obj.numDABoards = length(s.da_boards);
             obj.numADBoards = length(s.ad_boards);
@@ -169,7 +169,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.adDelayStep = s.adDelayStep;
             obj.adRange = s.adRange;
 
-            % ÅäÖÃDAC
+            % é…ç½®DAC
             for k = 1:obj.numDABoards
                 obj.da_list(k).da = qes.hwdriver.sync.ustcadda_backend.USTCDAC(s.da_boards{k}.ip,s.da_boards{k}.port);
                 obj.da_list(k).da.set('name',s.da_boards{k}.name);
@@ -178,29 +178,28 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.set('sample_rate',s.da_boards{k}.samplingRate);
                 obj.da_list(k).da.set('sync_delay',s.da_boards{k}.syncDelay); 
                 obj.da_list(k).da.set('trig_delay',s.da_boards{k}.daTrigDelayOffset);
-                %ÉèÖÃtrig_selÄ¬ÈÏÖµ0
+                %è®¾ç½®trig_selé»˜è®¤å€¼0
                 obj.da_list(k).da.set('trig_sel',s.trigger_source);
-                %ÉèÖÃmaster°å£¬Ä¬ÈÏÖµÎªµÚÒ»¸ö°å
+                %è®¾ç½®masteræ¿ï¼Œé»˜è®¤å€¼ä¸ºç¬¬ä¸€ä¸ªæ¿
                 obj.da_list(k).da.set('ismaster', 0);
                 if(isfield(s,'da_master') && strcmpi(s.da_boards{k}.name,s.da_master))
                     obj.da_master_index = k;
                 end
-                % ³õÊ¼»¯Í¨µÀµÄmaskÖµ
-                obj.da_list(k).mask_plus = 0; %Õımask
-                obj.da_list(k).mask_min  = 0; %¸ºmask
+                % åˆå§‹åŒ–é€šé“çš„maskå€¼
+                obj.da_list(k).mask_plus = 0; %æ­£mask
+                obj.da_list(k).mask_min  = 0; %è´Ÿmask
                 obj.da_list(k).da.set('trig_interval',s.triggerInterval);
-                % da_trig_delayÊôĞÔ
+                % da_trig_delayå±æ€§
                 obj.da_list(k).da_trig_delay = 0;
                 % redefined offsetCorr settings, Yulin Wu
                 obj.da_list(k).offsetCorr = cell2mat(s.da_boards{k}.offsetCorr);
                 obj.da_list(k).da.set('offsetcorr',cell2mat(s.da_boards{k}.offsetCorr));
             end
 
-            % ÉèÖÃÖ÷°å
+            % è®¾ç½®ä¸»æ¿
             obj.da_list(obj.da_master_index).da.set('ismaster',true);
             obj.da_list(obj.da_master_index).da.set('trig_interval',s.triggerInterval);
-            
-            % Ó³ÉäÍ¨µÀ
+                        % æ˜ å°„é€šé“
             for k = 1:length(s.da_chnl_map)
                 channel = fieldnames(s.da_chnl_map{k});
                 channel_info = s.da_chnl_map{k}.(channel{1});
@@ -225,22 +224,24 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 				end
                 obj.da_channel_list(k).index = da_index; % bug fix: obj.da_channel_list(ch) -> obj.da_channel_list(k), Yulin Wu
                 obj.da_channel_list(k).ch = ch;
-                % Ìí¼ÓÊı¾İ½á¹¹Ìå
+                % æ·»åŠ æ•°æ®ç»“æ„ä½“
                 obj.da_channel_list(k).data = [];
-                % ÉèÖÃÍ¨µÀ´¥·¢ºóÊä³öÑÓÊ±
+                % è®¾ç½®é€šé“è§¦å‘åè¾“å‡ºå»¶æ—¶
                 obj.da_channel_list(k).delay = 0;
             end
-            % ÅäÖÃADC,Ä¿Ç°Ö»Ö§³ÖÒ»¸öÍø¿¨
+            % é…ç½®ADC,ç›®å‰åªæ”¯æŒä¸€ä¸ªç½‘å¡
             for k = 1:obj.numADBoards
                 obj.ad_list(k).ad = qes.hwdriver.sync.ustcadda_backend.USTCADC(s.ad_boards{k}.netcard);
                 obj.ad_list(k).ad.set('sample_rate',s.ad_boards{k}.samplingRate);
                 obj.ad_list(k).ad.set('channel_amount',s.ad_boards{k}.numChnls);
                 obj.ad_list(k).ad.set('mac',s.ad_boards{k}.mac);
             end
-            % Ó³ÉäADCµÄÍ¨µÀ
+            % æ˜ å°„ADCçš„é€šé“
             for k = 1:length(s.ad_chnl_map)
                 channel = fieldnames(s.ad_chnl_map{k});
-                channel_info = s.ad_chnl_map{k}.(channel{1});
+
+                channel_info = s.ad_chnl_map{k}.(channel{1}); %20170411
+
                 % channel_info = regexp(channel_info,' ', 'split');
 				channel_info = regexp(channel_info,'\s+', 'split'); % Yulin Wu
                 ad_name = channel_info{1};
@@ -263,7 +264,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 				
                 obj.ad_channel_list(k).index = ad_index; % bug fix: obj.ad_channel_list(ch) -> obj.ad_channel_list(k), Yulin Wu
                 obj.ad_channel_list(k).ch = ch;
-                % Ìí¼ÓÊı¾İ½á¹¹Ìå
+                % æ·»åŠ æ•°æ®ç»“æ„ä½“
                 % obj.da_channel_list(ch).data = []; % bug? Yulin Wu
             end
             
@@ -302,27 +303,19 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         
         function [I,Q] = Run(obj,isSample)
             I=0;Q=0;ret = -1;
-            
-            
-             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
-			%                                                       ||
-			%                                                       ||
-			%                                                      \||/
-			%                                                       \/
-			% obj.da_list(obj.da_master_index).da.SetTrigCount(2*obj.runReps);
-            
-            
-            
-			
+
+            obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps); %20170411
+
+		
             obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
-            % Í£Ö¹³ıÁ¬Ğø²¨ĞÎÍâµÄÍ¨µÀ£¬Æô¶¯´¥·¢Í¨µÀ
+            % åœæ­¢é™¤è¿ç»­æ³¢å½¢å¤–çš„é€šé“ï¼Œå¯åŠ¨è§¦å‘é€šé“
             for k = 1:obj.numDABoards
                 obj.da_list(k).da.StartStop((15 - obj.da_list(k).mask_min)*16);
                 obj.da_list(k).da.StartStop(obj.da_list(k).mask_plus);
                 obj.da_list(k).da.SetTrigDelay(obj.da_list(k).da_trig_delay);
             end
-            % ¼ì²éÊÇ·ñ³É¹¦Ğ´ÈëÍê±Ï
+            % æ£€æŸ¥æ˜¯å¦æˆåŠŸå†™å…¥å®Œæ¯•
             
             for k=1:obj.numDABoards
 %                 tic
@@ -332,7 +325,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                     error('ustcadda_v1:Run','There were some task failed!');
                 end
             end
-            % ²É¼¯Êı¾İ
+            % é‡‡é›†æ•°æ®
             while(ret ~= 0)
                 obj.ad_list(1).ad.EnableADC();  
                 obj.da_list(obj.da_master_index).da.SendIntTrig();
@@ -342,12 +335,12 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                     ret = 0;
                 end
             end
-            % ½«Êı¾İÕûÀí³É¹Ì¶¨¸ñÊ½
+            % å°†æ•°æ®æ•´ç†æˆå›ºå®šæ ¼å¼
             if(isSample == true)
                 I = (reshape(I,[obj.adRecordLength,obj.runReps]))';
                 Q = (reshape(Q,[obj.adRecordLength,obj.runReps]))';
             end
-            % ²¢Çå¿ÕÍ¨µÀ¼ÇÂ¼
+            % å¹¶æ¸…ç©ºé€šé“è®°å½•
             for k = 1:obj.numDABoards
                 obj.da_list(k).mask_plus = 0;
                 obj.da_list(k).da_trig_delay = 0;
@@ -361,16 +354,16 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             ch = ch_info.ch;
             da_struct = obj.da_list(ch_info.index);
             len = length(data);
-            % Éú³É¸ñÊ½»¯µÄĞòÁĞ
+            % ç”Ÿæˆæ ¼å¼åŒ–çš„åºåˆ—
             seq = obj.GenerateTrigSeq(len,ch_delay);
-            % ·¢ËÍĞòÁĞ
+            % å‘é€åºåˆ—
             da_struct.da.WriteSeq(ch,0,seq);
-            % ¸ñÊ½»¯²¨ĞÎ,ĞèÒªÓëĞòÁĞÊı¾İÅäºÏÀ´ÊµÏÖ¸ñÊ½
+            % æ ¼å¼åŒ–æ³¢å½¢,éœ€è¦ä¸åºåˆ—æ•°æ®é…åˆæ¥å®ç°æ ¼å¼
             if(mod(len,8) ~= 0)
                 data(len+1:(floor(len/8)+2)*8) = 32768;
             end
             len = length(data);
-            data(len+1:len+16) = 32768;    %16¸ö²ÉÑùµãµÄÆğÊ¼Âë
+            data(len+1:len+16) = 32768;    %16ä¸ªé‡‡æ ·ç‚¹çš„èµ·å§‹ç 
             % added uint16 to do clipping, otherwise DA might do wrap
             % around(65535+N is taken as N-1), this is  unacceptable for
             % qubits measurement applications, Yulin Wu
@@ -379,28 +372,28 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % than a ustcadda property, Yulin Wu
             data = uint16(data +...
                 obj.da_list(obj.da_channel_list(channel).index).offsetCorr(obj.da_channel_list(channel).ch)); 
-            % ·¢ËÍ²¨ĞÎ
+            % å‘é€æ³¢å½¢
             da_struct.da.WriteWave(ch,0,data);
-            % Ïàµ±ÓÚ»òÉÏÒ»¸öÍ¨µÀ
+            % ç›¸å½“äºæˆ–ä¸Šä¸€ä¸ªé€šé“
             if(mod(floor(da_struct.mask_plus/(2^(ch-1))),2) == 0)
                 obj.da_list(ch_info.index).mask_plus = da_struct.mask_plus + 2^(ch-1);
             end
         end
        
         function SendContinuousWave(obj,channel,voltage)
-            % Èç¹ûÊÇÖ±Á÷£¬ÔòĞèÒª½«ÆäÀ©´óÎª1*8Êı×é
+            % å¦‚æœæ˜¯ç›´æµï¼Œåˆ™éœ€è¦å°†å…¶æ‰©å¤§ä¸º1*8æ•°ç»„
             if(length(voltage) == 1)
                 voltage = zeros(1,8) + voltage;
             end
             ch_info = obj.da_channel_list(channel);
             ch = ch_info.ch;
             da_struct = obj.da_list(ch_info.index);
-            % Í£Ö¹Êä³ö
+            % åœæ­¢è¾“å‡º
             da_struct.da.StartStop(2^(ch-1)*16);
-            % Ğ´ÈëĞòÁĞ
+            % å†™å…¥åºåˆ—
             seq = obj.GenerateContinuousSeq(length(voltage));
             da_struct.da.WriteSeq(ch,0,seq);
-            % Ğ´Èë²¨ĞÎ
+            % å†™å…¥æ³¢å½¢
             % added uint16 to do clipping, otherwise DA might do wrap
             % around(65535+N is taken as N-1), this is  unacceptable for
             % qubits measurement applications, Yulin Wu
@@ -410,7 +403,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             voltage = uint16(voltage +...
                 obj.da_list(obj.da_channel_list(channel).index).offsetCorr(obj.da_channel_list(channel).ch)); 
             da_struct.da.WriteWave(ch,0,voltage);
-            % ¸üĞÂ×´Ì¬
+            % æ›´æ–°çŠ¶æ€
             if(mod(floor(da_struct.mask_min/(2^(ch-1))),2) == 0)
                 obj.da_list(ch_info.index).mask_min = da_struct.mask_min + 2^(ch-1);
             end
@@ -453,7 +446,8 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 
         function name = GetDACNameByChnl(obj,ch)
             ch_info = obj.da_channel_list(ch);
-            da = obj.da_list(ch_info.index).da;
+            [ch_a,ch_b]=ch_info.index;
+            da = obj.da_list([ch_a,ch_b]).da;% GM, 070411
             name = da.name;
         end
         
