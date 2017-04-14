@@ -1,25 +1,25 @@
-%% load data
-load('F:\data\matlab\20161221\_170104T16111910_.mat')
-Data = Data{1};
-sz = size(Data);
-P = zeros(sz);
-P0 = zeros(sz);
-for ii = 1:sz(1)
-    for jj = 1:sz(2)
-        P(ii,jj) = Data{ii,jj}(1);
-        P0(ii,jj) = Data{ii,jj}(2);
-    end
-end
-x = SweepVals{1}{1};
-y = SweepVals{2}{1}/2e3;
-z = P-P0;
-z = z';
-figure();
-imagesc(x,y,z); set(gca,'YDir','normal'); colormap(jet);
+% %% load data
+% load('F:\data\matlab\20161221\_170104T16111910_.mat')
+% Data = Data{1};
+% sz = size(Data);
+% P = zeros(sz);
+% P0 = zeros(sz);
+% for ii = 1:sz(1)
+%     for jj = 1:sz(2)
+%         P(ii,jj) = Data{ii,jj}(1);
+%         P0(ii,jj) = Data{ii,jj}(2);
+%     end
+% end
+% x = SweepVals{1}{1};
+% y = SweepVals{2}{1}/2e3;
+% z = P-P0;
+% z = z';
+% figure();
+% imagesc(x,y,z); set(gca,'YDir','normal'); colormap(jet);
 %% data: x, y, z
 time = y;
 bias = x;
-z = z';
+z = z;
 nb = length(bias);
 
 plotfit = true;
@@ -45,9 +45,9 @@ if plotfit
     ax = gca;
     drawnow;
 end
-B0 = 0.45;
-td0 = 10;
-lb = [0.6*B0, 0.2*td0];
+B0 = 0.45; % amplitude estimation
+td0 = 5000; % decay time estimation
+lb = [0.6*B0, 0.01*td0];
 ub = [B0/0.6, 2*td0];
 for ii = 1:nb
     
@@ -69,9 +69,9 @@ for ii = 1:nb
     end
 end
 
-time = time;
-td = td;
-wci = wci;
+time = time/2/1000;
+td = td/2/1000;
+wci = wci/2/1000;
 
 figure();
 imagesc(bias,time,z');

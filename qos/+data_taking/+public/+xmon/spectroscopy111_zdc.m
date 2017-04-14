@@ -39,6 +39,7 @@ end
 X = op.mwDrive4Spectrum(driveQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
+R.state = 1;
 Z = op.zBias4Spectrum(biasQubit);
 
 x = expParam(Z.zdc_src{1},'dcval');
@@ -54,7 +55,7 @@ s2.vals = args.driveFreq;
 e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
-
+e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

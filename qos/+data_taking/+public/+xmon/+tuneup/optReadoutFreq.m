@@ -32,10 +32,18 @@ function varargout = optReadoutFreq(varargin)
     data = e.data{1};
     data = data(2:end,:); % 2:end, drop first point to deal with an ad bug, may not be necessary in future versions
     frequency = frequency(2:end);
-    data(:,1) = abs(data(:,1)).*...
-        exp(1i*qes.util.removeJumps(angle(data(:,1)),0.2*pi)); % remove mw source phase jumps
-    data(:,2) = abs(data(:,2)).*...
-        exp(1i*qes.util.removeJumps(angle(data(:,2)),0.2*pi)); 
+%     data(:,1) = abs(data(:,1)).*...
+%         exp(1i*qes.util.removeJumps(angle(data(:,1)),0.2*pi)); % remove mw source phase jumps
+%     data(:,2) = abs(data(:,2)).*...
+%         exp(1i*qes.util.removeJumps(angle(data(:,2)),0.2*pi));
+    [~,minIdx1] = min(abs(data(:,1)));
+    [~,minIdx2] = min(abs(data(:,2)));
+    numPts = size(data,1);
+    if any(abs([minIdx1,minIdx2] - numPts/2) > numPts/2/5*4)
+        throw(MException('QOS_XmonOptReadoutFreq:inproperSettings',...
+            'inproper r_freq or t_rrDipFWHM_est value, dip(s) out of range.'));
+    end
+
     data(:,1) = smooth(data(:,1),3);
     data(:,2) = smooth(data(:,2),3);
     

@@ -47,7 +47,7 @@ function varargout = s21_zdc(varargin)
     e.name = 's21-zdc';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    
+    e.datafileprefix = sprintf('%s', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

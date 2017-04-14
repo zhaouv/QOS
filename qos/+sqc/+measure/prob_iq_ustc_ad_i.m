@@ -5,8 +5,8 @@ classdef prob_iq_ustc_ad_i < sqc.measure.prob_iq_ustc_ad
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     methods
-        function obj = prob_iq_ustc_ad_i(iq_ustc_ad_obj)
-            obj = obj@sqc.measure.prob_iq_ustc_ad(iq_ustc_ad_obj);
+        function obj = prob_iq_ustc_ad_i(iq_ustc_ad_obj,qs)
+            obj = obj@sqc.measure.prob_iq_ustc_ad(iq_ustc_ad_obj,qs);
         end
         function Run(obj)
             Run@sqc.measure.prob_iq_ustc_ad(obj);

@@ -26,25 +26,25 @@ ErrMsg = [];
 
 if exist(datafile,'file')
     load(datafile);
-    if exist('Time','var');
+    if exist('Time','var')
         x = Time;
-    elseif exist('T','var');
+    elseif exist('T','var')
         x = T;
-    elseif exist('time','var');
+    elseif exist('time','var')
         x = time;
-    elseif exist('t','var');
+    elseif exist('t','var')
         x = t;
-    elseif exist('x','var');
+    elseif exist('x','var')
         % do nothing
     else
         ErrMsg = 'no variable ''x'' found!';
     end
 
-    if exist('P','var');
+    if exist('P','var')
         y = P;
-    elseif exist('p','var');
+    elseif exist('p','var')
         y = p;
-    elseif exist('y','var');
+    elseif exist('y','var')
         % do nothing
     else
         ErrMsg = 'no variable ''y'' found!';

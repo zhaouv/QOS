@@ -61,7 +61,7 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 % e.plotfcn = @qes.util.plotfcn.T1;
-
+e.datafileprefix = sprintf('%s',q.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;
