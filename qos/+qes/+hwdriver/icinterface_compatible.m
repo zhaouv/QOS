@@ -17,6 +17,7 @@ classdef (Abstract = true)icinterface_compatible < handle
 % mail4ywu@gmail.com/mail4ywu@icloud.com
     properties (SetAccess = private)
         timeout = 10 % seconds
+		Timeout
     end
     properties (SetAccess = private)
         Status = 'closed' % to be compatible with MATLAB icinterface class
@@ -34,6 +35,9 @@ classdef (Abstract = true)icinterface_compatible < handle
     end
 
     methods
+		function set(obj,properName,val)
+            obj.(properName) = val;
+        end
         function set.timeout(obj,val)
             if ~(val > 0)
                error('icinterface_compatible:InvalidValue','time out should be a positive value.'); 

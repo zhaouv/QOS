@@ -17,7 +17,7 @@ classdef I < sqc.op.physical.operator
         function set.ln(obj,val)
             obj.length = val;
         end
-        function val = get.ln(objl)
+        function val = get.ln(obj)
             val = obj.length;
         end
     end

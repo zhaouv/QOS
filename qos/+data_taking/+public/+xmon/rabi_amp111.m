@@ -6,7 +6,7 @@ function varargout = rabi_amp111(varargin)
 % the selelcted qubits can be listed with:
 % QS.loadSSettings('selected'); % QS is the qSettings object
 % 
-% <_o_> = rabi_amp111('biasQubit',_c&o_,'biasAmp',[_f_],'biasLonger',<_i_>,...
+% <_o_> = rabi_amp111('biasQubit',_c&o_,'biasAmp',<_f_>,'biasLonger',<_i_>,...
 %       'driveQubit',_c&o_,...
 %       'readoutQubit',_c&o_,...
 %       'xyDriveAmp',[_f_],'detuning',<[_f_]>,'driveTyp',<_c_>,...
@@ -30,7 +30,7 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasLonger',0,'detuning',0,'driveTyp','X','dataTyp','P',...
+args = util.processArgs(varargin,{'biasAmp',0,'biasLonger',0,'detuning',0,'driveTyp','X','dataTyp','P',...
     'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] =...
     data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
@@ -79,6 +79,7 @@ R.delay = Z.length;
 
 switch args.dataTyp
     case 'P'
+        R.state = 2;
         % pass
     case 'S21'
         R.swapdata = true;
@@ -116,6 +117,7 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.name = 'rabi_amp111';
+e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

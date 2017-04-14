@@ -58,7 +58,7 @@ s2.vals = {args.time,args.time};
 e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
-
+e.datafileprefix = sprintf('%s%s',q1.name,q2.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

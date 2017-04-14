@@ -6,10 +6,9 @@ classdef zBias4Spectrum < sqc.op.physical.gate.Z_z_base
 
     properties
         % by 'ln', we actually actually modifies the 'operator' basic
-        % property 'length', which by design is protected from use
+        % property 'length', which by design is protected from user
         % modification which is resonable for most operator objects.
         ln
-        delay
     end
     methods
         function obj = zBias4Spectrum(qubit)
@@ -37,7 +36,6 @@ classdef zBias4Spectrum < sqc.op.physical.gate.Z_z_base
             end
             obj.z_wv{1}.awg = da;
             obj.z_wv{1}.awgchnl = [obj.qubits{1}.channels.z_pulse.chnl];
-            obj.z_wv{1}.output_delay = obj.delay;
         end
     end
 end

@@ -49,6 +49,7 @@ function varargout = s21_01(varargin)
     e.savedata = false;
     e.Run();
     e.data{1} = cell2mat(e.data{1});
+    e.datafileprefix = sprintf('%s', q.name);
     if args.gui
         ax = axes('Parent',figure('NumberTitle','off','Name','QOS | s21 of |0>, |1> '));
         plot(ax, args.freq,abs(e.data{1}(:,1)));

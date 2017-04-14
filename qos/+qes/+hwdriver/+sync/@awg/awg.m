@@ -5,6 +5,7 @@ classdef awg < qes.hwdriver.sync.instrument
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     properties
+        dynamicReserve
 		irf % impulse response functions(numeric) of each channel
     end
     properties (SetAccess = private)
