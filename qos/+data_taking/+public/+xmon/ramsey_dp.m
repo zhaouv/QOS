@@ -50,7 +50,7 @@ function varargout = ramsey_dp(varargin)
 	X2_ = copy(X2);
     function proc = procFactory(delay)
         I.ln = delay;
-		X2.phase = 2*pi*detuning.val*delay/daSamplingRate;
+		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
         proc = X2*I*X2_;
     end
 
@@ -64,7 +64,7 @@ function varargout = ramsey_dp(varargin)
     y_s.snap_val = R.adDelayStep;
 	s1 = sweep(x);
     s1.vals = args.detuning;
-    s2 = sweep({x,x_s2});
+    s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};
     e = experiment();
 	e.name = 'ramsey_dp';

@@ -127,4 +127,4 @@ ENV/
 log.txt
 
 # private folders
-+yulin/
+qos/+data_taking/+yulin/
