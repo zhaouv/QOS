@@ -120,7 +120,7 @@ function [rPoint, ang, threshold, polarity] =...
     tol_iq = max(diff(rmm),diff(imm))*1e-4;
     tol_a = 0.1/2*pi;
     xsol = qes.util.fminsearchbnd(@invVisibility,[real(iq_raw_0_mean),imag(iq_raw_0_mean),theta10],...
-        [rmm(1),imm(1),theta10-pi/2],[rmm(2),imm(2),theta10+pi/2],optimset('Display','off','MaxIter',25));
+        [rmm(1),imm(1),theta10-pi/2],[rmm(2),imm(2),theta10+pi/2],optimset('Display','off','MaxIter',20));
 
     rPoint = xsol(1)+1j*xsol(2);
     ang = xsol(3);

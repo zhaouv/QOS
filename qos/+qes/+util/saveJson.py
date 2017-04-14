@@ -247,7 +247,7 @@ def prefilelist(filelist,achar):
 #errornum,filelists=func2([filelist],("layer2","carray"),'a[3,4,1]')
 #func1("aaa.txt",("channels","xy_q","instru"),'s"safdf"')
 #func1("aaa.txt",("da_chnl_map{3}","ch3"),'a[1,22,3]')
-func1("aaa.txt",("da_chnl_map{3}","ch3(2)"),'n25')
+#func1("aaa.txt",("da_chnl_map{3}","ch3(2)"),'n25')
 #func1("aaa.txt",("layer2","layer3","cname"),'s"safdf"')
 #func1("aaa.txt",("chnlMap",),'a[2,2,3,4]')
 #func1("aaa.txt",('da_boards{2}','name'),'s"testn"')

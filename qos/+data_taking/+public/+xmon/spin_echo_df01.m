@@ -57,6 +57,7 @@ function varargout = spin_echo_df01(varargin)
     e.sweeps = [s1,s2];
     e.measurements = R;
     e.name = 'spin_echo_df01';
+    e.datafileprefix = sprintf('%s',q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

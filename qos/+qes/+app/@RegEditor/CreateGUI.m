@@ -180,7 +180,11 @@ function CreateGUI(obj)
             ~isempty(obj.qs.hardware)
     	obj.createUITree();
     end
-     
+    fpos = get(obj.guiHandles.reWin,'Position');
+    set(obj.guiHandles.reWin,'Position',fpos+1);
+    set(obj.guiHandles.reWin,'Position',fpos);
+    drawnow;
+    
     function saveValue(src,entdata)
         if strcmp(entdata.PreviousData,entdata.EditData)
             return;

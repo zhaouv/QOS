@@ -52,10 +52,10 @@ classdef ustc_dc_v1 < qes.hwdriver.icinterface_compatible
             obj.ustcaddaObj.SendContinuousWave(obj.chnlMap(chnl),code);
         end
         function delete(obj)
-			for ch = obj.chnlMap
-                obj.SetDC(obj,0,chnl);
-				obj.ustcaddaObj.StopContinuousWave(ch);
-			end
+% 			for ii = 1:numel(obj.chnlMap)
+%                 obj.SetDC(0,obj.chnlMap(ii));
+% 				obj.ustcaddaObj.StopContinuousWave(obj.chnlMap(ii));
+% 			end
 			obj.ustcaddaObj.ReleaseDAChnls(obj.chnlMap);
 		end
     end

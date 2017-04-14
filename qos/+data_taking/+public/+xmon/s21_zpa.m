@@ -1,5 +1,5 @@
 function varargout = s21_zpa(varargin)
-% scan resonator s21 vs frequency and qubit z dc bias
+% scan resonator s21 vs frequency and qubit z pulse bias
 % 
 % <_o_> = s21_zpa('qubit',_c&o_,...
 %       'freq',[_f_],'amp',[_f_],...
@@ -31,6 +31,7 @@ function varargout = s21_zpa(varargin)
     R.name = 'iq';
     R.datafcn = @(x)mean(x);
     
+    
     Z = op.zBias4Spectrum(q);
     
     x = expParam(Z,'amp');
@@ -49,7 +50,7 @@ function varargout = s21_zpa(varargin)
     e.name = 's21-zpa';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    
+    e.datafileprefix = sprintf('%s', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

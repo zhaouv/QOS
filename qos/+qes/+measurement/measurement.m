@@ -13,6 +13,8 @@ classdef (Abstract = true) measurement < qes.qHandle
         % a function to do data tranform or data post process, type: function handle
         % example: @mean, produces mean of data
         datafcn
+		preRunFcns
+		postRunFcns
     end
 	properties (SetAccess = protected)
         % data is numeric scalar or not, default, true, to defined in specific sub classes
@@ -59,6 +61,30 @@ classdef (Abstract = true) measurement < qes.qHandle
             end
             obj.datafcn = val;
         end
+		function set.preRunFcns(obj,val)
+			if ~isempty(val) && ~iscell(val)
+				val = {val};
+			end
+			for ii = 1:numel(val)
+				if ~isa(val{ii},'function_handle')
+					error('measurement:InvalidInput',...
+						'preRunFcns should be empty or cell array of function handles');
+				end
+			end
+            obj.preRunFcns = val;
+        end
+		function set.postRunFcns(obj,val)
+			if ~isempty(val) && ~iscell(val)
+				val = {val};
+			end
+			for ii = 1:numel(val)
+				if ~isa(val{ii},'function_handle')
+					error('measurement:InvalidInput',...
+						'postRunFcns should be empty or cell array of function handles');
+				end
+			end
+            obj.postRunFcns = val;
+        end
         function val = get.numericscalardata(obj)
             if obj.swapdata % in case of swapdata, extradata is returned instead of data while qureying measurement data.
                 val = false;
@@ -104,9 +130,12 @@ classdef (Abstract = true) measurement < qes.qHandle
             end
         end
         function Run(obj)
-            if ~obj.IsValid()
-                error('measurement:RunError','The object itself not valid or some of its handle class properties not valid.');
-            end
+%             if ~obj.IsValid()
+%                 error('measurement:RunError','The object itself not valid or some of its handle class properties not valid.');
+%             end
+			for ii = 1:numel(obj.preRunFcns)
+				feval(obj.preRunFcns{ii});
+			end
             obj.data = [];
             obj.extradata = [];
             obj.dataready = false;
@@ -153,6 +182,9 @@ classdef (Abstract = true) measurement < qes.qHandle
             obj = eventData.AffectedObject;
             if obj.dataready
                 notify(obj,'DataReady');
+				for ii = 1:numel(obj.postRunFcns)
+					feval(obj.postRunFcns{ii});
+				end
             end
         end
     end

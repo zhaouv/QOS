@@ -73,15 +73,16 @@ classdef iq_ustc_ad < qes.measurement.iq
                 error('iq_ustc_ad:RunError','some properties are not set yet!');
             end
             Run@qes.measurement.measurement(obj); % check object and its handle properties are isvalid or not
+%             disp('===========');
+%             tic
             [Vi,Vq] = obj.instrumentObject.Run(obj.n);
+%             toc
             Vi = double(Vi) -127;
             Vq = double(Vq) -127;
-
+%             tic
             IQ = obj.Run_BothChnl(Vi,Vq);
-            
-%             Amp = obj.Amp(Vi, Vq);
-%             obj.data = Amp;
-            
+%             toc
+ 
             obj.data = mean(IQ);
             obj.extradata = IQ;
             obj.dataready = true;

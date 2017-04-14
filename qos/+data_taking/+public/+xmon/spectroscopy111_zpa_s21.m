@@ -9,8 +9,7 @@ function varargout = spectroscopy111_zpa_s21(varargin)
 %       'driveQubit','driveFreq',<[_f_]>,...
 %       'readoutQubit',_c&o_,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
-% _f_: float
-% _i_: integer
+% _f_: float% _i_: integer
 % _c_: char or char string
 % _b_: boolean
 % _o_: object
@@ -40,17 +39,18 @@ R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 R.swapdata = true;
 R.name = 'iq';
-R.datafcn = @(x)mean(x);
+R.datafcn = @(x)mean(abs(x));
 Z = op.zBias4Spectrum(biasQubit);
 
 x = expParam(Z,'amp');
 x.name = [biasQubit.name,' z bias amplitude'];
 x.callbacks ={@(x_) x_.expobj.Run()};
 x.deferCallbacks = true;
-y = expParam(X,'mw_src_frequency');
+y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.callbacks ={@(x_) x_.expobj.Run();@(x_)expParam.RunCallbacks(x)};
+y.auxpara = X;
+y.callbacks ={@(x_)expParam.RunCallbacks(x),@(x_)x_.auxpara.Run()};
 
 s1 = sweep(x);
 s1.vals = args.biasAmp;
@@ -60,6 +60,12 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 
+if length(s1.vals)>1% add by GM, 20170413
+    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
+elseif length(s1.vals)==1
+    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
+end
+e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

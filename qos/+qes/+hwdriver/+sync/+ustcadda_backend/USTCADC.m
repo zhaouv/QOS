@@ -144,7 +144,7 @@ classdef USTCADC < handle
         
         function set(obj,properties,value)
             switch properties
-                case 'mac';
+                case 'mac'
                     mac_str = regexp(value,'-', 'split');
                     obj.mac = hex2dec(mac_str);
                 case 'name'; obj.name = value;
