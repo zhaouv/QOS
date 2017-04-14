@@ -71,7 +71,11 @@ classdef ustc_da_v1 < qes.hwdriver.icinterface_compatible
             obj.ustcaddaObj.StopContinuousWave(chnl);
         end
         function SetBoardTrigDelayByChnl(obj,chnl,delay)
-            obj.ustcaddaObj.SetDABoardTrigDelay(obj.ustcaddaObj.GetDACNameByChnl(chnl),delay);
+            boardNames = obj.ustcaddaObj.GetDACNameByChnl(chnl);
+            boardNames = unique(boardNames);
+            for ii = 1:numel(boardNames)
+                obj.ustcaddaObj.SetDABoardTrigDelay(boardNames{ii},delay);
+            end
         end
         function val = GetBoardTrigDelayByChnl(obj,chnl)
             val =  obj.ustcaddaObj.GetDABoardTrigDelay(obj,obj.ustcaddaObj.GetDACNameByChnl(chnl));

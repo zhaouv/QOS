@@ -122,3 +122,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# log files
+log.txt
+
+# private folders
+qos/+data_taking/+yulin
