@@ -19,8 +19,8 @@ function varargout = spectroscopy1_zdc(varargin)
 
 import qes.*
 import data_taking.public.xmon.spectroscopy111_zdc
-args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
-varargout{1} = spectroscopy111_zdc('biasQubit',args.qubit,'biasAmp',args.biasAmp,'driveQubit',args.qubit,...
-    'driveFreq',args.driveFreq,'readoutQubit',args.qubit,'notes',args.notes,'gui',args.gui,'save',args.save);
+args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'driveFreq',[],'gui',false,'r_avg',0,'notes','','save',true});
+varargout{1} = spectroscopy111_zdc('biasQubit',args.qubit,'biasAmp',args.biasAmp,'driveQubit',args.qubit,'dataTyp',args.dataTyp,...
+    'driveFreq',args.driveFreq,'readoutQubit',args.qubit,'notes',args.notes,'r_avg',args.r_avg,'gui',args.gui,'save',args.save);
 
 end

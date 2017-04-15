@@ -122,3 +122,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# log file
+log.txt
+
+startup.m
+startup.p

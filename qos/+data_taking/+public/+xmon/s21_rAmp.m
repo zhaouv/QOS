@@ -22,8 +22,14 @@ function varargout = s21_rAmp(varargin)
     import sqc.*
     import sqc.op.physical.*
     
-    args = util.processArgs(varargin,{'gui',false,'notes','','save',true});
+    args = util.processArgs(varargin,{'r_avg',0,'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
+    
+    data_taking.public.util.setZDC(q.name,q.zdc_amp); %add by GM, 20170415
+    
+    if args.r_avg~=0 %add by GM, 20170414
+        q.r_avg=args.r_avg;
+    end
     
     R = measure.resonatorReadout_ss(q);
     R.swapdata = true;
@@ -44,7 +50,7 @@ function varargout = s21_rAmp(varargin)
     e.sweeps = [s1,s2];
     e.measurements = R;
     e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_dB_X; % add by GM, 20170413
-    e.datafileprefix = sprintf('%s', q.name);
+    e.datafileprefix = sprintf('%s_s21_rAmp', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;
