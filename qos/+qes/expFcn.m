@@ -51,7 +51,7 @@ classdef expFcn
             obj.params = ParamList;
             obj.measurements = MeasurementObj;
             function varargout = f(varargin)
-                if numel(varargin) == nparam;
+                if numel(varargin) == nparam
                     for ii = 1:nparam
                         obj.params(ii).val = varargin{ii};
                     end

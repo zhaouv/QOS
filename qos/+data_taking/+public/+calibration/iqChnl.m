@@ -32,15 +32,19 @@ function varargout = iqChnl(varargin)
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
 %     Calibrator.q_delay = s.q_delay;
+
     Calibrator.pulse_ln = s.pulse_ln;
     
     x = qes.expParam(Calibrator,'lo_freq');
     y = qes.expParam(Calibrator,'sb_freq');
+    y_s = qes.expParam(Calibrator,'pulse_ln');
 
     s1 = sweep(x);
     s1.vals = args.loFreq;
-    s2 = sweep(y);
-    s2.vals = args.sbFreq;
+    s2 = sweep({y_s,y});
+    ln = ceil(awgObj.samplingRate/args.sbFreq);
+    ln(ln>30e3) = 30e3;
+    s2.vals = {args.sbFreq,ln};
     e = experiment();
     e.sweeps = {s1,s2};
     e.measurements = Calibrator;
