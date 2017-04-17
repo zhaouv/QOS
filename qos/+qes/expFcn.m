@@ -73,7 +73,11 @@ classdef expFcn
 %                     end
                 end
                 for ii = 1:nmeas
-                    waitfor(obj.measurements{ii},'dataready')
+%                     waitfor(obj.measurements{ii},'dataready')
+                    if obj.measurements{ii}.dataready
+                        varargout{1}=obj.measurements{ii}.data;
+                        break;
+                    end
                 end
             end
             obj.fcn = @f;

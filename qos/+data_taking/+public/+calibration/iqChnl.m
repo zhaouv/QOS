@@ -13,7 +13,7 @@ function varargout = iqChnl(varargin)
 % Yulin Wu, 2017
 
     fcn_name = 'data_taking.public.calibration.iqChnl'; % this and args will be saved with data
-    args = qes.util.process_args(varargin,{'gui',false,'save',true});
+    args = qes.util.processArgs(varargin,{'gui',false,'save',true});
     try
         QS = qes.qSettings.GetInstance();
     catch
@@ -22,12 +22,12 @@ function varargout = iqChnl(varargin)
     end
     s = qes.util.loadSettings(QS.root,{'calibration',args.awgName,'iq',args.chnlSet});
 
-    awgObj = qes.qHandle.FindByClassProp('qes.hwdriver.sync.awg',args.awgName);
+    awgObj = qes.qHandle.FindByClassProp('qes.hwdriver.sync.awg','name',args.awgName);
     awgchnls = s.chnls;
-    spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer',s.spc_analyzer);
+    spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer','name',s.spc_analyzer);
     spcAmpObj = qes.measurement.specAmp(spcAnalyzer);
     
-    mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource',s.lo_source);
+    mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource','name',s.lo_source);
     loSource = mwSrc.GetChnl(s.lo_chnl);
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
@@ -37,6 +37,7 @@ function varargout = iqChnl(varargin)
     
     x = qes.expParam(Calibrator,'lo_freq');
     y = qes.expParam(Calibrator,'sb_freq');
+<<<<<<< HEAD
     y_s = qes.expParam(Calibrator,'pulse_ln');
 
     s1 = sweep(x);
@@ -47,8 +48,19 @@ function varargout = iqChnl(varargin)
     s2.vals = {args.sbFreq,ln};
     e = experiment();
     e.sweeps = {s1,s2};
+=======
+    
+    loFreq=args.loFreqStart:args.loFreqStep:args.loFreqStop;
+    sbFreq=-args.maxSbFreq:args.sbFreqStep:args.maxSbFreq;
+    s1 = qes.sweep(x);
+    s1.vals = loFreq;
+    s2 = qes.sweep(y);
+    s2.vals = sbFreq;
+    e = qes.experiment();
+    e.sweeps = [s1,s2];
+>>>>>>> b8ab85a51caa388e47ceafb700b3ada2218a4ca9
     e.measurements = Calibrator;
-    e.dataprefix = 'iqChnlCal';
+    e.datafileprefix = 'iqChnlCal';
     e.savedata = true;
     e.addSettings({'fcn','args'},{fcn_name,args});
     e.Run();

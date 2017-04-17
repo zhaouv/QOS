@@ -16,13 +16,12 @@ function RunContinuousWv(obj,WaveformObj)
             t = WaveformObj.t0:ceil(WaveformObj.t0+WaveformObj.length);
             y = WaveformObj(t);
             if WaveformObj.iq
-                mzeros = obj.MixerZeros(WaveformObj.fc);
-                WaveformData = {[zeros(1,software_delay(1)),real(y),0];...
-                    [zeros(1,software_delay(2)),imag(y),0]}; 
-                WaveformData{1} = uint16((WaveformData{1} + mzeros(1))+32768);
+                mzeros = obj.MixerZeros(WaveformObj.awgchnl,WaveformObj.fc);
+                WaveformData = {real(y);imag(y)}; 
+                WaveformData{1} = uint16(WaveformData{1} + mzeros(1)+32768);
                 WaveformData{2} = uint16(WaveformData{2} + mzeros(2)+32768);
             else
-				WaveformData = {uint16([zeros(1,software_delay),real(y),0]+32768)};
+				WaveformData = {uint16(real(y)+32768)};
             end
             if WaveformObj.iq
                 obj.interfaceobj.StartContinuousRun(WaveformObj.awgchnl(1),WaveformData{1});
