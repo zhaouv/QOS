@@ -33,32 +33,20 @@ function varargout = iqChnl(varargin)
     Calibrator.lo_power = s.lo_power;
 %     Calibrator.q_delay = s.q_delay;
 
-    Calibrator.pulse_ln = s.pulse_ln;
-    
     x = qes.expParam(Calibrator,'lo_freq');
     y = qes.expParam(Calibrator,'sb_freq');
-<<<<<<< HEAD
     y_s = qes.expParam(Calibrator,'pulse_ln');
-
-    s1 = sweep(x);
-    s1.vals = args.loFreq;
-    s2 = sweep({y_s,y});
-    ln = ceil(awgObj.samplingRate/args.sbFreq);
-    ln(ln>30e3) = 30e3;
-    s2.vals = {args.sbFreq,ln};
-    e = experiment();
-    e.sweeps = {s1,s2};
-=======
-    
     loFreq=args.loFreqStart:args.loFreqStep:args.loFreqStop;
     sbFreq=-args.maxSbFreq:args.sbFreqStep:args.maxSbFreq;
-    s1 = qes.sweep(x);
+    s1 = sweep(x);
     s1.vals = loFreq;
-    s2 = qes.sweep(y);
-    s2.vals = sbFreq;
-    e = qes.experiment();
+    s2 = sweep({y_s,y});
+    ln = ceil(awgObj.samplingRate./sbFreq);
+    ln(ln>30e3) = 30e3;
+    s2.vals = {ln,sbFreq};
+    e = experiment();
     e.sweeps = [s1,s2];
->>>>>>> b8ab85a51caa388e47ceafb700b3ada2218a4ca9
+
     e.measurements = Calibrator;
     e.datafileprefix = 'iqChnlCal';
     e.savedata = true;
