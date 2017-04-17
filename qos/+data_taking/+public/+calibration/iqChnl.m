@@ -41,7 +41,15 @@ function varargout = iqChnl(varargin)
     s1 = sweep(x);
     s1.vals = loFreq;
     s2 = sweep({y_s,y});
-    ln = ceil(awgObj.samplingRate./sbFreq);
+    ln = awgObj.samplingRate./sbFreq;
+    ln = ceil(ln);
+%     for ii = 1:ln
+%         d = ceil(ln(ii)) - ln(ii);
+%         if d ~= 0
+%             N = 1/d;
+%             ln(ii) = ln(ii)*N;
+%         end
+%     end
     ln(ln>30e3) = 30e3;
     s2.vals = {ln,sbFreq};
     e = experiment();
