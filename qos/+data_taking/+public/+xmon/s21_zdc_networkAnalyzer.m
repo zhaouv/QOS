@@ -68,6 +68,7 @@ function varargout = s21_zdc_networkAnalyzer(varargin)
     e = experiment();
     e.sweeps = s1;
     e.measurements = R;
+    e.datafileprefix = sprintf('%s_s21_zdc', q.name);
     e.plotfcn = @util.plotfcn.sparam.Amplitude;
     
     if ~args.gui

@@ -28,18 +28,33 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
+args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'driveFreq',[],'r_avg',0,'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] = data_taking.public.util.getQubits(...
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
     args.driveFreq = driveQubit.f01-5*driveQubit.t_spcFWHM_est:...
         driveQubit.t_spcFWHM_est/5:driveQubit.f01+5*driveQubit.t_spcFWHM_est;
 end
-
+if args.r_avg~=0 %add by GM, 20170414
+    readoutQubit.r_avg=args.r_avg;
+end
 X = op.mwDrive4Spectrum(driveQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
-R.state = 1;
+% R.state = 1;
+switch args.dataTyp %add by GM, 20170415
+    case 'P'
+        R.state = 2;
+        % pass
+    case 'S21'
+        R.swapdata = true;
+        R.name = '|S21|';
+        R.datafcn = @(x)mean(abs(x));
+    otherwise
+        throw(MException('QOS_spectroscopy111_zdc',...
+			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
+			args.dataTyp));
+end
 Z = op.zBias4Spectrum(biasQubit);
 
 x = expParam(Z.zdc_src{1},'dcval');
@@ -55,7 +70,12 @@ s2.vals = args.driveFreq;
 e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
-e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);
+e.datafileprefix = sprintf('[%s]_spect_zdc', readoutQubit.name);
+if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
+    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
+else
+    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
+end
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

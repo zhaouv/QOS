@@ -27,10 +27,14 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasAmp',0,'biasDelay',0,'backgroundWithZBias',true,...
+args = util.processArgs(varargin,{'r_avg',0,'biasAmp',0,'biasDelay',0,'backgroundWithZBias',true,...
     'gui',false,'notes',''});
 [readoutQubit, biasQubit, driveQubit] =...
     data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
+
+if args.r_avg~=0 %add by GM, 20170416
+    readoutQubit.r_avg=args.r_avg;
+end
 
 X = gate.X(driveQubit);
 I = gate.I(biasQubit);

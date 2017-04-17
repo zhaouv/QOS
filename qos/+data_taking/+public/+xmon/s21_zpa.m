@@ -22,8 +22,12 @@ function varargout = s21_zpa(varargin)
     import sqc.*
     import sqc.op.physical.*
     
-    args = util.processArgs(varargin,{'gui',false,'notes','','save',true});
+    args = util.processArgs(varargin,{'r_avg',0,'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
+    
+    if args.r_avg~=0 %add by GM, 20170414
+        q.r_avg=args.r_avg;
+    end
 
     R = measure.resonatorReadout_ss(q);
     R.state = 1;
@@ -50,7 +54,12 @@ function varargout = s21_zpa(varargin)
     e.name = 's21-zpa';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    e.datafileprefix = sprintf('%s', q.name);
+    e.datafileprefix = sprintf('%s_s21_zpa', q.name);
+    if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
+        e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp;
+    else
+        e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
+    end
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

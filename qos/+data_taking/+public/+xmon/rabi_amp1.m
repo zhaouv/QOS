@@ -22,10 +22,10 @@ function varargout = rabi_amp1(varargin)
 import qes.*
 import data_taking.public.xmon.rabi_amp111
 args = util.processArgs(varargin,{'biasLonger',0,'driveTyp','X','dataTyp','P','detuning',0,...
-    'gui',false,'notes','','save',true});
+    'r_avg',0,'gui',false,'notes','','save',true});
 varargout{1} = rabi_amp111('biasQubit',args.qubit,'biasAmp',args.biasAmp,'biasLonger',args.biasLonger,...
     'driveQubit',args.qubit,'readoutQubit',args.qubit,'xyDriveAmp',args.xyDriveAmp,'driveTyp',args.driveTyp,...
     'dataTyp',args.dataTyp,... % S21 or P
-	'detuning',args.detuning,'notes',args.notes,'gui',args.gui,'save',args.save);
+	'detuning',args.detuning,'notes',args.notes,'r_avg',args.r_avg,'gui',args.gui,'save',args.save);
 
 end

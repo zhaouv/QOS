@@ -1,4 +1,4 @@
-function varargout = rabi_amp111(varargin)
+function varargout = rabi_long111(varargin)
 % rabi_amp111: Rabi oscillation by changing the pi pulse amplitude
 % bias qubit q1, drive qubit q2 and readout qubit q3,
 % q1, q2, q3 can be the same qubit or diferent qubits,
@@ -9,7 +9,7 @@ function varargout = rabi_amp111(varargin)
 % <_o_> = rabi_amp111('biasQubit',_c&o_,'biasAmp',<_f_>,'biasLonger',<_i_>,...
 %       'driveQubit',_c&o_,...
 %       'readoutQubit',_c&o_,...
-%       'xyDriveAmp',[_f_],'detuning',<[_f_]>,'driveTyp',<_c_>,...
+%       'xyDriveAmp',[_f_],'xyDriveLong',[_f_],'detuning',<[_f_]>,'driveTyp',<_c_>,...
 %       'dataTyp','_c_',...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -24,8 +24,11 @@ function varargout = rabi_amp111(varargin)
 % arguments order not important as long as they form correct pairs.
 
 % Yulin Wu, 2016/12/27
+% GM, 2017/04/15
 
-fcn_name = 'data_taking.public.xmon.rabi_amp111'; % this and args will be saved with data
+% Not working right now. XY.length cannot be a varible.
+
+fcn_name = 'data_taking.public.xmon.rabi_long111'; % this and args will be saved with data
 import qes.*
 import sqc.*
 import sqc.op.physical.*
@@ -69,6 +72,7 @@ switch args.driveTyp
 	case {'X','Y'}
         XY.delay_xy_i = args.biasLonger;
         XY.delay_xy_q = args.biasLonger;
+        XY.amp = args.xyDriveAmp; % add by GM, 20170415
         XYLength = XY.length;
     otherwise
         g.delay_xy_i = args.biasLonger;
@@ -91,7 +95,7 @@ switch args.dataTyp
         R.name = '|S21|';
         R.datafcn = @(x)mean(abs(x));
     otherwise
-        throw(MException('QOS_rabi_amp111',...
+        throw(MException('QOS_rabi_long111',...
 			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
 			args.dataTyp));
 end
@@ -107,21 +111,21 @@ end
 x.offset = driveQubit.f01;
 x.name = [driveQubit.name,' detunning(f-f01, Hz)'];
 
-y = expParam(XY,'amp');
-y.name = [driveQubit.name,' xyDriveAmp'];
+y = expParam(XY,'length');
+y.name = [driveQubit.name,' xyDriveLength'];
 y.auxpara = Z;
 y.callbacks ={@(x_) x_.expobj.Run();...
-    @(x_) x_.auxpara.Run();...
+    @(x_) x_.auxpara.Run();... % Need to add Z.ln callback
     @(x_)expParam.RunCallbacks(x)};
 
 s1 = sweep(x);
 s1.vals = args.detuning;
 s2 = sweep(y);
-s2.vals = args.xyDriveAmp;
+s2.vals = args.xyDriveLength;
 e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
-e.name = 'rabi_amp111';
+e.name = 'rabi_long111';
 e.datafileprefix = sprintf('[%s]_rabi', readoutQubit.name);
 if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
     e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp; 
