@@ -11,7 +11,7 @@ function obj = GetInstance(name,interfaceobj,drivertype)
     if isempty(objlst)
         if nargin == 0 || isempty(name)
             throw(MException('QOS_spectrumAnalyzer:GetInstanceError',...
-                'No existing instance, all input paramenters should be specified!');
+                'No existing instance, all input paramenters should be specified!'));
         end
         if nargin > 2
             obj = qes.hwdriver.sync.spectrumAnalyzer(name,interfaceobj,drivertype);
@@ -40,7 +40,7 @@ function obj = GetInstance(name,interfaceobj,drivertype)
             if ii >= nexistingobj  % instance not exit, create one
                 if nargin == 0 || isempty(name)
                     throw(MException('QOS_spectrumAnalyzer:GetInstanceError',...
-                        'No existing instance, all input paramenter should be specified!');
+                        'No existing instance, all input paramenter should be specified!'));
                 end
                 if nargin > 2
                     obj = qes.hwdriver.sync.spectrumAnalyzer(name,interfaceobj,drivertype);
