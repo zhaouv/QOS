@@ -32,8 +32,8 @@ args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'gui',false,'notes'
 [readoutQubit, biasQubit, driveQubit] = data_taking.public.util.getQubits(...
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
-    args.driveFreq = driveQubit.f01-5*driveQubit.t_spcFWHM_est:...
-        driveQubit.t_spcFWHM_est/5:driveQubit.f01+5*driveQubit.t_spcFWHM_est;
+    args.driveFreq = driveQubit.f01-3*driveQubit.t_spcFWHM_est:...
+        driveQubit.t_spcFWHM_est/10:driveQubit.f01+3*driveQubit.t_spcFWHM_est;
 end
 
 X = op.mwDrive4Spectrum(driveQubit);

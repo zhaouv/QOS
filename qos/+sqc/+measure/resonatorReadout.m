@@ -1,6 +1,6 @@
 classdef resonatorReadout < qes.measurement.prob
     % a resonator readout multiple qubits
-	% data: 1 by 2^(number of qubits)
+% 	% data: 1 by 2^(number of qubits)
     
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com

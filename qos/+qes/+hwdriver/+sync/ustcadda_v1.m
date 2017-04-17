@@ -7,7 +7,7 @@
 classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
     properties
         runReps = 1             %run repetition
-        adRecordLength = 1           %需要在Run前设置 !!!!!     % daRecordLength
+        adRecordLength = 1           %需�?在Run�?设置 !!!!!     % daRecordLength
     end
     
     properties (SetAccess = private)
@@ -105,14 +105,14 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             else
                 count = count/8;
             end
-            % 共2个序列数据,但是必须组成512bit位宽的数据
+            % 共2个�?列数�?�,但是必须组�?512bit�?宽的数�?�
             seq  = zeros(1,16384);
-            %first sequence,会产生16ns延时，用于触发启动输出。
-            function_ctrl = 64;   %53-63位
-            trigger_ctrl  = 0;      %48-55位
-            counter_ctrl  = 0;      %32-47位，计时计数器
-            length_wave   = 2;      %16-31位,输出波形长度
-            address_wave  = 0;  %0    %0-15波形起始地址
+            %first sequence,会产生16ns延时，用于触�?��?�动输出。
+            function_ctrl = 64;   %53-63�?
+            trigger_ctrl  = 0;      %48-55�?
+            counter_ctrl  = 0;      %32-47�?，计时计数器
+            length_wave   = 2;      %16-31�?,输出波形长度
+            address_wave  = 0;  %0    %0-15波形起始地�?�
             for  k = 1:2:4096 
                 seq(4*k-3) = counter_ctrl;
                 seq(4*k-2) = function_ctrl*256 + trigger_ctrl;
@@ -121,16 +121,16 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             end
 
             if(delay ~= 0)
-                function_ctrl = 32;     %53-63位，计时输出加停止标识
-                counter_ctrl  = delay-1;%32-47位，计时计数器
+                function_ctrl = 32;     %53-63�?，计时输出加�?�止标识
+                counter_ctrl  = delay-1;%32-47�?，计时计数器
             else
-                function_ctrl = 0;      %保持输出
+                function_ctrl = 0;      %�?�?输出
                 counter_ctrl  = 0;
             end
             
-            trigger_ctrl = 0;       %48-55位
-            length_wave  = count;   %16-31位,输出波形长度
-            address_wave = count;   %0-15波形起始地址，加1是为了跳过多余的保持码
+            trigger_ctrl = 0;       %48-55�?
+            length_wave  = count;   %16-31�?,输出波形长度
+            address_wave = count;   %0-15波形起始地�?�，加1是为了跳过多余的�?�?�?
             for k = 2:2:4096
                 seq(4*k-3) = counter_ctrl;
                 seq(4*k-2) = function_ctrl*256 + trigger_ctrl;
@@ -160,7 +160,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.Close();
             QS = qes.qSettings.GetInstance();
             s = QS.loadHwSettings('ustcadda');
-            % 配置ADDA
+            % �?置ADDA
             
             obj.numDABoards = length(s.da_boards);
             obj.numADBoards = length(s.ad_boards);
@@ -169,7 +169,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.adDelayStep = s.adDelayStep;
             obj.adRange = s.adRange;
 
-            % 配置DAC
+            % �?置DAC
             for k = 1:obj.numDABoards
                 obj.da_list(k).da = qes.hwdriver.sync.ustcadda_backend.USTCDAC(s.da_boards{k}.ip,s.da_boards{k}.port);
                 obj.da_list(k).da.set('name',s.da_boards{k}.name);
@@ -180,12 +180,12 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.set('trig_delay',s.da_boards{k}.daTrigDelayOffset);
                 %设置trig_sel默认值0
                 obj.da_list(k).da.set('trig_sel',s.trigger_source);
-                %设置master板，默认值为第一个板
+                %设置master�?�，默认值为第一个�?�
                 obj.da_list(k).da.set('ismaster', 0);
                 if(isfield(s,'da_master') && strcmpi(s.da_boards{k}.name,s.da_master))
                     obj.da_master_index = k;
                 end
-                % 初始化通道的mask值
+                % �?始化通�?�的mask值
                 obj.da_list(k).mask_plus = 0; %正mask
                 obj.da_list(k).mask_min  = 0; %负mask
                 obj.da_list(k).da.set('trig_interval',s.triggerInterval);
@@ -196,10 +196,10 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.set('offsetcorr',cell2mat(s.da_boards{k}.offsetCorr));
             end
 
-            % 设置主板
+            % 设置主�?�
             obj.da_list(obj.da_master_index).da.set('ismaster',true);
             obj.da_list(obj.da_master_index).da.set('trig_interval',s.triggerInterval);
-                        % 映射通道
+                        % 映射通�?�
             for k = 1:length(s.da_chnl_map)
                 channel = fieldnames(s.da_chnl_map{k});
                 channel_info = s.da_chnl_map{k}.(channel{1});
@@ -224,19 +224,19 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 				end
                 obj.da_channel_list(k).index = da_index; % bug fix: obj.da_channel_list(ch) -> obj.da_channel_list(k), Yulin Wu
                 obj.da_channel_list(k).ch = ch;
-                % 添加数据结构体
+                % 添加数�?�结构体
                 obj.da_channel_list(k).data = [];
-                % 设置通道触发后输出延时
+                % 设置通�?�触�?��?�输出延时
                 obj.da_channel_list(k).delay = 0;
             end
-            % 配置ADC,目前只支持一个网卡
+            % �?置ADC,目�?�?�支�?一个网�?�
             for k = 1:obj.numADBoards
                 obj.ad_list(k).ad = qes.hwdriver.sync.ustcadda_backend.USTCADC(s.ad_boards{k}.netcard);
                 obj.ad_list(k).ad.set('sample_rate',s.ad_boards{k}.samplingRate);
                 obj.ad_list(k).ad.set('channel_amount',s.ad_boards{k}.numChnls);
                 obj.ad_list(k).ad.set('mac',s.ad_boards{k}.mac);
             end
-            % 映射ADC的通道
+            % 映射ADC的通�?�
             for k = 1:length(s.ad_chnl_map)
                 channel = fieldnames(s.ad_chnl_map{k});
 
@@ -264,7 +264,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 				
                 obj.ad_channel_list(k).index = ad_index; % bug fix: obj.ad_channel_list(ch) -> obj.ad_channel_list(k), Yulin Wu
                 obj.ad_channel_list(k).ch = ch;
-                % 添加数据结构体
+                % 添加数�?�结构体
                 % obj.da_channel_list(ch).data = []; % bug? Yulin Wu
             end
             
@@ -309,13 +309,13 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 		
             obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
-            % 停止除连续波形外的通道，启动触发通道
+            % �?�止除连续波形外的通�?�，�?�动触�?�通�?�
             for k = 1:obj.numDABoards
                 obj.da_list(k).da.StartStop((15 - obj.da_list(k).mask_min)*16);
                 obj.da_list(k).da.StartStop(obj.da_list(k).mask_plus);
                 obj.da_list(k).da.SetTrigDelay(obj.da_list(k).da_trig_delay);
             end
-            % 检查是否成功写入完毕
+            % 检查是�?��?功写入完毕
             
             for k=1:obj.numDABoards
 %                 tic
@@ -325,7 +325,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                     error('ustcadda_v1:Run','There were some task failed!');
                 end
             end
-            % 采集数据
+            % 采集数�?�
             while(ret ~= 0)
                 obj.ad_list(1).ad.EnableADC();  
                 obj.da_list(obj.da_master_index).da.SendIntTrig();
@@ -335,12 +335,12 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                     ret = 0;
                 end
             end
-            % 将数据整理成固定格式
+            % 将数�?�整�?��?固定格�?
             if(isSample == true)
                 I = (reshape(I,[obj.adRecordLength,obj.runReps]))';
                 Q = (reshape(Q,[obj.adRecordLength,obj.runReps]))';
             end
-            % 并清空通道记录
+            % 并清空通�?�记录
             for k = 1:obj.numDABoards
                 obj.da_list(k).mask_plus = 0;
                 obj.da_list(k).da_trig_delay = 0;
@@ -354,16 +354,16 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             ch = ch_info.ch;
             da_struct = obj.da_list(ch_info.index);
             len = length(data);
-            % 生成格式化的序列
+            % 生�?格�?化的�?列
             seq = obj.GenerateTrigSeq(len,ch_delay);
-            % 发送序列
+            % �?��?�?列
             da_struct.da.WriteSeq(ch,0,seq);
-            % 格式化波形,需要与序列数据配合来实现格式
+            % 格�?化波形,需�?与�?列数�?��?�?��?�实现格�?
             if(mod(len,8) ~= 0)
                 data(len+1:(floor(len/8)+2)*8) = 32768;
             end
             len = length(data);
-            data(len+1:len+16) = 32768;    %16个采样点的起始码
+            data(len+1:len+16) = 32768;    %16个采样点的起始�?
             % added uint16 to do clipping, otherwise DA might do wrap
             % around(65535+N is taken as N-1), this is  unacceptable for
             % qubits measurement applications, Yulin Wu
@@ -372,25 +372,25 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % than a ustcadda property, Yulin Wu
             data = uint16(data +...
                 obj.da_list(obj.da_channel_list(channel).index).offsetCorr(obj.da_channel_list(channel).ch)); 
-            % 发送波形
+            % �?��?波形
             da_struct.da.WriteWave(ch,0,data);
-            % 相当于或上一个通道
+            % 相当于或上一个通�?�
             if(mod(floor(da_struct.mask_plus/(2^(ch-1))),2) == 0)
                 obj.da_list(ch_info.index).mask_plus = da_struct.mask_plus + 2^(ch-1);
             end
         end
        
         function SendContinuousWave(obj,channel,voltage)
-            % 如果是直流，则需要将其扩大为1*8数组
+            % 如果是直�?，则需�?将其扩大为1*8数组
             if(length(voltage) == 1)
                 voltage = zeros(1,8) + voltage;
             end
             ch_info = obj.da_channel_list(channel);
             ch = ch_info.ch;
             da_struct = obj.da_list(ch_info.index);
-            % 停止输出
+            % �?�止输出
             da_struct.da.StartStop(2^(ch-1)*16);
-            % 写入序列
+            % 写入�?列
             seq = obj.GenerateContinuousSeq(length(voltage));
             da_struct.da.WriteSeq(ch,0,seq);
             % 写入波形
@@ -403,7 +403,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             voltage = uint16(voltage +...
                 obj.da_list(obj.da_channel_list(channel).index).offsetCorr(obj.da_channel_list(channel).ch)); 
             da_struct.da.WriteWave(ch,0,voltage);
-            % 更新状态
+            % 更新状�?
             if(mod(floor(da_struct.mask_min/(2^(ch-1))),2) == 0)
                 obj.da_list(ch_info.index).mask_min = da_struct.mask_min + 2^(ch-1);
             end
@@ -445,10 +445,13 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         end
 
         function name = GetDACNameByChnl(obj,ch)
+            numChnls = numel(ch);
             ch_info = obj.da_channel_list(ch);
-            [ch_a,ch_b]=ch_info.index;
-            da = obj.da_list([ch_a,ch_b]).da;% GM, 070411
-            name = da.name;
+            name = cell(1,numChnls);
+            for ii = 1:numChnls
+                da = obj.da_list(ch_info(ii).index).da;% GM, 070411
+                name{ii} = da.name;
+            end
         end
         
         function delete(obj) % Yulin Wu
