@@ -11,6 +11,8 @@ function saveJson(fullfilename,fields,value,formatedArray)
 % cell(p*q*..=n string)->[1*n string]
 %
 
+value_backup = value;
+
 if ~qes.util.endsWith(fullfilename,'.key')
     fullfilename = [fullfilename,'.key'];
 end
@@ -72,7 +74,16 @@ if result{1}== 4
     error('index error');
 end
 if result{1}== 5
-    error('not found');
+    if numel(fields) > 1
+        fields = fields(2:end);
+        if nargin == 4
+            qes.util.saveJson(fullfilename,fields,value_backup,formatedArray);
+        else
+            qes.util.saveJson(fullfilename,fields,value_backup);
+        end
+    else
+        error('not found');
+    end
 end
 
 

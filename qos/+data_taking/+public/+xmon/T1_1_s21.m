@@ -25,12 +25,16 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasAmp',0,'gui',false,'notes',''});
+args = util.processArgs(varargin,{'r_avg',0,'biasAmp',0,'gui',false,'notes',''});
 q = data_taking.public.util.getQubits(args,{'qubit'});
+
+if args.r_avg~=0 %add by GM, 20170416
+    q.r_avg=args.r_avg;
+end
 
 X = gate.X(q);
 Z = op.zBias4Spectrum(q);
-Z.delay = X.length;
+Z.ln = X.length; % GM, 20170416
 
 
 
@@ -61,6 +65,7 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 % e.plotfcn = @qes.util.plotfcn.T1;
+% e.plotfcn = @qes.util.plotfcn.OneMeasComplex_1D_Amp;
 e.datafileprefix = sprintf('%s',q.name);
 if ~args.gui
     e.showctrlpanel = false;
