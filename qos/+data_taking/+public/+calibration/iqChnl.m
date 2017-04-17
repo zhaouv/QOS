@@ -1,8 +1,9 @@
-function iqChnl(varargin)
+function varargout = iqChnl(varargin)
     % run this function to calibrate iq channels
-    % signiture
-    % iqChnl('awgName',n,'chnlSet',s,'maxSbFreq',fsbMax,'sbFreqStep',dfsb...
-	%		'loFreqStart',flo0,'loFreqStop',flo1,'loFreqStep',dflo,'gui',false)
+    % 
+    % iqChnl('awgName',_c_,'chnlSet',_c_,'maxSbFreq',_f_,'sbFreqStep',_f_...
+	%		'loFreqStart',_f_,'loFreqStop',_f_,'loFreqStep',_f_,...
+    %       'gui',<_b_>,'save',<_b_>);
 	% awgName: name of the awg to calibrate
 	% chnlSet: channel set to calibrate, it is a settings group in:
 	% settingsRoot\calibration\awgName\
@@ -11,26 +12,26 @@ function iqChnl(varargin)
 
 % Yulin Wu, 2017
 
-    fcn_name = 'iqChnl'; % this and args will be saved with data
-    args = util.process_args(varargin,{'gui',false,'notes','','save',true});
-%     args = util.process_args(varargin);
-    
+    fcn_name = 'data_taking.public.calibration.iqChnl'; % this and args will be saved with data
+    args = qes.util.process_args(varargin,{'gui',false,'save',true});
     try
         QS = qes.qSettings.GetInstance();
     catch
         throw(MException('QOS_calibration_iqChnl:qSettingsNotCreated',...
-			'qSettings not created: create the qSettings object, set user and select session first(only need to do once).');
+			'qSettings not created: create the qSettings object, set user and select session first.'));
     end
-    s = qes.util.loadSettings(QS.root,{'calibration',awgName,'iq',chnlSet});
+    s = qes.util.loadSettings(QS.root,{'calibration',args.awgName,'iq',args.chnlSet});
 
-    awgObj = qes.qHandle.FindByClassProp('qes.hwdriver.sync.awg',awgName);
-    awgchnls = args.awgchnls;
+    awgObj = qes.qHandle.FindByClassProp('qes.hwdriver.sync.awg',args.awgName);
+    awgchnls = s.chnls;
     spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer',s.spc_analyzer);
     spcAmpObj = qes.measurement.specAmp(spcAnalyzer);
-    loSource = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource',s.lo_source);
-    Calibrator = qes.measurement.iqiqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
+    
+    mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource',s.lo_source);
+    loSource = mwSrc.GetChnl(s.lo_chnl);
+    Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
-    Calibrator.q_delay = s.q_delay;
+%     Calibrator.q_delay = s.q_delay;
     Calibrator.pulse_ln = s.pulse_ln;
     
     x = qes.expParam(Calibrator,'lo_freq');
@@ -43,18 +44,25 @@ function iqChnl(varargin)
     e = experiment();
     e.sweeps = {s1,s2};
     e.measurements = Calibrator;
-
-    if ~args.gui
-        e.showctrlpanel = false;
-        e.plotdata = false;
-    end
-    if ~args.save
-        e.savedata = false;
-    end
-    e.notes = args.notes;
+    e.dataprefix = 'iqChnlCal';
+    e.savedata = true;
     e.addSettings({'fcn','args'},{fcn_name,args});
     e.Run();
-
-    data = e.data{1};
-	
+    data = cell2mat(e.data{1});
+    iZeros = [data.iZeros];
+    qZeros = [data.qZeros];
+    sbCompensation = [data.sbCompensation];
+    iqAmp = data(1).iqAmp;
+    loPower = data(1).loPower;
+    
+    timeStamp = now;
+    if ~args.save
+        dataFileDir = fullfile(QS.root,'calibration',args.awgName,'iq',args.chnlSet,'_data');
+        if isempty(dir(dataFileDir))
+            mkdir(dataFileDir);
+        end
+        save(fullfile(timeStamp,datestr(now,'yymmTDDHHMMSS')),...
+            'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp');
+    end
+    varargout{1} = e.data{1};
 end

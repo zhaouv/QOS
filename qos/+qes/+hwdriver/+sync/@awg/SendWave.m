@@ -218,7 +218,7 @@ function SendWave(obj,WaveformObj)
             t = WaveformObj.t0:ceil(WaveformObj.t0+WaveformObj.length);
             y = WaveformObj(t);
             if WaveformObj.iq
-                mzeros = obj.MixerZeros(WaveformObj.fc);
+                mzeros = obj.MixerZeros(WaveformObj.awgchnl,WaveformObj.fc);
                 WaveformData = {[zeros(1,software_delay(1)),real(y),0];...
                     [zeros(1,software_delay(2)),imag(y),0]}; 
                 WaveformData{1} = uint16((WaveformData{1} + mzeros(1))+32768);

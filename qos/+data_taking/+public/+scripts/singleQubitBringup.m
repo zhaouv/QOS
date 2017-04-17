@@ -36,8 +36,8 @@ end
 % spectroscopy1_zpa_s21('qubit','q2'); % lazy mode
 %%
 spectroscopy1_zpa('qubit','q2',...
-       'biasAmp',[-3.5e4:1000:1e4],'driveFreq',[5.978e9:0.25e6:6.15e9],...
-       'gui',true,'save',true);
+       'biasAmp',[0],'driveFreq',[5.9859e9-10e6:0.3e6:5.9859e9+10e6],...
+       'gui',true,'save',false);
 %%
 spectroscopy1_zdc('qubit','q1',...
        'biasAmp',[-3e4:5e2:3e4],'driveFreq',[5.5e9:15e6:6.3e9]+125e6,...
@@ -50,23 +50,28 @@ rabi_amp1('qubit','q1','biasAmp',0,'biasLonger',0,...
 %%
 s21_01('qubit','q2','freq',[],'notes','','gui',true,'save',true);
 %%
-ramsey('qubit','q1','mode','df01',... % available modes are: df01, dp and dz
-      'time',[0:16:20e2],'detuning',[-5]*1e6,...
+ramsey('qubit','q2','mode','dp',... % available modes are: df01, dp and dz
+      'time',[0:16*2:4e3],'detuning',[-5]*1e6,...
       'dataTyp','P','notes','','gui',true,'save',true);
 %%
 spin_echo('qubit','q1','mode','dp',... % available modes are: df01, dp and dz
-      'time',[0:16:2e3],'detuning',[5]*1e6,...
+      'time',[0:16:2e3],'detuning',[-5]*1e6,...
       'notes','','gui',true,'save',true);
 %%
 T1_1('qubit','q1','biasAmp',[0],'biasDelay',16,'time',[0:160*2:20e3],...
+      'gui',true,'save',true);
+%%
+tuneup.APE('qubit','q2',...
+      'phase',-pi:pi/10:pi,'numI',0,...
       'gui',true,'save',true);
 %%
 
 
 
 %% automatic function, after previous steps pined down qubit parameters, 
-q = qubits{1};
+q = qubits{2};
 tuneup.correctf01bySpc('qubit',q,'gui',false,'save',true); % measure f01 by spectrum
+% tuneup.correctf01byRamsey('qubit',q,'gui',false,'save',true); 
 XYGate = 'X'; % 'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2'
 tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','gui',false,'save',true); % finds the XY gate amplitude and update to settings
 tuneup.optReadoutFreq('qubit',q,'gui',false,'save',true);

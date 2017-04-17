@@ -26,7 +26,7 @@ function varargout = APE(varargin)
 		'numI',5,'gui',false,'notes','','phase',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    X2p = op.X2p(q);
+    X2p = gate.X2p(q);
 	X2m = gate.X2m(q);
 	XY2 = op.XY2p(q,0);
 	I = (X2m*X2p)^args.numI;
