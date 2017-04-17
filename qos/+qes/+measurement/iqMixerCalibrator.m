@@ -10,8 +10,9 @@ classdef iqMixerCalibrator < qes.measurement.measurement
         lo_power
         sb_freq % Hz, side band frequency
         pulse_ln = 25000
+%         chnls
         
-        debug = false;
+        debug = true;
     end
 	properties (SetAccess = private, GetAccess = private)
 		awg
@@ -34,10 +35,9 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 	end
     methods
         function obj = iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource)
-			if ~isa(awgObj,'qes.hwdriver.sync.awg') ||...
-				~isa(awgObj,'qes.hwdriver.async.awg') ||...
+			if (~isa(awgObj,'qes.hwdriver.sync.awg') &&...
+				~isa(awgObj,'qes.hwdriver.async.awg')) ||...
 				~isa(spcAmpObj,'qes.measurement.specAmp') ||...
-				~isa(loSource,'qes.hwdriver.instrumentChnl') ||...
 				~isa(loSource,'qes.hwdriver.instrumentChnl') ||...
 				numel(awgchnls) ~= 2
 				throw(MException('QOS_iqMixerCalibrator:InvalidInput','Invalud input arguments.'));
@@ -46,6 +46,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 			obj.awg = awgObj;
 			obj.i_chnl = awgchnls(1);
 			obj.q_chnl = awgchnls(2);
+%             obj.chnls = awgchnls;
 			obj.spc_amp_obj = spcAmpObj;
 			obj.lo_source = loSource;
             obj.numericscalardata = false;
@@ -53,6 +54,11 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             obj.awg.iqCalDataSet = []; % clear loaded iqCalDataSet is important!
 
             numIQCalDataSet = numel(obj.awg.iqCalDataSet);
+            if numIQCalDataSet==0
+                obj.awg.iqCalDataSet = struct(...
+                        'loFreq',[],'iZero',[],'qZero',[],'sbFreq',[],'sbCompensation',[]);
+                    obj.iqCalDataSetIdx = numIQCalDataSet+1;
+            end
             for ii = 1:numIQCalDataSet
                 if all(obj.awg.iqCalDataSet(ii).chnls == [obj.i_chnl,obj.q_chnl])
                     obj.iqCalDataSetIdx = ii;
@@ -134,24 +140,36 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             
             obj.spc_amp_obj.freq = obj.lo_freq;
             f = qes.expFcn([p1, p2],obj.spc_amp_obj);
-            x = 0;
-            y = 0;
-            precision = obj.awg.vpp/8;
-            stopPrecision = obj.awg.vpp/1e5;
-            while precision <= stopPrecision
-                l = f(x-precision,y);
-                c = f(x,y);
-                r = f(x+precision,y);
-                dx = precision*qes.util.minPos(l, c, r);
-                x = x+dx;
-                
-                l = f(x,y-precision);
-                c = f(x,y);
-                r = f(x,y+precision);
-                dy = precision*qes.util.minPos(l, c, r);
-                y = x+dy;
-                precision = max(precision/2, max(abs(dx), abs(dy)));
-            end
+%             x = 0;
+%             y = 0;
+%             precision = obj.awg.vpp/8;
+%             stopPrecision = obj.awg.vpp/1e5;
+%             while precision >= stopPrecision
+%                 l = f(x-precision,y);
+%                 c = f(x,y);
+%                 r = f(x+precision,y);
+%                 dx = precision*qes.util.minPos(l, c, r)
+%                 x = x+dx
+%                 
+%                 l = f(x,y-precision);
+%                 c = f(x,y);
+%                 r = f(x,y+precision);
+%                 dy = precision*qes.util.minPos(l, c, r)
+%                 y = y+dy;
+%                 dx_ = dx;
+%                 dy_ = dy;
+%                 if sign(dx*dx_)|| sign(dy*dy_)<0
+%                     precision =precision/2;
+%                 end
+%                 precision
+%             end
+            
+            opts = optimset('Display','notify','MaxIter',30,'TolX',0.2,'TolFun',0.1,'PlotFcns',{@optimplotfval});%,'PlotFcns',''); % current value and history
+            lb = [-obj.awg.vpp/8, -obj.awg.vpp/8];
+            ub = [obj.awg.vpp/8, obj.awg.vpp/8];
+            xsol = qes.util.fminsearchbnd(f.fcn,[0,0],lb,ub,opts);
+            x = xsol(1);
+            y = xsol(2);
 			
 			if obj.debug
                 f(0,0);
@@ -163,10 +181,10 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 bandwidth_backup = spcAnalyzerObj.bandwidth;
                 numpts_backup = spcAnalyzerObj.numpts;
 
-                spcAnalyzerObj.startfreq = obj.lo_source - 10e6;
-                spcAnalyzerObj.stopfreq = obj.lo_source + 10e6;
-                spcAnalyzerObj.bandwidth = 50e3;
-                spcAnalyzerObj.numpts = 401;
+                spcAnalyzerObj.startfreq = obj.lo_freq - 10e6;
+                spcAnalyzerObj.stopfreq = obj.lo_freq + 10e6;
+                spcAnalyzerObj.bandwidth = 10e3;
+                spcAnalyzerObj.numpts = 4001;
                 spcAmpBeforeCal = spcAnalyzerObj.get_trace();
 
                 f(x,y);
@@ -185,8 +203,8 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 spcAnalyzerObj.numpts = numpts_backup;
             end
 			
-			obj.awg.StopContinousWv(I);
-            obj.awg.StopContinousWv(Q);
+			obj.awg.StopContinuousWv(I);
+            obj.awg.StopContinuousWv(Q);
         end
         function x = CalibrateSideband(obj)
 			% todo: correct mixer zero with the calibration
@@ -196,13 +214,13 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 			awgchnl_ = [obj.i_chnl, obj.q_chnl];
             IQ = qes.waveform.dc(obj.pulse_ln);
             IQ.dcval = obj.iqAmp;
+            
+            IQ.df = obj.sb_freq/2e9;
+%             IQ.q_delay = obj.q_delay;
             IQ.awg = awg_;
             IQ.awgchnl = awgchnl_;
-            IQ.df = obj.sb_freq;
-%             IQ.q_delay = obj.q_delay;
 			IQ_op = copy(IQ);
-			IQ_op.df = -obj.sb_freq;
-            
+			IQ_op.df = -obj.sb_freq/2e9;
             
 
             function wv = calWv(comp_)
@@ -215,24 +233,28 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
             
             obj.spc_amp_obj.freq = obj.lo_freq;
-            f = qes.expFcn(p1,obj.spc_amp_obj);
+            f = qes.expFcn(p,obj.spc_amp_obj);
 
-            precision = 1;
-			x = 0*1j;
-            while precision > 1e-5
-                l = f(x-precision);
-                c = f(x);
-                r = f(x+precision);
-                dr = precision*qes.util.minPos(l, c, r);
-                x = x+dr;
-                
-                l = f(x-1j*precision);
-                c = f(x);
-                r = f(x+1j*precision);
-                di = precision*qes.util.minPos(l, c, r);
-                x = x+1j*di;
-                precision = max(precision/2, max(abs(dr), abs(di)));
-            end
+%             precision = 1;
+% 			x = 0*1j;
+%             while precision > 1e-5
+%                 l = f(x-precision);
+%                 c = f(x);
+%                 r = f(x+precision);
+%                 dr = precision*qes.util.minPos(l, c, r);
+%                 x = x+dr;
+%                 
+%                 l = f(x-1j*precision);
+%                 c = f(x);
+%                 r = f(x+1j*precision);
+%                 di = precision*qes.util.minPos(l, c, r);
+%                 x = x+1j*di;
+%                 precision = max(precision/2, max(abs(dr), abs(di)));
+%             end
+            
+            opts = optimset('Display','notify','MaxIter',30,'TolX',0.0001,'TolFun',0.1,'PlotFcns',{@optimplotfval});%,'PlotFcns',''); % current value and history
+            xsol = fminsearch(f.fcn,0,opts);
+            x = xsol(1);
 			
 			if obj.debug
                 f(0);
@@ -244,18 +266,18 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 bandwidth_backup = spcAnalyzerObj.bandwidth;
                 numpts_backup = spcAnalyzerObj.numpts;
 
-                spcAnalyzerObj.startfreq = obj.lo_source - obj.sb_freq - 10e6;
-                spcAnalyzerObj.stopfreq = obj.lo_source - obj.sb_freq + 10e6;
-                spcAnalyzerObj.bandwidth = 50e3;
-                spcAnalyzerObj.numpts = 401;
+                spcAnalyzerObj.startfreq = obj.lo_freq - obj.sb_freq - 10e6;
+                spcAnalyzerObj.stopfreq = obj.lo_freq - obj.sb_freq + 10e6;
+                spcAnalyzerObj.bandwidth = 10e3;
+                spcAnalyzerObj.numpts = 4001;
                 spcAmpBeforeCal_neg = spcAnalyzerObj.get_trace();
                 freq4plot = linspace(spcAnalyzerObj.startfreq,...
                     spcAnalyzerObj.stopfreq,spcAnalyzerObj.numpts)/1e9;
 
-                spcAnalyzerObj.startfreq = obj.lo_source + obj.sb_freq - 10e6;
-                spcAnalyzerObj.stopfreq = obj.lo_source + obj.sb_freq + 10e6;
-                spcAnalyzerObj.bandwidth = 50e3;
-                spcAnalyzerObj.numpts = 401;
+                spcAnalyzerObj.startfreq = obj.lo_freq + obj.sb_freq - 10e6;
+                spcAnalyzerObj.stopfreq = obj.lo_freq + obj.sb_freq + 10e6;
+                spcAnalyzerObj.bandwidth = 10e3;
+                spcAnalyzerObj.numpts = 4001;
                 spcAmpBeforeCal_pos = spcAnalyzerObj.get_trace();
                 freq4plot = [freq4plot, linspace(spcAnalyzerObj.startfreq,...
                     spcAnalyzerObj.stopfreq,spcAnalyzerObj.numpts)/1e9];
@@ -265,10 +287,10 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 f(x);
                 spcAmpAfterCal_pos = spcAnalyzerObj.get_trace();
 
-                spcAnalyzerObj.startfreq = obj.lo_source - obj.sb_freq - 10e6;
-                spcAnalyzerObj.stopfreq = obj.lo_source - obj.sb_freq + 10e6;
-                spcAnalyzerObj.bandwidth = 50e3;
-                spcAnalyzerObj.numpts = 401;
+                spcAnalyzerObj.startfreq = obj.lo_freq - obj.sb_freq - 10e6;
+                spcAnalyzerObj.stopfreq = obj.lo_freq - obj.sb_freq + 10e6;
+                spcAnalyzerObj.bandwidth = 10e3;
+                spcAnalyzerObj.numpts = 4001;
                 spcAmpAfterCal = [spcAnalyzerObj.get_trace(), spcAmpAfterCal_pos];
 
                 figure();
@@ -283,8 +305,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 spcAnalyzerObj.numpts = numpts_backup;
             end
 			
-			obj.awg.StopContinousWv(I);
-            obj.awg.StopContinousWv(Q);
+			obj.awg.StopContinuousWv(IQ);
         end
     end
 
