@@ -121,9 +121,10 @@ function [varargout] = OneMeasComplex_1D_Phase(Data, SweepVals,ParamNames,MainPa
             end
         end
     elseif NumSweeps == 2
-        if numel(Data{1}) > 1 % in cases of more than one sweeps, each measurement data point can only be a scalar, otherwise it is too complex to be plotted.
-            error('data too complex to be handled by this plot function.');
-        end
+        % Here Data = Data{1} is already given in line 30. % GM, 20170415
+%         if numel(Data{1}) > 1 % in cases of more than one sweeps, each measurement data point can only be a scalar, otherwise it is too complex to be plotted.
+%             error('data too complex to be handled by this plot function.');
+%         end
         if iscell(Data) % in case of numeric scalar measurement data, data may saved as matrix to reduce volume
             sz = size(Data);
             for ii = 1:sz(1)
