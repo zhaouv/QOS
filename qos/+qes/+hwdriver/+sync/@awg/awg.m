@@ -7,6 +7,7 @@ classdef awg < qes.hwdriver.sync.instrument
     properties
         dynamicReserve
 		irf % impulse response functions(numeric) of each channel
+        iqCalDataSet
     end
     properties (SetAccess = private)
         nchnls      % number of channels(number of channels may differ even for the same awg model, so has to be set by user)
@@ -58,6 +59,8 @@ classdef awg < qes.hwdriver.sync.instrument
     methods
         Run(obj,N)
         SetTrigOutDelay(obj,chnl,val)
+        StopContinuousWv(obj,WaveformObj)
+        RunContinuousWv(obj,WaveformObj)
         function set.nchnls(obj,val)
             if ~isempty(obj.nchnls) && obj.nchnls ~= val
                 throw(MException('QOS_awg:settingInmmutable',...
@@ -163,10 +166,39 @@ classdef awg < qes.hwdriver.sync.instrument
             end
             obj.waveforms{chnl} = wvfrmobj.id;
         end
-        function mzeros = MixerZeros(obj,fc)
+        function mzeros = MixerZeros(obj,chnls,loFreq)
             % mixer zeros
-            % to be implemented
-            mzeros = [0,0];
+            
+            assert(numel(chnls) == 2);
+            numIQCalDataSet = numel(obj.iqCalDataSet);
+            if numIQCalDataSet == 0
+                mzeros = [0,0];
+                return;
+            end
+            for ii = 1:numIQCalDataSet
+                if all(obj.iqCalDataSet(ii).chnls == chnls)
+                    break;
+                elseif ii == numIQCalDataSet
+                    mzeros = [0,0];
+                    return;
+                end
+            end
+            f = obj.iqCalDataSet(ii).loFreq;
+            iZero = obj.iqCalDataSet(ii).iZero;
+            qZero  = obj.iqCalDataSet(ii).qZero;
+            if f > 1
+                i0 = interp1(f,iZeros,loFreq,'pchip',0);
+                q0 = interp1(f,qZeros,loFreq,'pchip',0);
+            else
+                idx = f==loFreq;
+                i0 = iZero(idx);
+                q0 = qZero(idx);
+                if isempty(i0)
+                    i0 = 0;
+                    q0 = 0;
+                end
+            end
+            mzeros = [i0,q0];
         end
     end
     methods (Hidden = true) % hidden, only to be indirectly called by methods of Waveform class objects
