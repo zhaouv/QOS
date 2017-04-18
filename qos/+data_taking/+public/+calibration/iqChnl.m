@@ -63,7 +63,7 @@ function varargout = iqChnl(varargin)
     loPower = data(1).loPower;
     
     timeStamp = now;
-    if ~args.save
+    if args.save
         dataFileDir = fullfile(QS.root,'calibration',args.awgName,'iq',args.chnlSet,'_data');
         if isempty(dir(dataFileDir))
             mkdir(dataFileDir);
