@@ -26,6 +26,7 @@ function varargout = iqChnl(varargin)
     awgchnls = s.chnls;
     spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer','name',s.spc_analyzer);
     spcAmpObj = qes.measurement.specAmp(spcAnalyzer);
+    spcAmpObj.avgnum = 2;
     
     mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource','name',s.lo_source);
     loSource = mwSrc.GetChnl(s.lo_chnl);
@@ -39,6 +40,7 @@ function varargout = iqChnl(varargin)
     
     loFreq=args.loFreqStart:args.loFreqStep:args.loFreqStop;
     sbFreq=-args.maxSbFreq:args.sbFreqStep:args.maxSbFreq;
+    sbFreq(abs(sbFreq)<3.5e4)=[];
     s1 = qes.sweep(x);
     s1.vals = loFreq;
     s2 = qes.sweep(y);
@@ -54,6 +56,9 @@ function varargout = iqChnl(varargin)
     iZeros = [data.iZeros];
     qZeros = [data.qZeros];
     sbCompensation = [data.sbCompensation];
+    iZeros=unique(iZeros);
+    qZeros=unique(qZeros);
+    sbCompensation = reshape(sbCompensation,[numel(loFreq),numel(sbFreq)]); % Row is loFreq, Column is sbFreq
     iqAmp = data(1).iqAmp;
     loPower = data(1).loPower;
     
@@ -64,7 +69,7 @@ function varargout = iqChnl(varargin)
             mkdir(dataFileDir);
         end
         save(fullfile(timeStamp,datestr(now,'yymmTDDHHMMSS')),...
-            'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp');
+            'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
     end
     varargout{1} = e.data{1};
 end
