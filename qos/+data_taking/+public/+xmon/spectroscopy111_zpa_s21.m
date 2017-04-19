@@ -62,13 +62,12 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 
-
-if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
-
-    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
-else
-    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
-end
+% e.plotfcn = @util.plotfcn.OneMeas_Def; 
+% if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
+%     e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
+% else
+%     e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
+% end
 e.datafileprefix = sprintf('[%s]_spect_zpa', readoutQubit.name);
 if ~args.gui
     e.showctrlpanel = false;

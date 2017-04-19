@@ -7,7 +7,6 @@ function wv_drag = DRAG(wv, alpha, f01, f02)
 
     assert(isa(wv,'qes.waveform.waveform'));
     assert(f02 ~= 2*f01);
-    wv = copy(wv); % make a copy is necessary
     if (~isempty(wv.df) && wv.df ~=0) || wv.phase ~= 0
         throw(MException('QOS_DRAG:incorrectUsage','Only envelop waveforms can be dragified.'))
     end

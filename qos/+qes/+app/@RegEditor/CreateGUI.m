@@ -134,10 +134,6 @@ function CreateGUI(obj)
         'FontSize',10,'FontUnits','points',...
         'Units','characters','Position',pos,'Callback',{@InitializeCallback},...
         'Tooltip','Create hardware objects.','Enable','off');
-	if obj.qs.hwCreated
-		set(obj.guiHandles.iniBtn,'String','Initialization Done');
-	end
-    
 
     obj.guiHandles.regTable = uitable('Parent',obj.guiHandles.reWin,...
          'Data',[],...
@@ -304,4 +300,8 @@ function CreateGUI(obj)
     function copyCallback(src,ent,typ)
         % todo...
     end
+
+    if obj.qs.hwCreated
+		set(obj.guiHandles.iniBtn,'String','Initialization Done','Enable','off');
+	end
 end
