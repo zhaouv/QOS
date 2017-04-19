@@ -230,18 +230,19 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             
             IQ.df = obj.sb_freq/2e9;
             IQ.awg = awg_;
-            IQ.awgchnl = awgchnl_;
-            IQ.balance=1;
+            IQ.awgchnl = awgchnl_;     
+%             IQ.balance=1;
             
-            p=qes.expParam(IQ,'balance');
-            p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
-            
-            obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
-            f = qes.expFcn(p,obj.spc_amp_obj);
-            
-            opts = optimset('Display','none','MaxIter',30,'TolX',0.0003,'TolFun',0.03,'PlotFcns',{@optimplotfval});
-            z = qes.util.fminsearchbnd(f.fcn,1.2,0.5,1.5,opts)
-            
+%% IQ balance method       
+%             p=qes.expParam(IQ,'balance');
+%             p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
+%             
+%             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
+%             f = qes.expFcn(p,obj.spc_amp_obj);
+%             
+%             opts = optimset('Display','none','MaxIter',20,'TolX',0.01,'TolFun',0.1,'PlotFcns',{@optimplotfval});
+%             z = qes.util.fminsearchbnd(f.fcn,1.2,0.5,1.5,opts)
+%             
 %             IQ.balance=z;
             
 
@@ -290,67 +291,57 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 %             obj.iZero=i0;
 %             obj.qZero=q0;
 
- 
-%% Calibrate Phase.Wrong£¡ phase is not between I and Q but initial phase.           
-%             p = qes.expParam(IQ,'phase');
-% 			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
-%             
-%             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
-%             f = qes.expFcn(p,obj.spc_amp_obj);
-%             
-%             opts = optimset('Display','notify','MaxIter',30,'TolX',0.001,'TolFun',0.01,'PlotFcns',{@optimplotfval});
-%             x = qes.util.fminsearchbnd(f.fcn,0,-3,3,opts);
+%% Complex component method.            
+			IQ_op = copy(IQ);
+			IQ_op.df = -obj.sb_freq/2e9;
             
-%% Previous methos. Wrong!            
-% 			IQ_op = copy(IQ);
-% 			IQ_op.df = -obj.sb_freq/2e9;
-%             
-%             function wv = calWv(comp_)
-% 				wv = IQ + comp_*IQ_op;
-% 				wv.awg = awg_;
-% 				wv.awgchnl = awgchnl_;
-% 			end
-% 			
-% 			p = qes.expParam(@calWv);
-% 			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
-%             
-%             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
-%             f = qes.expFcn(p,obj.spc_amp_obj);
-% 
-%             precisionx = 0.5;
-%             precisiony = 0.5;
-% 			x = 0*1j;
-%             dx_=0;
-%             dy_=0;
-%             while abs(precisionx) > 1e-3 || abs(precisiony) > 1e-3 
-%                 l = f(x+precisionx);
-%                 c = f(x);
-%                 r = f(x-precisionx);
-%                 dx = precisionx*qes.util.minPos(l, c, r);
-%                 x = x - dx;
-%                 
-%                 l = f(x+1j*precisiony);
-%                 c = f(x);
-%                 r = f(x-1j*precisiony);
-%                 dy = precisiony*qes.util.minPos(l, c, r);
-%                 x = x - 1j*dy;
-%                 
-%                 if sign(dx*dx_)<=0
-%                     precisionx=precisionx/2;
-%                 end
-%                 if sign(dy*dy_)<=0
-%                     precisiony=precisiony/2;
-%                 end
-%                 
-%                 dx_=dx;
-%                 dy_=dy;
-%             end
-%             
-%             p0 = precisionx+1j*precisiony
+            function wv = calWv(comp_)
+				wv = IQ + comp_*IQ_op;
+				wv.awg = awg_;
+				wv.awgchnl = awgchnl_;
+                wv.fc=IQ.fc;
+			end
+			
+			p = qes.expParam(@calWv);
+			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
+            
+            obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
+            f = qes.expFcn(p,obj.spc_amp_obj);
+
+            precisionx = 0.1;
+            precisiony = 0.1;
+			x = 0*1j;
+            dx_=0;
+            dy_=0;
+            while abs(precisionx) > 1e-3 || abs(precisiony) > 1e-3 
+                l = f(x-precisionx);
+                c = f(x);
+                r = f(x+precisionx);
+                dx = precisionx*qes.util.minPos(l, c, r);
+                x = x + dx;
+                
+                l = f(x-1j*precisiony);
+                c = f(x);
+                r = f(x+1j*precisiony);
+                dy = precisiony*qes.util.minPos(l, c, r);
+                x = x + 1j*dy
+                
+                if sign(dx*dx_)<=0
+                    precisionx=precisionx/2;
+                end
+                if sign(dy*dy_)<=0
+                    precisiony=precisiony/2;
+                end
+                
+                dx_=dx;
+                dy_=dy;
+            end
+            
+            z = x
             
 %%			
 			if obj.debug
-                f(1);
+                f(0)
                 instr = qes.qHandle.FindByClass('qes.hwdriver.sync.spectrumAnalyzer');
                 spcAnalyzerObj = instr{1};
 
@@ -391,9 +382,9 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 
                 
                 
-                spcAnalyzerObj.startfreq = obj.lo_freq-abs(obj.sb_freq) - 5e6;
-                spcAnalyzerObj.stopfreq = obj.lo_freq+abs(obj.sb_freq) + 5e6;
-                spcAnalyzerObj.bandwidth = 1e3;
+                spcAnalyzerObj.startfreq = obj.lo_freq-abs(obj.sb_freq) - 1e6;
+                spcAnalyzerObj.stopfreq = obj.lo_freq+abs(obj.sb_freq) + 1e6;
+                spcAnalyzerObj.bandwidth = 5e3;
                 spcAnalyzerObj.numpts = 4001;
                 spcAmpAfterCal = spcAnalyzerObj.get_trace();
                 

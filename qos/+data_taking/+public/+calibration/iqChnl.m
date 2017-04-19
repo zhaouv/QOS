@@ -26,13 +26,13 @@ function varargout = iqChnl(varargin)
     awgchnls = s.chnls;
     spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer','name',s.spc_analyzer);
     spcAmpObj = qes.measurement.specAmp(spcAnalyzer);
-    spcAmpObj.avgnum = 2;
+    spcAmpObj.avgnum = 1;
     
     mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource','name',s.lo_source);
     loSource = mwSrc.GetChnl(s.lo_chnl);
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
-%     Calibrator.q_delay = s.q_delay;
+    Calibrator.debug = true;
     Calibrator.pulse_ln = s.pulse_ln;
     
     x = qes.expParam(Calibrator,'lo_freq');
@@ -51,6 +51,7 @@ function varargout = iqChnl(varargin)
     e.datafileprefix = 'iqChnlCal';
     e.savedata = true;
     e.addSettings({'fcn','args'},{fcn_name,args});
+%     e.plotfcn = @qes.util.plotfcn.OneMeas_Def;
     e.Run();
     data = cell2mat(e.data{1});
     iZeros = [data.iZeros];
@@ -68,7 +69,7 @@ function varargout = iqChnl(varargin)
         if isempty(dir(dataFileDir))
             mkdir(dataFileDir);
         end
-        save(fullfile(timeStamp,datestr(now,'yymmTDDHHMMSS')),...
+        save(fullfile(dataFileDir,datestr(timeStamp,'yymmddTDDHHMMSS')),...
             'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
     end
     varargout{1} = e.data{1};
