@@ -264,7 +264,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             
             if depress<0
                 z=0;
-                disp(['WARNING: Phase calibration failed, lo = ' num2str(obj.lofreq) ', sb = ' num2str(obj.sbfreq)])
+                disp(['WARNING: Phase calibration failed, lo = ' num2str(obj.lo_freq) ', sb = ' num2str(obj.sb_freq)])
             end
             
 %% Another method
