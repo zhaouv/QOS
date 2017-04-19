@@ -9,31 +9,31 @@ classdef USTCDAC < handle
     properties (SetAccess = private)
         id = [];            %设备标识
         ip = '';            %设备ip
-        port = 80;          %端口号
-        status = 'close';   %打开状态
-        isopen = 0;         %打开状态
-        isblock = 0;        %是否以阻塞模式运行
+        port = 80;          %端口�?
+        status = 'close';   %打开状�?
+        isopen = 0;         %打开状�?
+        isblock = 0;        %是否以阻塞模式运�?
     end
     
     properties (SetAccess = private)
         name = '';              %DAC名字
         channel_amount = 4;     %DAC通道数目
-        sample_rate = 2e9;      %采样率
-        sync_delay = 0;         %DAC板子的同步延时
+        sample_rate = 2e9;      %采样�?
+        sync_delay = 0;         %DAC板子的同步延�?
         trig_delay = 0;         %DAC触发输出延时
-        da_range = 0.8;         %最大电压，未使用
+        da_range = 0.8;         %�?��电压，未使用
         gain = zeros(1,4);      %通道增益
         offset = zeros(1,4);    %通道偏置
         offsetcorr  = zeros(1,4); % 关闭DAC电压
         
-        trig_sel = 0;           %触发源选择
+        trig_sel = 0;           %触发源�?�?
         trig_interval = 200e-6; %主板连续触发输出时间间隔
         ismaster = 0;           %主板标识
-        daTrigDelayOffset = 0;  %未使用
+        daTrigDelayOffset = 0;  %未使�?
     end
     
     properties (GetAccess = private,Constant = true)
-        driver  = 'USTCDACDriver';   %驱动名
+        driver  = 'USTCDACDriver';   %驱动�?
         driverh = 'USTCDACDriver.h'; %头文件名
     end
     
@@ -86,7 +86,7 @@ classdef USTCDAC < handle
                 else
                    error('USTCDA:OpenError','Open DAC failed!');
                 end
-                obj.Init();
+%                 obj.Init();
             end
         end
          
@@ -268,7 +268,7 @@ classdef USTCDAC < handle
         
         function SetGain(obj,channel,data)
              obj.AutoOpen();
-             map = [2,3,0,1];       %有bug，需要做一次映射
+             map = [2,3,0,1];       %有bug，需要做�?��映射
              channel = map(channel+1);
              ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00000702')),uint32(channel),uint32(data));
              if(ret == -1)
@@ -278,7 +278,7 @@ classdef USTCDAC < handle
         
         function SetOffset(obj,channel,data)
             obj.AutoOpen();
-            map = [6,7,4,5];       %有bug，需要做一次映射
+            map = [6,7,4,5];       %有bug，需要做�?��映射
             channel = map(channel+1);
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00000702')),uint32(channel),uint32(data));
             if(ret == -1)
@@ -288,7 +288,7 @@ classdef USTCDAC < handle
         
         function SetDefaultVolt(obj,channel,volt)
             obj.AutoOpen();
-            volt = mod(volt,256)*256 + floor(volt/256);    %高低位切换
+            volt = mod(volt,256)*256 + floor(volt/256);    %高低位切�?
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00001B05')),uint32(channel),uint32(volt));
             if(ret == -1)
                  error('USTCDAC:WriteOffset','WriteOffset failed.');
@@ -297,7 +297,7 @@ classdef USTCDAC < handle
         
         function WriteReg(obj,bank,addr,data)
              obj.AutoOpen();
-             cmd = bank*256 + 2; %1表示ReadReg，指令和bank存储在一个DWORD数据中
+             cmd = bank*256 + 2; %1表示ReadReg，指令和bank存储在一个DWORD数据�?
              ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(cmd),uint32(addr),uint32(data));
              if(ret == -1)
                  error('USTCDAC:WriteRegError','WriteReg failed.');
@@ -309,7 +309,7 @@ classdef USTCDAC < handle
             % 范围限制
             wave(wave > 65535) = 65535;
             wave(wave < 0) = 0;
-            % 补够512bit的位宽整数倍
+            % 补够512bit的位宽整数�?
             data = wave;
             len = length(wave);
             if(mod(len,32) ~= 0)
@@ -317,15 +317,15 @@ classdef USTCDAC < handle
                 data = zeros(1,len);
                 data(1:length(wave)) = wave;
             end            
-            % 颠倒前后数据，这是由于FPGA接收字节序问题
+            % 颠�?前后数据，这是由于FPGA接收字节序问�?
             for k = 1:length(data)/2
                 temp = data(2*k);
                 data(2*k) = data(2*k-1);
                 data(2*k-1) = temp;
             end
-            % 数据反相，临时需要
+            % 数据反相，临时需�?
             data = 65535 - data;
-            % 从0通道开始编号
+            % �?通道�?��编号
             ch = ch - 1;
             ch(ch < 0) = 0;
             startaddr = ch*2*2^18+2*offset;
@@ -347,11 +347,11 @@ classdef USTCDAC < handle
                 data = zeros(1,len);
                 data(1:length(seq)) = seq;
             end
-            % 从0通道开始编号
+            % �?通道�?��编号
             ch = ch - 1;
             ch(ch < 0) = 0;
-            startaddr = (ch*2+1)*2^18+offset*8; %序列的内存起始地址，单位是字节。
-            len = length(data)*2;               %字节个数。
+            startaddr = (ch*2+1)*2^18+offset*8; %序列的内存起始地�?��单位是字节�?
+            len = length(data)*2;               %字节个数�?
             pval = libpointer('uint16Ptr', data);
             [ret,~] = calllib(obj.driver,'WriteMemory',obj.id,uint32(hex2dec('00000004')),uint32(startaddr),uint32(len),pval);
             if(ret == -1)
@@ -388,7 +388,7 @@ classdef USTCDAC < handle
         
         function reg = ReadReg(obj,bank,addr)
              obj.AutoOpen();
-             cmd = bank*256 + 1; %1表示ReadReg，指令和bank存储在一个DWORD数据中
+             cmd = bank*256 + 1; %1表示ReadReg，指令和bank存储在一个DWORD数据�?
              reg = 0;
              ret = calllib(obj.driver,'ReadInstruction',obj.id,uint32(cmd),uint32(addr));
              if(ret == 0)

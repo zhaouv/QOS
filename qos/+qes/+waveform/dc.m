@@ -6,6 +6,7 @@ classdef dc < qes.waveform.waveform
 
 	properties
 		dcval = 0
+        balance = 1; % = Q/I. add by GM. 20170418
 	end
     methods
         function obj = dc(ln)
