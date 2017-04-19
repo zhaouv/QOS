@@ -33,20 +33,32 @@ function varargout = iqChnl(varargin)
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
 %     Calibrator.q_delay = s.q_delay;
-    Calibrator.pulse_ln = s.pulse_ln;
-    
+
     x = qes.expParam(Calibrator,'lo_freq');
     y = qes.expParam(Calibrator,'sb_freq');
-    
+    y_s = qes.expParam(Calibrator,'pulse_ln');
     loFreq=args.loFreqStart:args.loFreqStep:args.loFreqStop;
     sbFreq=-args.maxSbFreq:args.sbFreqStep:args.maxSbFreq;
+
     sbFreq(abs(sbFreq)<3.5e4)=[];
     s1 = qes.sweep(x);
+
     s1.vals = loFreq;
-    s2 = qes.sweep(y);
-    s2.vals = sbFreq;
-    e = qes.experiment();
+    s2 = sweep({y_s,y});
+    ln = awgObj.samplingRate./sbFreq;
+    ln = ceil(ln);
+%     for ii = 1:ln
+%         d = ceil(ln(ii)) - ln(ii);
+%         if d ~= 0
+%             N = 1/d;
+%             ln(ii) = ln(ii)*N;
+%         end
+%     end
+    ln(ln>30e3) = 30e3;
+    s2.vals = {ln,sbFreq};
+    e = experiment();
     e.sweeps = [s1,s2];
+
     e.measurements = Calibrator;
     e.datafileprefix = 'iqChnlCal';
     e.savedata = true;
