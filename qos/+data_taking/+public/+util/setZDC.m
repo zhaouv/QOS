@@ -9,7 +9,11 @@ function setZDC(qubits,dcLevel)
         qubits = {qubits};
     end
     for ii = 1:numel(qubits)
-        q = sqc.util.qName2Obj(qubits{ii});
+        if ischar(qubits{ii})
+            q = sqc.util.qName2Obj(qubits{ii});
+        else
+            q = qubits{ii};
+        end
         dcSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.z_dc.instru);
         dcChnl = dcSrc.GetChnl(q.channels.z_dc.chnl);
         if ~isempty(dcLevel)
