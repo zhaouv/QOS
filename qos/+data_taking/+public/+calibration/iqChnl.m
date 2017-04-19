@@ -13,7 +13,7 @@ function varargout = iqChnl(varargin)
 % Yulin Wu, 2017
 
     fcn_name = 'data_taking.public.calibration.iqChnl'; % this and args will be saved with data
-    args = qes.util.processArgs(varargin,{'gui',false,'save',true});
+    args = qes.util.processArgs(varargin,{'debug',false,'avgnum',1,'gui',false,'save',true});
     try
         QS = qes.qSettings.GetInstance();
     catch
@@ -26,13 +26,13 @@ function varargout = iqChnl(varargin)
     awgchnls = s.chnls;
     spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer','name',s.spc_analyzer);
     spcAmpObj = qes.measurement.specAmp(spcAnalyzer);
-    spcAmpObj.avgnum = 1;
+    spcAmpObj.avgnum = args.avgnum;
     
     mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource','name',s.lo_source);
     loSource = mwSrc.GetChnl(s.lo_chnl);
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
-    Calibrator.debug = true;
+    Calibrator.debug = args.debug;
     Calibrator.pulse_ln = s.pulse_ln;
     
     x = qes.expParam(Calibrator,'lo_freq');
@@ -45,8 +45,8 @@ function varargout = iqChnl(varargin)
     s1 = qes.sweep(x);
 
     s1.vals = loFreq;
-    s2 = sweep({y_s,y});
-    ln = awgObj.samplingRate./sbFreq;
+    s2 = qes.sweep({y_s,y});
+    ln = awgObj.samplingRate./abs(sbFreq);
     ln = ceil(ln);
 %     for ii = 1:ln
 %         d = ceil(ln(ii)) - ln(ii);
@@ -57,7 +57,7 @@ function varargout = iqChnl(varargin)
 %     end
     ln(ln>30e3) = 30e3;
     s2.vals = {ln,sbFreq};
-    e = experiment();
+    e = qes.experiment();
     e.sweeps = [s1,s2];
 
     e.measurements = Calibrator;
@@ -82,7 +82,7 @@ function varargout = iqChnl(varargin)
         if isempty(dir(dataFileDir))
             mkdir(dataFileDir);
         end
-        save(fullfile(dataFileDir,datestr(timeStamp,'yymmddTDDHHMMSS')),...
+        save(fullfile(dataFileDir,datestr(timeStamp,'yymmDDTHHMMSS')),...
             'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
     end
     varargout{1} = e.data{1};
