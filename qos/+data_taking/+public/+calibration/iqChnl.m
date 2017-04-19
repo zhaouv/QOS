@@ -82,7 +82,11 @@ function varargout = iqChnl(varargin)
         if isempty(dir(dataFileDir))
             mkdir(dataFileDir);
         end
+<<<<<<< HEAD
+        save(fullfile(timeStamp,datestr(now,'yymmTDDHHMMSS')),...
+=======
         save(fullfile(dataFileDir,datestr(timeStamp,'yymmDDTHHMMSS')),...
+>>>>>>> bd34fc82e0f2203a3dcb472421ae7d9756ab687d
             'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
     end
     varargout{1} = e.data{1};

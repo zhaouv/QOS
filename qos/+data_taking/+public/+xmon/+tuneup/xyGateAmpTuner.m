@@ -87,13 +87,14 @@ function varargout = xyGateAmpTuner(varargin)
 	end
 
 	if args.gui
-		h = figure();
+		h = qes.ui.qosFigure(sprintf('XY Gate Tuner | %s: %s', q.name, args.gateTyp),true);
 		ax = axes('parent',h);
 		plot(ax,amps,P,'-b');
 		hold(ax,'on');
 		plot(ax,[gateAmp,gateAmp],[min(P),maxP],'--r');
-		xlabel('xy drive amplitude');
-		ylabel('P');
+		xlabel(ax,'xy drive amplitude');
+		ylabel(ax,'P|1>');
+        legend(ax,{'data',sprintf('%s gate amplitude',args.gateTyp)})
 	end
 	
     if args.save
