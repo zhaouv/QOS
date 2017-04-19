@@ -176,21 +176,20 @@ classdef awg < qes.hwdriver.sync.instrument
                 return;
             end
             for ii = 1:numIQCalDataSet
-                % Error: obj.iqCalDataSet has no chnls!
-%                 if all(obj.iqCalDataSet(ii).chnls == chnls)
-%                     break;
-%                 end
+                if all(obj.iqCalDataSet(ii).chnls == chnls)
+                    break;
+                end
                 if ii == numIQCalDataSet
                     mzeros = [0,0];
                     return;
                 end
-                f = obj.iqCalDataSet(ii).loFreq;
-                iZero = obj.iqCalDataSet(ii).iZero;
-                qZero  = obj.iqCalDataSet(ii).qZero;
             end
-            if f > 1
-                i0 = interp1(f,iZeros,loFreq,'pchip',0);
-                q0 = interp1(f,qZeros,loFreq,'pchip',0);
+            f = obj.iqCalDataSet(ii).loFreq;
+            iZero = obj.iqCalDataSet(ii).iZero;
+            qZero  = obj.iqCalDataSet(ii).qZero;
+            if numel(f) > 1
+                i0 = interp1(f,iZero,loFreq,'pchip',0);
+                q0 = interp1(f,qZero,loFreq,'pchip',0);
             else
                 idx = f==loFreq;
                 i0 = iZero(idx);
