@@ -176,7 +176,6 @@ classdef awg < qes.hwdriver.sync.instrument
                 return;
             end
             for ii = 1:numIQCalDataSet
-                % Error: obj.iqCalDataSet has no chnls!
                 if all(obj.iqCalDataSet(ii).chnls == chnls)
                     break;
                 end

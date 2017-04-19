@@ -6,14 +6,15 @@ function d = minPos(l,c,r)
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     d = l+r-2*c;
-    if d == 0
-        if r == c
-            d = 0;
-        elseif r > c
-            d = -1;
-        else
-            d = 1;
-        end
+    if d < 0
+%         if r == c
+%             d = 0;
+%         elseif r > c
+%             d = -1;
+%         else
+%             d = 1;
+%         end
+        d=0;
         return;
     end
     d = 0.5*( -r)/d;
