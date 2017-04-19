@@ -24,8 +24,8 @@ function varargout = spectroscopy1_zpa_s21(varargin)
 
 import qes.*
 import data_taking.public.xmon.spectroscopy111_zpa_s21
-args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
+args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'r_avg',0,'gui',false,'notes','','save',true});
 varargout{1} = spectroscopy111_zpa_s21('biasQubit',args.qubit,'biasAmp',args.biasAmp,'driveQubit',args.qubit,...
-    'driveFreq',args.driveFreq,'readoutQubit',args.qubit,'notes',args.notes,'gui',args.gui,'save',args.save);
+    'driveFreq',args.driveFreq,'readoutQubit',args.qubit,'notes',args.notes,'r_avg',args.r_avg,'gui',args.gui,'save',args.save);
 
 end

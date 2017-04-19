@@ -31,9 +31,13 @@ import sqc.*
 import sqc.op.physical.*
 
 args = util.processArgs(varargin,{'biasAmp',0,'biasLonger',0,'detuning',0,'driveTyp','X','dataTyp','P',...
-    'gui',false,'notes','','save',true});
+    'r_avg',0,'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] =...
     data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
+
+if args.r_avg~=0 %add by GM, 20170414
+    readoutQubit.r_avg=args.r_avg;
+end
 
 function proc = procFactory(amp_)
     g.amp = amp_;
@@ -74,6 +78,7 @@ end
 Z = op.zBias4Spectrum(biasQubit);
 Z.amp = args.biasAmp;
 Z.ln = XYLength + 2*args.biasLonger;
+
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = Z.length;
 
@@ -117,7 +122,13 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.name = 'rabi_amp111';
-e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);
+e.datafileprefix = sprintf('[%s]_rabi', readoutQubit.name);
+if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
+    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp; 
+else
+    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
+end
+
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

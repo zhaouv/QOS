@@ -258,9 +258,6 @@ classdef resonatorReadout < qes.measurement.prob
                     end
                 end
                 wv_{ii}.amp = obj.r_amp(ii);
-                % here iq is delibrately set to true because even if df = 0
-                % we need the waveform to be an iq waveform
-                wv_{ii}.iq = true;
                 wv_{ii}.df = (obj.qubits{ii}.r_freq - obj.qubits{ii}.r_fc)/obj.da.samplingRate;
             end
             obj.r_wv = wv_{1};

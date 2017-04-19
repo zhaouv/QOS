@@ -1,5 +1,5 @@
 function varargout = spin_echo_dp(varargin)
-% spin echo: detune by detune mw source frequency
+% spin echo:
 % detune by changing the second pi/2 pulse tracking frame
 % 
 % <_o_> = spin_echo_dp('qubit',_c&o_,...
@@ -16,7 +16,6 @@ function varargout = spin_echo_dp(varargin)
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as they form correct pairs.
 
-
 % Yulin Wu, 2016/12/27
 
     fcn_name = 'data_taking.public.xmon.spin_echo_dp'; % this and args will be saved with data
@@ -28,17 +27,18 @@ function varargout = spin_echo_dp(varargin)
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
     da =  qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.xy_i.instru);
-    sampling_rate = da.sampling_rate;
+    daSamplingRate = da.samplingRate;
 
     X = op.XY(q,0);
-    X2 = gate.XY2p(q,0);
+    X2 = op.XY2p(q,0);
     I = gate.I(q);
     R = measure.resonatorReadout_ss(q);
 	detuning = util.hvar(0);
 	X2_ = copy(X2);
     function proc = procFactory(delay)
         I.ln = delay/2;
-		X2.phase = 2*pi*detuning.val*delay/daSamplingRate;
+		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
+        X.phase = X2.phase/2;
         proc = X2*I*X*I*X2_;
     end
 
@@ -50,7 +50,7 @@ function varargout = spin_echo_dp(varargin)
     y.callbacks ={@(x_) x_.expobj.Run()};
     y_s = expParam(R,'delay');
     y_s.offset = 2*X2.length+X.length+5*X2.gate_buffer;
-	s1 = sweep({x,x_s});
+	s1 = sweep(x);
     s1.vals = args.detuning;
     s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};

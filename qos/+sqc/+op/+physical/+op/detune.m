@@ -44,8 +44,8 @@ classdef detune < sqc.op.physical.gate.Z_z_base
             else
                 if obj.df
                      throw(MException('QOS_op:zplsamp2f01NotSet',...
-                        sprintf('zpls_amp2f01Df setting for qubit %s not set yet, can not generate non zero detuning pulse.',...
-                        obj.qubits{1}.name, obj.df/1e6)));
+                        sprintf('can not generate non zero detuning(%0.3fMHz given) pulse as z pulse amplitude to detuning(zpls_amp2f01Df) setting for qubit %s is not set.',...
+                        obj.df/1e6, obj.qubits{1}.name)));
                 else
                     obj.z_wv{1}.amp = 0;
                 end

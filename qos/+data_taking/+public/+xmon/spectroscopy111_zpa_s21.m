@@ -26,14 +26,16 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
+args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'r_avg',0,'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] = data_taking.public.util.getQubits(...
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
     args.driveFreq = driveQubit.f01-5*driveQubit.t_spcFWHM_est:...
         driveQubit.t_spcFWHM_est/5:driveQubit.f01+5*driveQubit.t_spcFWHM_est;
 end
-
+if args.r_avg~=0 %add by GM, 20170414
+    readoutQubit.r_avg=args.r_avg;
+end
 X = op.mwDrive4Spectrum(driveQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
@@ -60,12 +62,13 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 
-if length(s1.vals)>1% add by GM, 20170413
-    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
-elseif length(s1.vals)==1
-    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
-end
-e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);
+% e.plotfcn = @util.plotfcn.OneMeas_Def; 
+% if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
+%     e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
+% else
+%     e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
+% end
+e.datafileprefix = sprintf('[%s]_spect_zpa', readoutQubit.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

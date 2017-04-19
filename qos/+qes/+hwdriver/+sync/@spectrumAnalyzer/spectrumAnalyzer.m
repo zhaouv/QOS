@@ -5,7 +5,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
 
 % Copyright 2016 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
-
+    
     properties
         startfreq % Hz
         stopfreq % Hz
@@ -53,18 +53,18 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             fprintf(obj.interfaceobj,'*ESE 1'); 
             fprintf(obj.interfaceobj,':INIT:IMM'); 
             fprintf(obj.interfaceobj,'*OPC'); 
-            while ~str2double(iquery(obj.interfaceobj,'*STB?'))
+            while ~str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,'*STB?'))
                 pause(0.005);
             end   
-            val = str2double(iquery(obj.interfaceobj, ':TRAC:MATH:MEAN? TRACE1'));
+            val = str2double(qes.hwdriver.sync.iquery(obj.interfaceobj, ':TRAC:MATH:MEAN? TRACE1'));
         end
         function val = peak_amp(obj)
             % Gets the current amplitude from the peak detector
-            val = num2str(iquery(obj.interfaceobj, ':CALC:MARK:Y?'));
+            val = num2str(qes.hwdriver.sync.iquery(obj.interfaceobj, ':CALC:MARK:Y?'));
         end
         function val = peak_freq(obj)
             % Gets the current frequency from the peak detector
-            val = num2str(iquery(obj.interfaceobj, ':CALC:MARK:X?'));
+            val = num2str(qes.hwdriver.sync.iquery(obj.interfaceobj, ':CALC:MARK:X?'));
         end
         function val = get_trace(obj)
             % Gets the current amplitude from the peak detector
@@ -72,13 +72,13 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             fprintf(obj.interfaceobj,'*ESE 1'); 
             fprintf(obj.interfaceobj,':INIT:IMM'); 
             fprintf(obj.interfaceobj,'*OPC'); 
-            while ~str2double(iquery(obj.interfaceobj,'*STB?'))
+            while ~str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,'*STB?'))
                 pause(0.005);
             end
 
             fprintf(obj.interfaceobj,':FORM ASC,8');
             fprintf(obj.interfaceobj,':FORM:BORD NORM'); % big endian
-            resp = iquery(obj.interfaceobj,':TRAC? TRACE1');
+            resp = qes.hwdriver.sync.iquery(obj.interfaceobj,':TRAC? TRACE1');
             val = str2double(strsplit(resp,','));
         end
         
@@ -96,7 +96,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             end
         end
         function val = get.avgnum(obj)
-            val = str2double(iquery(obj.interfaceobj,':AVER:COUN?'));
+            val = str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,':AVER:COUN?'));
         end
 
         function set.startfreq(obj,val)
@@ -110,7 +110,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             fprintf(obj.interfaceobj,[':FREQ:STAR ', num2str(val/1e6,'%0.6f'),'MHz']);
         end
         function val = get.startfreq(obj)
-            val = str2double(iquery(obj.interfaceobj,':FREQ:STAR?'));
+            val = str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,':FREQ:STAR?'));
         end
         function set.stopfreq(obj,val)
             if isempty(val) || ~isnumeric(val) || ~isreal(val) || val <= 0
@@ -123,7 +123,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             fprintf(obj.interfaceobj,[':FREQ:STOP ', num2str(val/1e6,'%0.6f'),'MHz']);
         end
         function val = get.stopfreq(obj)
-            val = str2double(iquery(obj.interfaceobj,':FREQ:STOP?'));
+            val = str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,':FREQ:STOP?'));
         end
         function set.trigmod(obj,val)
             switch val
@@ -140,7 +140,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             end
         end
         function val = get.trigmod(obj)
-            resp = iquery(obj.interfaceobj,':TRIG:SOUR?');
+            resp = qes.hwdriver.sync.iquery(obj.interfaceobj,':TRIG:SOUR?');
             resp((resp == 10) | (resp == 13)) = [];
             switch resp
                 case 'IMM'
@@ -166,7 +166,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             end
         end
         function val = get.extref(obj)
-            resp = iquery(obj.interfaceobj,':SENS:ROSC:SOUR?');
+            resp = qes.hwdriver.sync.iquery(obj.interfaceobj,':SENS:ROSC:SOUR?');
             resp((resp == 10) | (resp == 13)) = [];
             switch resp
                 case 'INT'
@@ -184,7 +184,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             fprintf(obj.interfaceobj,['DISP:WIND:TRAC:Y:RLEV ', num2str(val, '%0.1f'),'dBm']);
         end
         function val = get.reflevel(obj)
-            val = str2double(iquery(obj.interfaceobj,'DISP:WIND:TRAC:Y:RLEV?'));
+            val = str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,'DISP:WIND:TRAC:Y:RLEV?'));
         end
         function set.bandwidth(obj,val)
             if isempty(val) || ~isnumeric(val) || ~isreal(val) || val <= 0
@@ -196,7 +196,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             fprintf(obj.interfaceobj,[':BAND ', num2str(val/1e6, '%0.6f'),'MHz']);
         end
         function val = get.bandwidth(obj)
-            val = str2double(iquery(obj.interfaceobj,':BAND?'));
+            val = str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,':BAND?'));
         end
         function set.numpts(obj,val)
             if isempty(val) || val <= 0 || ceil(val) ~=val
@@ -205,7 +205,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             fprintf(obj.interfaceobj,[':SWE:POIN ', num2str(val, '%0.0f')]);
         end
         function val = get.numpts(obj)
-            val = str2double(iquery(obj.interfaceobj,':SWE:POIN?'));
+            val = str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,':SWE:POIN?'));
         end
 
         function set.on(obj,val)
@@ -229,7 +229,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
             obj.on = val;
         end
         function val = get.on(obj)
-            if logical(str2double(iquery(obj.interfaceobj,'*OPC?')));
+            if logical(str2double(qes.hwdriver.sync.iquery(obj.interfaceobj,'*OPC?')));
                 val = true;
             else
                 val = false;

@@ -27,7 +27,7 @@ function varargout = spin_echo_dz(varargin)
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
     da =  qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.xy_i.instru);
-    sampling_rate = da.sampling_rate;
+    daSamplingRate = da.samplingRate;
 
     X = op.XY(q,0);
     X2 = gate.X2p(q);
@@ -35,7 +35,7 @@ function varargout = spin_echo_dz(varargin)
     R = measure.resonatorReadout_ss(q);
     function proc = procFactory(delay)
         I.ln = delay/2;
-        X.phase = pi/2+2*pi*args.detuning*delay/2/sampling_rate;
+        X.phase = pi/2+2*pi*args.detuning*delay/2/daSamplingRate;
         proc = X2*I*X*I*X2;
     end
 
