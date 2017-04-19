@@ -71,11 +71,6 @@ e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.datafileprefix = sprintf('[%s]_spect_zdc', readoutQubit.name);
-if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
-    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
-else
-    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
-end
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;
@@ -87,5 +82,6 @@ e.notes = args.notes;
 e.addSettings({'fcn','args'},{fcn_name,args});
 e.Run();
 varargout{1} = e;
+data_taking.public.util.setZDC(biasQubit,biasQubit.zdc_amp);
 end
 

@@ -74,7 +74,7 @@ function varargout = iqChnl(varargin)
             mkdir(dataFileDir);
         end
         save(fullfile(timeStamp,datestr(now,'yymmTDDHHMMSS')),...
-            'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp');
+            'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
     end
     varargout{1} = e.data{1};
 end

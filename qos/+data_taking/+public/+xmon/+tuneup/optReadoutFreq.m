@@ -51,7 +51,7 @@ function varargout = optReadoutFreq(varargin)
     optFreq = frequency(idx);
     
     if args.gui
-        hf = figure('NumberTitle','off','Name','optimal resonator readout frequency','HandleVisibility','callback');
+        hf = qes.ui.qosFigure(sprintf('Opt. Readout Freq. | %s', q.name),true);
         ax = axes('parent',hf);
         plot(ax,data(:,1),'--.r');
         hold(ax,'on');

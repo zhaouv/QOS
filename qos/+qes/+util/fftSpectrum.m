@@ -18,7 +18,7 @@ else
         ti = linspace(t(1),t(end),L1); % resample in case original data is not equally sampled
         yi = interp1(t,y,ti,'spline');
     else
-        ti =  t;
+        ti = t;
         yi = y;
     end
     NFFT = 2^nextpow2(L); % Next power of 2 from length of y

@@ -14,8 +14,8 @@ function [varargout] = OneMeas_Def(Data, SweepVals,ParamNames,MainParam,Measurem
     if nargin < 7
         IsPreview = false;
     end
-    if (iscell(Data{1}) && ~isreal(Data{1}{1}(1))) ||...
-       (~iscell(Data{1}) && ~isreal(Data{1}(1)))
+    if (iscell(Data{1}) && ~isempty(Data{1}{1}) && ~isreal(Data{1}{1}(1))) ||...
+       (~iscell(Data{1}) && ~isempty(Data{1}{1}) && ~isreal(Data{1}(1)))
         [x,y,z] = OneMeasComplex_Def(Data, SweepVals,ParamNames,MainParam,MeasurementName,AX,IsPreview);
     else
         [x,y,z] = OneMeasReal_Def(Data, SweepVals,ParamNames,MainParam,MeasurementName,AX,IsPreview);
