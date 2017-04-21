@@ -33,13 +33,35 @@ signalCenter = 6.6744e9;
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as the form correct pairs.
 %% scan s21-bias,signal frequency
-s21_BiasPwrpPwrs_networkAnalyzer('jpaName','impa1',...
+data=s21_BiasPwrpPwrs_networkAnalyzer('jpaName','impa1',...
        'startFreq',4e9,'stopFreq',8e9,...
        'numFreqPts',200,'avgcounts',20,...
        'NAPower',-20,'bandwidth',3e3,...
        'pumpFreq',2*signalCenter,'pumpPower',-120,...
        'bias',-1e-3:10e-6:1e-3,...
-       'notes','na 40dB @ Room Temperature','gui',true,'save',true)
+       'notes','na 40dB @ Room Temperature','gui',true,'save',true);
+%% 
+delt=1.05;
+if exist('Data','var') && numel(Data)==1 % Analyse loaded data
+    Data = Data{1,1};
+    bias = SweepVals{1,1}{1,1};
+    freqs = Data{1,1}(2,:);
+else % Analyse fresh data
+    Data = data.data{1};
+    bias = data.sweepvals{1,1}{1,1};
+    freqs = Data{1,1}(2,:);
+end
+meshdata=NaN(numel(bias),numel(freqs));
+for II=1:numel(bias)
+    meshdata(II,:)=Data{II,1}(1,:);
+end
+ANG=unwrap(angle(meshdata'));
+figure(11);imagesc(bias,freqs,abs(meshdata'));  set(gca,'ydir','normal');xlabel('JPA bias');ylabel('Freq'); title('|S21|')
+slop=(mean(ANG(end,:))-mean(ANG(1,:)))/(freqs(end)-freqs(1))*delt;
+slops=meshgrid(slop*(freqs-freqs(1)),ones(1,numel(bias)))';
+ANGS=mod(ANG-slops-(ANG(1,end))+pi,2*pi);
+figure(12);imagesc(bias,freqs,ANGS);  set(gca,'ydir','normal');xlabel('JPA bias');ylabel('Freq');colorbar;title('unwraped phase')
+
 %% scan s21-pump power,signal frequency
 s21_BiasPwrpPwrs_networkAnalyzer('jpaName','impa1',...
        'startFreq',6.45e9,'stopFreq',6.9e9,...
