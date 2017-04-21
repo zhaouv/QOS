@@ -23,13 +23,20 @@ ustcaddaObj.SendWave(39,[32768*ones(1,200),33768*ones(1,200)]+0); % -230
 ustcaddaObj.SendWave(40,[32768*ones(1,200),33768*ones(1,200)]+0); % -400
 ustcaddaObj.Run(false);
 %% Amp test
-t=1:50000;
+t=1:4000;
 wave1=32768+32768/2*cos(2*pi*t/40);
 wave2=32768+32768/2*sin(2*pi*t/40);
-ustcaddaObj.runReps = 1e7;
+ustcaddaObj.runReps = 1000;
 ustcaddaObj.SendWave(2,wave1); % 620
 ustcaddaObj.SendWave(1,wave2); % 750
-ustcaddaObj.Run(false);
+[datai,dataq] = ustcaddaObj.Run(true);
+plot(mean(datai,1));hold on;plot(datai(1,:));hold off;
+%%
+t=1:4000;
+wave1=32768+32768/2*cos(2*pi*t/10);
+wave2=32768+32768/2*sin(2*pi*t/10);
+ustcaddaObj.SendContinuousWave(2,wave1)
+ustcaddaObj.SendContinuousWave(1,wave2)
 %% sin wave
 for ii = 1:40
     ustcaddaObj.SendWave(ii,32768+32768*sin((1:8000)/1000*2*pi));
