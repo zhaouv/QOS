@@ -37,7 +37,6 @@ if isempty(args.driveFreq)
 end
 
 X = op.mwDrive4Spectrum(driveQubit);
-X.Run();
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 R.state = 2;

@@ -1,4 +1,4 @@
-classdef DynMwSweepRng_Bnd < DynMwSweepRng
+classdef dynMwSweepRngBnd < qes.util.dynMwSweepRng
     % Dynamically change the sweeping range of a target Sweep object
     % according to the current step value of a control Sweep object by
     % setting the mask property of the target Sweep object.
@@ -12,10 +12,10 @@ classdef DynMwSweepRng_Bnd < DynMwSweepRng
         bandwidth  % width of the band
     end
     methods
-        function obj = DynMwSweepRng_Bnd(CtrlSweepObj,TrgtSweepObj)
+        function obj = dynMwSweepRngBnd(CtrlSweepObj,TrgtSweepObj)
             % CtrlSweepObj: control sweep
             % TrgtSweepObj: target sweep
-            obj = obj@DynMwSweepRng(CtrlSweepObj,TrgtSweepObj);
+            obj = obj@qes.util.dynMwSweepRng(CtrlSweepObj,TrgtSweepObj);
         end
     end
     methods
