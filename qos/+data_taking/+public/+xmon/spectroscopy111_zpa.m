@@ -50,8 +50,8 @@ x.deferCallbacks = true;
 y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.auxpara = X;
-y.callbacks ={@(x_)expParam.RunCallbacks(x),@(x_)x_.auxpara.Run()};
+y.auxpara = {x,X};
+y.callbacks ={@(x_)x.RunCallbacks(x),@(x_)x_.auxpara{2}.Run()};
 
 s1 = sweep(x);
 s1.vals = args.biasAmp;

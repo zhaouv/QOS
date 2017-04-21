@@ -66,7 +66,7 @@ tuneup.APE('qubit','q7',...
       'phase',-pi:pi/10:pi,'numI',2,...
       'gui',true,'save',true);
 %%
-tuneup.zpls2f01('qubit','q7', 'gui',true,'save',false);
+tuneup.zpls2f01('qubit','q7','maxBias',35e3 ,'gui',true,'save',false);
 %%
 
 %% automatic function, after previous steps pined down qubit parameters, 

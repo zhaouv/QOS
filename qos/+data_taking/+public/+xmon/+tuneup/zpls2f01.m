@@ -1,7 +1,7 @@
 function varargout = zpls2f01(varargin)
 % map out z pulse bias amplitude to qubit frequency f01. 
 %
-% <[_f_]> = zpls2f01('qubit',_c&o_,...
+% <[_f_]> = zpls2f01('qubit',_c&o_,'maxBias',mb...
 %       'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -145,12 +145,12 @@ function varargout = zpls2f01(varargin)
 %             [~,midx] = max(P{end});
 %             f01 = [f01,f(midx)];
             % [~,midx] = max(P{end}(2:end));
-            rP = range();
+            rP = range(P{end}(2:end));
             [pks,locs,w,p] = findpeaks(P{end}(2:end),'SortStr','descend','MinPeakHeight',rP/2,...
-                'MinPeakProminence',rP/2,'MinPeakDistance',nunmel(P{end})/5,...
+                'MinPeakProminence',rP/2,'MinPeakDistance',numel(P{end})/5,...
                 'WidthReference','halfprom');
             if numel(pks)
-                [~,idx_] = sort(abs(locs - (nunmel(P{end})-1)/2),'descend');
+                [~,idx_] = sort(abs(locs - (numel(P{end})-1)/2),'descend');
                 [~,rnk_locs] = sort(idx_,'ascend');
                 if numel(FwdPkWdth) >= 5
                     [~,idx_] = sort(abs(w - mean(FwdPkWdth(max(1,numel(FwdPkWdth)-10):end))),'descend');
@@ -169,7 +169,7 @@ function varargout = zpls2f01(varargin)
                 FwdPkProminence = [FwdPkProminence,p(pkIdx)];
                 f01 = [f01,f(locs(pkIdx)+1)];
             else
-                f01 = [f01,f(round(nunmel(P{end})/2))];
+                f01 = [f01,f(round(numel(P{end})/2))];
             end
             dbForward = db;
             q.f01 = f01(end);
@@ -213,12 +213,12 @@ function varargout = zpls2f01(varargin)
 %             f01 = [f(midx),f01];
 %             [~,midx] = max(P{1}(2:end));
 
-            rP = range();
+            rP = range(P{end}(2:end));
             [pks,locs,w,p] = findpeaks(P{end}(2:end),'SortStr','descend','MinPeakHeight',rP/2,...
-                'MinPeakProminence',rP/2,'MinPeakDistance',nunmel(P{end})/5,...
+                'MinPeakProminence',rP/2,'MinPeakDistance',numel(P{end})/5,...
                 'WidthReference','halfprom');
             if numel(pks)
-                [~,idx_] = sort(abs(locs - (nunmel(P{end})-1)/2),'descend');
+                [~,idx_] = sort(abs(locs - (numel(P{end})-1)/2),'descend');
                 [~,rnk_locs] = sort(idx_,'ascend');
                 if numel(BkwdPkWdth) >= 5
                     [~,idx_] = sort(abs(w - mean(BkwdPkWdth(max(1,numel(BkwdPkWdth)-10):end))),'descend');
@@ -237,7 +237,7 @@ function varargout = zpls2f01(varargin)
                 BkwdPkProminence = [BkwdPkProminence,p(pkIdx)];
                 f01 = [f(locs(pkIdx)+1),f01];
             else
-                f01 = [f(round(nunmel(P{end})/2)),f01];
+                f01 = [f(round(numel(P{end})/2)),f01];
             end
             dbBackward = db;
             q.f01 = f01(1);

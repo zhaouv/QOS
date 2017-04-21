@@ -156,8 +156,10 @@ classdef (Sealed = true)RegEditor < handle
                     isvalid(obj.guiHandles.reWin)
                 close(obj.guiHandles.reWin);
             end
-            stop(obj.tblRefreshTmr);
-            delete(obj.tblRefreshTmr);
+            if ~isempty(obj.tblRefreshTmr)
+                stop(obj.tblRefreshTmr);
+                delete(obj.tblRefreshTmr);
+            end
         end
     end
     methods (Access = private)
