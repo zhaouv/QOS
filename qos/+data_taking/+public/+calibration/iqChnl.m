@@ -64,14 +64,14 @@ function varargout = iqChnl(varargin)
     e.datafileprefix = 'iqChnlCal';
     e.savedata = true;
     e.addSettings({'fcn','args'},{fcn_name,args});
-%     e.plotfcn = @qes.util.plotfcn.OneMeas_Def;
+    e.plotfcn = [];
     e.Run();
     data = cell2mat(e.data{1});
     iZeros = [data.iZeros];
     qZeros = [data.qZeros];
     sbCompensation = [data.sbCompensation];
-    iZeros=unique(iZeros);
-    qZeros=unique(qZeros);
+    iZeros=iZeros(1:numel(loFreq));
+    qZeros=qZeros(1:numel(loFreq));
     sbCompensation = reshape(sbCompensation,[numel(loFreq),numel(sbFreq)]); % Row is loFreq, Column is sbFreq
     iqAmp = data(1).iqAmp;
     loPower = data(1).loPower;
@@ -82,12 +82,14 @@ function varargout = iqChnl(varargin)
         if isempty(dir(dataFileDir))
             mkdir(dataFileDir);
         end
-<<<<<<< HEAD
-        save(fullfile(timeStamp,datestr(now,'yymmTDDHHMMSS')),...
-=======
-        save(fullfile(dataFileDir,datestr(timeStamp,'yymmDDTHHMMSS')),...
->>>>>>> bd34fc82e0f2203a3dcb472421ae7d9756ab687d
+        filename=fullfile(dataFileDir,datestr(timeStamp,'yymmDDTHHMMSS'));
+        save(filename,...
             'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
+        figure;plot(loFreq,iZeros,'-o',loFreq,qZeros,'-o','linewidth',2);legend('iZeros','qZeros');xlabel('LoFreq');ylabel('Amp')
+        saveas(gcf,[filename '_Zeros.fig']);
+        figure;subplot(2,1,1);surface(sbFreq,loFreq,real(sbCompensation),'edgecolor','none');ylabel('LoFreq');xlabel('SbFreq');title('Real');colorbar
+        subplot(2,1,2);surface(sbFreq,loFreq,imag(sbCompensation),'edgecolor','none');ylabel('LoFreq');xlabel('SbFreq');title('Image');colorbar
+        saveas(gcf,[filename '_Sb.fig']);
     end
     varargout{1} = e.data{1};
 end

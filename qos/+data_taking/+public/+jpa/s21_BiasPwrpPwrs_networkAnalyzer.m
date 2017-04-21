@@ -1,4 +1,4 @@
-function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
+function varargout = s21_BiasPwrpPwrs_networkAnalyzer(varargin)
 % [s21] vs [pump frequency], [signal frequency] with network analyser
 % 
 % <_o_> = s21_BiasPumpPwrPumpFreq_networkAnalyzer('jpaName',_c&o_,...
@@ -40,24 +40,26 @@ function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
         throw(MException('s21_BiasPumpPwrPumpFreq_networkAnalyzer:inValidSettings',...
               sprintf('the bias source %s is not a dc source.',jpa.channels.bias.instru)));
     end
-	biasSrc = biasSrc.GetChnl(jpa.channels.bias.chnl);
+	biasChnl = biasSrc.GetChnl(jpa.channels.bias.chnl);
     pumpMwSrc = qHandle.FindByClassProp('qes.hwdriver.hardware','name',jpa.channels.pump_mw.instru);
 	pumpMwSrc = pumpMwSrc.GetChnl(jpa.channels.pump_mw.chnl);
     
     s = [];
     if numel(args.bias) == 1
-        biasSrc.dcval = args.bias;
-        biasSrc.on = true;
+        biasChnl.dcval = args.bias;
+        biasChnl.on = true;
     else
-        x = expParam(biasSrc,'dcval');
-        x.name = 'bias(A)';
-        x.callbacks = {@(x) x.expobj.On(), @(x) pause(0.3)};
+        x = expParam(biasChnl,'dcval');
+        x.name = 'JPA dc bias';
+        x.callbacks = {@(x) x.expobj.On(), @(x) pause(1)};
         s_ = sweep(x);
         s_.vals = args.bias;
         s = [s,s_];
     end
     
-    if numel(args.pumpFreq) == 1
+    if numel(args.pumpFreq) == 0
+        pumpMwSrc.on = false;
+    elseif numel(args.pumpFreq) == 1
         pumpMwSrc.frequency = args.pumpFreq;
         pumpMwSrc.on = true;
     else
@@ -69,7 +71,9 @@ function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
         s = [s,s_];
     end
     
-    if numel(args.pumpPower) == 1
+    if numel(args.pumpPower) == 0
+        pumpMwSrc.on = false;
+    elseif numel(args.pumpPower) <= 1
         pumpMwSrc.power = args.pumpPower;
         pumpMwSrc.on = true;
     else
@@ -83,7 +87,7 @@ function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
     
     if isempty(s) % we need at least one sweep
         x = expParam(biasSrc,'dcval');
-        x.name = 'bias(A)';
+        x.name = 'JPA dc bias';
         x.callbacks = {@(x) x.expobj.On(), @(x) pause(0.3)};
         s_ = sweep(x);
         s_.vals = args.bias;
@@ -96,6 +100,7 @@ function varargout = s21_BiasPumpPwrPumpFreq_networkAnalyzer(varargin)
     na.bandwidth = args.bandwidth;
     na.avgcounts = args.avgcounts;
     na.power = args.NAPower;
+    pause(2)
     
     R = qes.measurement.sParam(na);
     R.name = 'S21';
