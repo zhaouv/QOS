@@ -1,7 +1,7 @@
 function varargout = spectroscopy111_zpa(varargin)
 % spectroscopy111: qubit spectroscopy
 % bias qubit q1, drive qubit q2 and readout qubit q3,
-% q1, q2, q3 can be the same qubit or diferent qubits,
+% q1, q2, q3 can be the same qubit or different qubits,
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % the selelcted qubits can be listed with:
 % QS.loadSSettings('selected'); % QS is the qSettings object
@@ -58,6 +58,7 @@ s1.vals = args.biasAmp;
 s2 = sweep(y);
 s2.vals = args.driveFreq;
 e = experiment();
+e.name = 'Spectroscopy';
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);

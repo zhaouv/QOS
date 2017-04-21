@@ -1,7 +1,7 @@
 function varargout = rabi_long111(varargin)
 % rabi_amp111: Rabi oscillation by changing the pi pulse amplitude
 % bias qubit q1, drive qubit q2 and readout qubit q3,
-% q1, q2, q3 can be the same qubit or diferent qubits,
+% q1, q2, q3 can be the same qubit or different qubits,
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % the selelcted qubits can be listed with:
 % QS.loadSSettings('selected'); % QS is the qSettings object
@@ -125,7 +125,7 @@ s2.vals = args.xyDriveLength;
 e = experiment();
 e.sweeps = [s1,s2];
 e.measurements = R;
-e.name = 'rabi_long111';
+e.name = 'Rabi Long';
 e.datafileprefix = sprintf('[%s]_rabi', readoutQubit.name);
 if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
     e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp; 

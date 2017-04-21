@@ -59,6 +59,7 @@ s1.vals = args.biasAmp;
 s2 = sweep(y);
 s2.vals = args.driveFreq;
 e = experiment();
+e.name = 'Spectroscopy';
 e.sweeps = [s1,s2];
 e.measurements = R;
 

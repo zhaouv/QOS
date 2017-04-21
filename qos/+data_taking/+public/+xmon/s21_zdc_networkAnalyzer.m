@@ -66,6 +66,7 @@ function varargout = s21_zdc_networkAnalyzer(varargin)
     s1 = sweep(x);
     s1.vals = args.amp;
     e = experiment();
+    e.name = 'S21 with NA';
     e.sweeps = s1;
     e.measurements = R;
     e.datafileprefix = sprintf('%s_s21_zdc', q.name);

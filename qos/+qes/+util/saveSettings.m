@@ -119,7 +119,8 @@ function saveSettings(spath, field,value)
                                 value = regexprep(value,',\.',',0\.');
                                 value = regexprep(value,'\[\.','[0\.');
                                 if isnan(str2double(value)) &&...
-                                	isempty(regexp(value,'[(\d+(\.\d+){0,1},)*(\d+(\.\d+){0,1}])', 'once'))
+                                	isempty(regexp(regexprep(value,'[eE][-\+]\d+',''),...
+                                        '[(\d+(\.\d+){0,1},)*(\d+(\.\d+){0,1}])', 'once'))
                                     error('saveSettings:invalidInput',...
                                          'value type of the current settings field is numeric, %s given.', value);
                                 end
