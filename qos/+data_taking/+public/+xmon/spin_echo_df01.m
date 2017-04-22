@@ -45,6 +45,7 @@ function varargout = spin_echo_df01(varargin)
 	x_s =  expParam(X,'f01');
 	x_s.offset = X.f01;
     y = expParam(@procFactory);
+    
     y.name = [q.name,' time'];
     y.callbacks ={@(x_) x_.expobj.Run()};
     y_s = expParam(R,'delay');
@@ -56,7 +57,7 @@ function varargout = spin_echo_df01(varargin)
     e = experiment();
     e.sweeps = [s1,s2];
     e.measurements = R;
-    e.name = 'spin_echo_df01';
+    e.name = 'Spin Echo(Detune by Sb. Freq.';
     e.datafileprefix = sprintf('%s',q.name);
     if ~args.gui
         e.showctrlpanel = false;

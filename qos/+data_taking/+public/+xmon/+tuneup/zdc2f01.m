@@ -224,7 +224,7 @@ function varargout = zdc2f01(varargin)
     function plotAndSave(bias_,Frequency_,P_,f01_)
         persistent ax
         if isempty(ax) || ~isvalid(ax)
-            hf = figure('NumberTitle','off','Name','z dc bias to f01','HandleVisibility','callback');
+            hf = qes.ui.qosFigure(sprintf('Z DC -> f01 | %s', q.name),true,60*30);
             ax = axes('parent',hf);
         end
         num_biases = numel(bias);

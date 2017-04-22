@@ -12,6 +12,11 @@ classdef (Sealed = true)RegEditor < handle
         hwList
         sessionList
         guiHandles
+        
+        tblRefreshTmr
+    end
+    properties (Constant = true, GetAccess = private)
+        tblRefreshPeriond = 10
     end
     methods
         function obj = RegEditor()
@@ -150,6 +155,10 @@ classdef (Sealed = true)RegEditor < handle
                     isfield(obj.guiHandles,'reWin') &&...
                     isvalid(obj.guiHandles.reWin)
                 close(obj.guiHandles.reWin);
+            end
+            if ~isempty(obj.tblRefreshTmr)
+                stop(obj.tblRefreshTmr);
+                delete(obj.tblRefreshTmr);
             end
         end
     end

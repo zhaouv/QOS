@@ -124,10 +124,10 @@ ENV/
 .ropeproject
 
 # log file
-log.txt
+qos/log.txt
 
 startup.m
 startup.p
 
-+qos/+data_taking/+yulin/
-+qos/+data_taking/+ming/
+qos/+data_taking/+yulin/
+qos/+data_taking/+ming/

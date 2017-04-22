@@ -1,7 +1,7 @@
 function varargout = zpls2f01(varargin)
 % map out z pulse bias amplitude to qubit frequency f01. 
 %
-% <[_f_]> = zpls2f01('qubit',_c&o_,...
+% <[_f_]> = zpls2f01('qubit',_c&o_,'maxBias',mb...
 %       'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -28,32 +28,21 @@ function varargout = zpls2f01(varargin)
 					% thus we transfer frequency unit to GHz to reduce the order difference.
     
     args = qes.util.processArgs(varargin,{'gui',false,'save',true});
-	q = copy(getQubits(args,{'qubit'})); % we need to modify the qubit properties, better make a copy to avoid unwanted modifications to the original.
+	q = getQubits(args,{'qubit'}); 
 
 	if isempty(q.zpls_amp2f01)
 		throw(MException('QOS_zpls2f01:invalidInitialValue',...
-		'zpls_amp2f01 empty, zpls_amp2f01(1) is taken as the initial value for M(1/M is the modulation cycle of f01 in dc bias)'));
+		'zpls_amp2f01 empty, zpls_amp2f01(1) is taken as the initial value for M(1/M is the modulation cycle of f01 in z bias)'));
+    end
 	if q.zpls_amp2f01(1) == 0
 		throw(MException('QOS_zpls2f01:invalidInitialValue',...
-		'invalid initial value for M(1/M is the modulation cycle of f01 in dc bias), value of M can not be zero.'));
+		'invalid initial value for M(1/M is the modulation cycle of f01 in z bias), value of M can not be zero.'));
 	end
 	if q.zpls_amp2fFreqRng < 100e6 || q.zpls_amp2fFreqRng > 2e9
 		throw(MException('QOS_zpls2f01:invalidAmp2fFreqRng',...
 			'zpls_amp2fFreqRng out of supported range:[100e6, 2e9]'));
 	end
-	
-	% standard qubit tuneup proceedure:
-	% n, ...
-	% n+1, measure f01(S21) at zdc_amp = 0;
-	% n+2, power rabi(S21) to find pi pulse;
-	% n+3, with pi pulse, find the optimal readout frequency;
-	% n+4, find the iq raw data to probablity centers;
-	% n+5, fine calibrate pi pulse with power rabi(|1> probability) or ignore this step if pi pulse already good enough.
-	% n+6, measure zpls2f01
-	% ...
-	% so here if q.zdc_amp ~= 0, you might be using incorrect qubit settings, copy and paste another qubit's
-	% settings without changing the values of some crutial entries for example, or you might be doing things
-	% in a non standard way and is responsible for possible risks.
+
 	if q.zdc_amp ~= 0
 		warning('q.zdc_amp ~= 0.');
 	end
@@ -65,7 +54,7 @@ function varargout = zpls2f01(varargin)
 	addprop(q,'amp2f_poly__');
 	% addprop(q,'amp2f__');
 	% addprop(q,'f2amp__');
-	q.amp2f_poly__ = q.f01*[2*M,1];
+	q.amp2f_poly__ = q.f01*[2*M,1]/freqUnit;
 	% q.amp2f__ = @(x) fmax*sqrt(abs(cos(pi*M*abs(x-offset))))+fc*(sqrt(abs(cos(pi*M*abs(x-offset))))-1);
 	% q.f2amp__  = {@(x)M*acos((x+fc)^2/(fc+fmax)^2)/pi+offset,...
 	%			@(x)-acos((x+fc)^2/(fc+fmax)^2)/(M*pi)+offset};
@@ -84,17 +73,23 @@ function varargout = zpls2f01(varargin)
     f01 = [];
     P = {};
     Frequency = {};
-	meanRes = 0;
-	currentRes = Inf;
+    dbForward = [];
+    dbBackward = [];
+    FwdPkWdth = [];
+    FwdPkProminence = [];
+    BkwdPkWdth = [];
+    BkwdPkProminence = [];
     while true
         if isempty(bias)
             bias = 0;
             f = sweepFreq(bias);
-            e0 = spectroscopy1_zpa('qubit',qName,'bias',bias(end),'driveFreq',f,'save',false,'gui',false);
+            e0 = spectroscopy1_zpa('qubit',q,'biasAmp',bias(end),'driveFreq',f,'save',false,'gui',false);
             P = e0.data;
             Frequency = {f};
-            [~,midx] = max(P{end});
-            f01 = f(midx);
+%             [~,midx] = max(P{end});
+%             f01 = f(midx);
+            [~,midx] = max(P{end}(2:end));
+            f01 = f(midx+1);
             continue;
         end
         stopBiasForward = false;
@@ -105,42 +100,77 @@ function varargout = zpls2f01(varargin)
             stopBiasBackward = true;
         end
         if numel(bias) < 10
-            df = q.t_zdc2freqFreqSrchRng/10;
+            df = q.t_zAmp2freqFreqSrchRng/10;
         else
-            df = q.t_zdc2freqFreqSrchRng/5;
+            df = q.t_zAmp2freqFreqSrchRng/5;
         end
         if ~stopBiasForward
             zpls_amp2f01_ = q.amp2f_poly__;
             if numel(f01) <= 3
                 zpls_amp2f01_(end) = zpls_amp2f01_(end) - (f01(1) - df)/freqUnit;
                 r = roots(zpls_amp2f01_);
-                db  = min(abs([r -  bias(1),r -  bias(end)]));
 				db  = min(abs([r -  bias(1),r -  bias(end)]));
             else
+                if numel(f01) > 15
+                    kkk = 1;
+                end
                 if polyval(zpls_amp2f01_,bias(end)) >=  polyval(zpls_amp2f01_,bias(end-1))
                     zpls_amp2f01_(end) = zpls_amp2f01_(end) - (f01(end) + df)/freqUnit;
                 else
                     zpls_amp2f01_(end) = zpls_amp2f01_(end) - (f01(end) - df)/freqUnit;
                 end
-                r = roots(zpls_amp2f01_)*q.zdc_amp2f_dcUnit;
-                db = sort(r(isreal(r))) - bias(end);
+                r = roots(zpls_amp2f01_);
+                ridx = [];
+                for qq = 1:numel(r)
+                    if isreal(r(qq))
+                        ridx = [ridx,qq];
+                    end
+                end
+                db = sort(r(ridx)) - bias(end);
                 db = db(db>0);
                 if isempty(db)
                     db = dbForward;
                 else
                     db = db(1);
-                    if db > 1.5*dbForward % avoid blow up
-                        db = 1.5*dbForward;
-                    end
                 end
+            end
+            if ~isempty(dbForward) && db > 1.5*dbForward % avoid blow up
+                db = 1.5*dbForward;
             end
             bias = [bias,bias(end)+db];
             f = sweepFreq(bias(end));
-            e = spectroscopy1_zpa('qubit',q,'bias',bias(end),'driveFreq',f,'save',false,'gui',false);
+            e = spectroscopy1_zpa('qubit',q,'biasAmp',bias(end),'driveFreq',f,'save',false,'gui',false);
             P = [P, e.data];
             Frequency = [Frequency,{f}];
-            [~,midx] = max(P{end});
-            f01 = [f01,f(midx)];
+%             [~,midx] = max(P{end});
+%             f01 = [f01,f(midx)];
+            % [~,midx] = max(P{end}(2:end));
+            rP = range(P{end}(2:end));
+            [pks,locs,w,p] = findpeaks(P{end}(2:end),'SortStr','descend','MinPeakHeight',rP/2,...
+                'MinPeakProminence',rP/2,'MinPeakDistance',numel(P{end})/5,...
+                'WidthReference','halfprom');
+            if numel(pks)
+                [~,idx_] = sort(abs(locs - (numel(P{end})-1)/2),'descend');
+                [~,rnk_locs] = sort(idx_,'ascend');
+                if numel(FwdPkWdth) >= 5
+                    [~,idx_] = sort(abs(w - mean(FwdPkWdth(max(1,numel(FwdPkWdth)-10):end))),'descend');
+                else
+                    [~,idx_] = sort(w,'descend');
+                end
+                [~,rnk_w] = sort(idx_,'ascend');
+                if numel(FwdPkWdth) >= 5
+                    [~,idx_] = sort(abs(p - mean(FwdPkProminence(max(1,numel(FwdPkProminence)-10):end))),'descend');
+                else
+                    [~,idx_] = sort(p,'descend');
+                end
+                [~,rnk_p] = sort(idx_,'ascend');
+                [~,pkIdx] = max(rnk_locs+0.5*rnk_w+rnk_p);
+                FwdPkWdth = [FwdPkWdth,w(pkIdx)];
+                FwdPkProminence = [FwdPkProminence,p(pkIdx)];
+                f01 = [f01,f(locs(pkIdx)+1)];
+            else
+                f01 = [f01,f(round(numel(P{end})/2))];
+            end
             dbForward = db;
             q.f01 = f01(end);
         end
@@ -156,41 +186,75 @@ function varargout = zpls2f01(varargin)
                 else
                     zpls_amp2f01_(end) = zpls_amp2f01_(end) - (f01(1) - df)/freqUnit;
                 end
-                r = roots(zpls_amp2f01_)*q.zdc_amp2f_dcUnit;
-                db = sort(r(isreal(r))) - bias(1);
+                r = roots(zpls_amp2f01_);
+                ridx = [];
+                for qq = 1:numel(r)
+                    if isreal(r(qq))
+                        ridx = [ridx,qq];
+                    end
+                end
+                db = sort(r(ridx)) - bias(1);
                 db = db(db<0);
                 if isempty(db)
                     db = dbBackward;
                 else
                     db = db(end);
-                    if db < 1.5*dbBackward % avoid blow up
-                        db = 1.5*dbBackward;
-                    end
                 end
+            end
+            if ~isempty(dbBackward) && db < 1.5*dbBackward % avoid blow up
+                db = 1.5*dbBackward;
             end
             bias = [bias(1)+db, bias];
             f = sweepFreq(bias(1));
-            e = spectroscopy1_zpa('qubit',q,'bias',bias(1),'driveFreq',f,'save',false,'gui',false);
+            e = spectroscopy1_zpa('qubit',q,'biasAmp',bias(1),'driveFreq',f,'save',false,'gui',false);
             P = [e.data, P];
             Frequency = [{f}, Frequency];
-            [~,midx] = max(P{1});
-            f01 = [f(midx),f01];
+%             [~,midx] = max(P{1});
+%             f01 = [f(midx),f01];
+%             [~,midx] = max(P{1}(2:end));
+
+            rP = range(P{end}(2:end));
+            [pks,locs,w,p] = findpeaks(P{end}(2:end),'SortStr','descend','MinPeakHeight',rP/2,...
+                'MinPeakProminence',rP/2,'MinPeakDistance',numel(P{end})/5,...
+                'WidthReference','halfprom');
+            if numel(pks)
+                [~,idx_] = sort(abs(locs - (numel(P{end})-1)/2),'descend');
+                [~,rnk_locs] = sort(idx_,'ascend');
+                if numel(BkwdPkWdth) >= 5
+                    [~,idx_] = sort(abs(w - mean(BkwdPkWdth(max(1,numel(BkwdPkWdth)-10):end))),'descend');
+                else
+                    [~,idx_] = sort(w,'descend');
+                end
+                [~,rnk_w] = sort(idx_,'ascend');
+                if numel(BkwdPkWdth) >= 5
+                    [~,idx_] = sort(abs(p - mean(BkwdPkProminence(max(1,numel(BkwdPkProminence)-10):end))),'descend');
+                else
+                    [~,idx_] = sort(p,'descend');
+                end
+                [~,rnk_p] = sort(idx_,'ascend');
+                [~,pkIdx] = max(rnk_locs+0.5*rnk_w+rnk_p);
+                BkwdPkWdth = [BkwdPkWdth,w(pkIdx)];
+                BkwdPkProminence = [BkwdPkProminence,p(pkIdx)];
+                f01 = [f(locs(pkIdx)+1),f01];
+            else
+                f01 = [f(round(numel(P{end})/2)),f01];
+            end
             dbBackward = db;
             q.f01 = f01(1);
         end
         try
             zpls_amp2f01_backup = q.amp2f_poly__;
             num_data_points = numel(bias);
-            if range(f01) > 0.2e6  && num_data_points > 20
-                pf = polyfit(bias,f01/freqUnit,4);
-            elseif num_data_points > 10
+            if range(f01) > 300e6  && num_data_points > 20
+                pf = poyfit(bias,f01/freqUnit,4);
+            elseif range(f01) > q.t_zAmp2freqFreqSrchRng/4 && num_data_points >= 6
                 pf = polyfit(bias,f01/freqUnit,2);
             else
                 pf = polyfit(bias,f01/freqUnit,1);
-				if pf(1) < q.zpls_amp2f01(1)/5
+				if abs(pf(1)) < abs(q.zpls_amp2f01(1)/10)
 					% this might happen when zdc_amp = 0 is very close to the optimal point,
 					% here we assume the initial guess of M is resonable: not absurdly large
-					pf(1) = q.zpls_amp2f01(1)/5;
+					pf(1) = sign(pf(1))*abs(q.zpls_amp2f01(1)/10);
 				end
             end
             q.amp2f_poly__ = pf;
@@ -198,7 +262,7 @@ function varargout = zpls2f01(varargin)
             q.amp2f_poly__ = zpls_amp2f01_backup;
         end
         plotAndSave(bias,Frequency,P,f01);
-        if abs(f01_ini - f01(end)) > q.zpls_amp2fFreqRng && abs(f01_ini - f01(1)) > q.zpls_amp2fFreqRng
+        if max(abs(bias)) >= args.maxBias && abs(f01_ini - f01(end)) > q.zpls_amp2fFreqRng && abs(f01_ini - f01(1)) > q.zpls_amp2fFreqRng
             break;
         end
     end
@@ -210,7 +274,7 @@ function varargout = zpls2f01(varargin)
         end
         num_biases = numel(bias);
         all_freq = cell2mat(Frequency_);
-        f_ = min(all_freq):q.t_zdc2freqFreqStep:max(all_freq);
+        f_ = min(all_freq):q.t_zAmp2freqFreqStep:max(all_freq);
         num_freq = numel(f_);
         prob = NaN*ones(num_biases,num_freq);
         for ww = 1:num_biases

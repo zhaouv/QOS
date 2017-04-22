@@ -1,7 +1,7 @@
 function varargout = spectroscopy111_zpa(varargin)
 % spectroscopy111: qubit spectroscopy
 % bias qubit q1, drive qubit q2 and readout qubit q3,
-% q1, q2, q3 can be the same qubit or diferent qubits,
+% q1, q2, q3 can be the same qubit or different qubits,
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % the selelcted qubits can be listed with:
 % QS.loadSSettings('selected'); % QS is the qSettings object
@@ -37,7 +37,6 @@ if isempty(args.driveFreq)
 end
 
 X = op.mwDrive4Spectrum(driveQubit);
-X.Run();
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 R.state = 2;
@@ -50,14 +49,15 @@ x.deferCallbacks = true;
 y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.auxpara = X;
-y.callbacks ={@(x_)expParam.RunCallbacks(x),@(x_)x_.auxpara.Run()};
+y.auxpara = {x,X};
+y.callbacks ={@(x_)x.RunCallbacks(x),@(x_)x_.auxpara{2}.Run()};
 
 s1 = sweep(x);
 s1.vals = args.biasAmp;
 s2 = sweep(y);
 s2.vals = args.driveFreq;
 e = experiment();
+e.name = 'Spectroscopy';
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.datafileprefix = sprintf('%s%s[%s]', biasQubit.name, driveQubit.name, readoutQubit.name);

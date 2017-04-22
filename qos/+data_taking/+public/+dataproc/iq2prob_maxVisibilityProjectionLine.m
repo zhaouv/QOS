@@ -22,15 +22,10 @@ function [rPoint, ang, threshold, polarity] =...
     iq_raw_0_mean = mean(iq_raw_0);
 
     if ~auto
-        hf = figure('Units','characters',...
-                'NumberTitle','off','Name','QES | IQ Raw',...
-                'Color',[1,1,1],...
-                'DockControls','off');
-        ax1 = subplot(2,2,[1,3]);
-        ax2 = subplot(2,2,2);
-        ax3 = subplot(2,2,4);
-    %     set(ax2,'parent',hf,'PlotBoxAspectRatio',[1,1,1],...
-    %         'PlotBoxAspectRatio',[1,1,1],'FontSize',14);
+        hf = qes.ui.qosFigure('IQ Raw',true);
+        ax1 = subplot(2,2,[1,3],'Parent',hf);
+        ax2 = subplot(2,2,2,'Parent',hf);
+        ax3 = subplot(2,2,4,'Parent',hf);
     end
 
     threshold = NaN;

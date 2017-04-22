@@ -181,6 +181,18 @@ function CreateGUI(obj)
     set(obj.guiHandles.reWin,'Position',fpos);
     drawnow;
     
+    obj.tblRefreshTmr = timer('BusyMode','drop','ExecutionMode','fixedSpacing',...
+            'ObjectVisibility','off','Period',obj.tblRefreshPeriond,...
+            'TimerFcn',{@refreshTableData});
+    start(obj.tblRefreshTmr);
+    
+    function refreshTableData(~,~)
+        if isempty(obj.nodeName) || isempty(obj.nodeParent)
+            return;
+        end
+        set(obj.guiHandles.regTable,'Data',obj.TableData(obj.nodeName,obj.nodeParent));
+    end
+    
     function saveValue(src,entdata)
         if strcmp(entdata.PreviousData,entdata.EditData)
             return;

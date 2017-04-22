@@ -146,8 +146,8 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             lb = [-obj.awg.vpp/8, -obj.awg.vpp/8];
             ub = [obj.awg.vpp/8, obj.awg.vpp/8];
             xsol = qes.util.fminsearchbnd(f.fcn,[0,0],lb,ub,opts);
-            x = round(xsol(1))
-            y = round(xsol(2))
+            x = round(xsol(1));
+            y = round(xsol(2));
 			
 			if obj.debug
                 f([0,0]);
@@ -159,49 +159,31 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 bandwidth_backup = spcAnalyzerObj.bandwidth;
                 numpts_backup = spcAnalyzerObj.numpts;
 
-                spcAnalyzerObj.startfreq = obj.lo_freq - obj.sb_freq - 2e6;
-                spcAnalyzerObj.stopfreq = obj.lo_freq - obj.sb_freq + 2e6;
-                spcAnalyzerObj.bandwidth = 10e3;
-                spcAnalyzerObj.numpts = 401;
-                spcAmpBeforeCal_neg = spcAnalyzerObj.get_trace();
-                freq4plot = linspace(spcAnalyzerObj.startfreq,...
-                    spcAnalyzerObj.stopfreq,spcAnalyzerObj.numpts)/1e9;
+                obj.spc_amp_obj.freq = obj.lo_freq+obj.sb_freq;
+                obj.spc_amp_obj.Run()
+                bp=obj.spc_amp_obj.data;
+                obj.spc_amp_obj.freq = obj.lo_freq;
+                obj.spc_amp_obj.Run()
+                b0=obj.spc_amp_obj.data;
+                obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
+                obj.spc_amp_obj.Run()
+                bm=obj.spc_amp_obj.data;
                 
-                spcAnalyzerObj.startfreq = obj.lo_freq - 2e6;
-                spcAnalyzerObj.stopfreq = obj.lo_freq + 2e6;
-                spcAnalyzerObj.bandwidth = 10e3;
-                spcAnalyzerObj.numpts = 401;
-                spcAmpBeforeCal_zero = spcAnalyzerObj.get_trace();
-                freq4plot = [freq4plot, linspace(spcAnalyzerObj.startfreq,...
-                    spcAnalyzerObj.stopfreq,spcAnalyzerObj.numpts)/1e9];
-
-                spcAnalyzerObj.startfreq = obj.lo_freq + obj.sb_freq - 2e6;
-                spcAnalyzerObj.stopfreq = obj.lo_freq + obj.sb_freq + 2e6;
-                spcAnalyzerObj.bandwidth = 10e3;
-                spcAnalyzerObj.numpts = 401;
-                spcAmpBeforeCal_pos = spcAnalyzerObj.get_trace();
-                freq4plot = [freq4plot, linspace(spcAnalyzerObj.startfreq,...
-                    spcAnalyzerObj.stopfreq,spcAnalyzerObj.numpts)/1e9];
-
-                spcAmpBeforeCal = [spcAmpBeforeCal_neg, spcAmpBeforeCal_zero, spcAmpBeforeCal_pos];
-
                 f([x,y]);
-                spcAmpAfterCal_pos = spcAnalyzerObj.get_trace();
+                obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
+                obj.spc_amp_obj.Run()
+                am=obj.spc_amp_obj.data;
+                obj.spc_amp_obj.freq = obj.lo_freq+obj.sb_freq;
+                obj.spc_amp_obj.Run()
+                ap=obj.spc_amp_obj.data;
+                obj.spc_amp_obj.freq = obj.lo_freq;
+                obj.spc_amp_obj.Run()
+                a0=obj.spc_amp_obj.data;
                 
-                spcAnalyzerObj.startfreq = obj.lo_freq - 2e6;
-                spcAnalyzerObj.stopfreq = obj.lo_freq + 2e6;
-                spcAnalyzerObj.bandwidth = 10e3;
-                spcAnalyzerObj.numpts = 401;
-                spcAmpAfterCal = [spcAnalyzerObj.get_trace(), spcAmpAfterCal_pos];
+                freq4plot=[obj.lo_freq-obj.sb_freq, obj.lo_freq, obj.lo_freq+obj.sb_freq];
 
-                spcAnalyzerObj.startfreq = obj.lo_freq - obj.sb_freq - 2e6;
-                spcAnalyzerObj.stopfreq = obj.lo_freq - obj.sb_freq + 2e6;
-                spcAnalyzerObj.bandwidth = 10e3;
-                spcAnalyzerObj.numpts = 401;
-                spcAmpAfterCal = [spcAmpAfterCal, spcAmpAfterCal_pos];
-
-                figure(41);
-                plot(freq4plot,spcAmpBeforeCal,freq4plot,spcAmpAfterCal);
+                figure(42);
+                plot(freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
                 xlabel('Frequency(GHz)');
                 ylabel('Amplitude');
                 legend({'before calibration','after calibration'});
@@ -226,22 +208,89 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             IQ = qes.waveform.dc(pulse_ln);
             IQ.dcval = obj.iqAmp;
             IQ.fc = obj.lo_freq;
-%             IQ.sb_comp = [obj.iZero,obj.qZero]; % add by GM. 20170418
             
             IQ.df = obj.sb_freq/2e9;
             IQ.awg = awg_;
-            IQ.awgchnl = awgchnl_;
-            IQ.balance=1;
+            IQ.awgchnl = awgchnl_;     
             
-            p=qes.expParam(IQ,'balance');
-            p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
+%% Complex component method.            
+			IQ_op = copy(IQ);
+			IQ_op.df = -obj.sb_freq/2e9;
+            
+            function wv = calWv(comp_)
+				wv = IQ + comp_(1)*IQ_op+comp_(2)*1j*IQ_op;
+				wv.awg = awg_;
+				wv.awgchnl = awgchnl_;
+                wv.fc=IQ.fc;
+			end
+			
+			p = qes.expParam(@calWv);
+			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
             
             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
             f = qes.expFcn(p,obj.spc_amp_obj);
             
-            opts = optimset('Display','none','MaxIter',30,'TolX',0.0003,'TolFun',0.03,'PlotFcns',{@optimplotfval});
-            z = qes.util.fminsearchbnd(f.fcn,1.2,0.5,1.5,opts)
+%             function res=f2(a)
+%                 res=f(a(1)+1j*a(2));
+%             end
             
+            opts = optimset('Display','none','MaxIter',30,'TolX',0.01,'TolFun',0.1,'PlotFcns',{@optimplotfval});
+            z1 = qes.util.fminsearchbnd(f.fcn,[0,0],[-0.5,-0.5],[0.5,0.5],opts);
+            z=z1(1)+1j*z1(2);
+            
+            depress=f([0,0])-f(z1);
+            
+            if depress<0
+                z1 = qes.util.fminsearchbnd(f.fcn,[0,0],[-0.5,-0.5],[0.5,0.5],opts);
+                z=z1(1)+1j*z1(2);
+                
+                depress=f([0,0])-f(z1);
+                
+                if depress<0
+                    z=0;
+                    disp(['WARNING: Phase calibration failed, lo = ' num2str(obj.lo_freq) ', sb = ' num2str(obj.sb_freq)])
+                end
+            end
+            
+%% Another method
+%             precisionx = 0.1; %balance
+%             precisiony = 0.1; %phase
+% 			x = 0*1j;
+%             dx_=0;
+%             dy_=0;
+%             while abs(precisionx) > 1e-3 || abs(precisiony) > 1e-3 
+%                 l = f(x-precisionx);
+%                 c = f(x);
+%                 r = f(x+precisionx);
+%                 dx = precisionx*qes.util.minPos(l, c, r);
+%                 x = x + dx;
+%                 if sign(dx*dx_)<=0
+%                     precisionx=precisionx/2;
+%                 end
+%                 dx_=dx;
+%                 
+%                 l = f(x-1j*precisiony);
+%                 c = f(x);
+%                 r = f(x+1j*precisiony);
+%                 dy = precisiony*qes.util.minPos(l, c, r);
+%                 x = x + 1j*dy
+%                 if sign(dy*dy_)<=0
+%                     precisiony=precisiony/2;
+%                 end
+%                 dy_=dy;
+%             end
+%             
+%             z = x
+%% IQ balance method       
+%             p=qes.expParam(IQ,'balance');
+%             p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
+%             
+%             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
+%             f = qes.expFcn(p,obj.spc_amp_obj);
+%             
+%             opts = optimset('Display','none','MaxIter',20,'TolX',0.01,'TolFun',0.1,'PlotFcns',{@optimplotfval});
+%             z = qes.util.fminsearchbnd(f.fcn,1.2,0.5,1.5,opts)
+%             
 %             IQ.balance=z;
             
 
@@ -288,69 +337,10 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 %             q0=round(y)
 %             
 %             obj.iZero=i0;
-%             obj.qZero=q0;
-
- 
-%% Calibrate Phase.Wrong£¡ phase is not between I and Q but initial phase.           
-%             p = qes.expParam(IQ,'phase');
-% 			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
-%             
-%             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
-%             f = qes.expFcn(p,obj.spc_amp_obj);
-%             
-%             opts = optimset('Display','notify','MaxIter',30,'TolX',0.001,'TolFun',0.01,'PlotFcns',{@optimplotfval});
-%             x = qes.util.fminsearchbnd(f.fcn,0,-3,3,opts);
-            
-%% Previous methos. Wrong!            
-% 			IQ_op = copy(IQ);
-% 			IQ_op.df = -obj.sb_freq/2e9;
-%             
-%             function wv = calWv(comp_)
-% 				wv = IQ + comp_*IQ_op;
-% 				wv.awg = awg_;
-% 				wv.awgchnl = awgchnl_;
-% 			end
-% 			
-% 			p = qes.expParam(@calWv);
-% 			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
-%             
-%             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
-%             f = qes.expFcn(p,obj.spc_amp_obj);
-% 
-%             precisionx = 0.5;
-%             precisiony = 0.5;
-% 			x = 0*1j;
-%             dx_=0;
-%             dy_=0;
-%             while abs(precisionx) > 1e-3 || abs(precisiony) > 1e-3 
-%                 l = f(x+precisionx);
-%                 c = f(x);
-%                 r = f(x-precisionx);
-%                 dx = precisionx*qes.util.minPos(l, c, r);
-%                 x = x - dx;
-%                 
-%                 l = f(x+1j*precisiony);
-%                 c = f(x);
-%                 r = f(x-1j*precisiony);
-%                 dy = precisiony*qes.util.minPos(l, c, r);
-%                 x = x - 1j*dy;
-%                 
-%                 if sign(dx*dx_)<=0
-%                     precisionx=precisionx/2;
-%                 end
-%                 if sign(dy*dy_)<=0
-%                     precisiony=precisiony/2;
-%                 end
-%                 
-%                 dx_=dx;
-%                 dy_=dy;
-%             end
-%             
-%             p0 = precisionx+1j*precisiony
-            
+%             obj.qZero=q0;            
 %%			
 			if obj.debug
-                f(1);
+                f([0,0]);
                 instr = qes.qHandle.FindByClass('qes.hwdriver.sync.spectrumAnalyzer');
                 spcAnalyzerObj = instr{1};
 
@@ -359,18 +349,17 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 bandwidth_backup = spcAnalyzerObj.bandwidth;
                 numpts_backup = spcAnalyzerObj.numpts;
 
-                obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
-                obj.spc_amp_obj.Run()
-                bm=obj.spc_amp_obj.data;
                 obj.spc_amp_obj.freq = obj.lo_freq+obj.sb_freq;
                 obj.spc_amp_obj.Run()
                 bp=obj.spc_amp_obj.data;
                 obj.spc_amp_obj.freq = obj.lo_freq;
                 obj.spc_amp_obj.Run()
                 b0=obj.spc_amp_obj.data;
+                obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
+                obj.spc_amp_obj.Run()
+                bm=obj.spc_amp_obj.data;
                 
-                f(z)
-                
+                f(z1);
                 obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
                 obj.spc_amp_obj.Run()
                 am=obj.spc_amp_obj.data;
@@ -384,23 +373,25 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 freq4plot=[obj.lo_freq-obj.sb_freq, obj.lo_freq, obj.lo_freq+obj.sb_freq];
 
                 figure(42);
-                plot(freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-o');
+                plot(freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
                 xlabel('Frequency(GHz)');
                 ylabel('Amplitude');
                 legend({'after calibration zero','after calibration phase'});
+                if am-bm>0
+                    title('BAD!','color','r')
+                else
+                    title('GOOD!','color','g')
+                end
                 
+%                 spcAnalyzerObj.startfreq = obj.lo_freq-abs(obj.sb_freq) - 1e6;
+%                 spcAnalyzerObj.stopfreq = obj.lo_freq+abs(obj.sb_freq) + 1e6;
+%                 spcAnalyzerObj.bandwidth = 5e3;
+%                 spcAnalyzerObj.numpts = 4001;
+%                 spcAmpAfterCal = spcAnalyzerObj.get_trace();
+%                 
+%                 figure(43)
+%                 plot(linspace(spcAnalyzerObj.startfreq,spcAnalyzerObj.stopfreq,spcAnalyzerObj.numpts),spcAmpAfterCal);
                 
-                
-                spcAnalyzerObj.startfreq = obj.lo_freq-abs(obj.sb_freq) - 5e6;
-                spcAnalyzerObj.stopfreq = obj.lo_freq+abs(obj.sb_freq) + 5e6;
-                spcAnalyzerObj.bandwidth = 1e3;
-                spcAnalyzerObj.numpts = 4001;
-                spcAmpAfterCal = spcAnalyzerObj.get_trace();
-                
-                figure(43)
-                plot(linspace(spcAnalyzerObj.startfreq,spcAnalyzerObj.stopfreq,spcAnalyzerObj.numpts),spcAmpAfterCal);
-                
-
                 spcAnalyzerObj.startfreq = startfreq_backup;
                 spcAnalyzerObj.stopfreq = stopfreq_backup;
                 spcAnalyzerObj.bandwidth = bandwidth_backup;

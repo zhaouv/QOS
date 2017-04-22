@@ -1,7 +1,7 @@
 function varargout = spectroscopy111_zdc(varargin)
 % spectroscopy111: qubit spectroscopy
 % bias qubit q1, drive qubit q2 and readout qubit q3,
-% q1, q2, q3 can be the same qubit or diferent qubits,
+% q1, q2, q3 can be the same qubit or different qubits,
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % the selelcted qubits can be listed with:
 % QS.loadSSettings('selected'); % QS is the qSettings object
@@ -68,14 +68,10 @@ s1.vals = args.biasAmp;
 s2 = sweep(y);
 s2.vals = args.driveFreq;
 e = experiment();
+e.name = 'Spectroscopy';
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.datafileprefix = sprintf('[%s]_spect_zdc', readoutQubit.name);
-if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
-    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_Y; 
-else
-    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
-end
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;
@@ -87,5 +83,6 @@ e.notes = args.notes;
 e.addSettings({'fcn','args'},{fcn_name,args});
 e.Run();
 varargout{1} = e;
+data_taking.public.util.setZDC(biasQubit,biasQubit.zdc_amp);
 end
 

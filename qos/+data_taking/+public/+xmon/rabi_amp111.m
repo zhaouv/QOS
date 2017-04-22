@@ -1,7 +1,7 @@
 function varargout = rabi_amp111(varargin)
 % rabi_amp111: Rabi oscillation by changing the pi pulse amplitude
 % bias qubit q1, drive qubit q2 and readout qubit q3,
-% q1, q2, q3 can be the same qubit or diferent qubits,
+% q1, q2, q3 can be the same qubit or different qubits,
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % the selelcted qubits can be listed with:
 % QS.loadSSettings('selected'); % QS is the qSettings object

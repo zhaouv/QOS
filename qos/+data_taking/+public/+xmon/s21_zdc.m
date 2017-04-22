@@ -44,7 +44,7 @@ function varargout = s21_zdc(varargin)
     s2 = sweep(y);
     s2.vals = args.freq;
     e = experiment();
-    e.name = 's21-zdc';
+    e.name = 'S21-ZDC';
     e.sweeps = [s1,s2];
     e.measurements = R;
     e.datafileprefix = sprintf('%s_s21_zdc', q.name);
@@ -59,4 +59,5 @@ function varargout = s21_zdc(varargin)
     e.addSettings({'fcn','args'},{fcn_name,args});
     e.Run();
     varargout{1} = e;
+    data_taking.public.util.setZDC(q,q.zdc_amp);
 end

@@ -13,7 +13,7 @@ function varargout = iqChnl(varargin)
 % Yulin Wu, 2017
 
     fcn_name = 'data_taking.public.calibration.iqChnl'; % this and args will be saved with data
-    args = qes.util.processArgs(varargin,{'gui',false,'save',true});
+    args = qes.util.processArgs(varargin,{'debug',false,'avgnum',1,'gui',false,'save',true});
     try
         QS = qes.qSettings.GetInstance();
     catch
@@ -26,14 +26,15 @@ function varargout = iqChnl(varargin)
     awgchnls = s.chnls;
     spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer','name',s.spc_analyzer);
     spcAmpObj = qes.measurement.specAmp(spcAnalyzer);
-    spcAmpObj.avgnum = 2;
+    spcAmpObj.avgnum = args.avgnum;
     
     mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource','name',s.lo_source);
     loSource = mwSrc.GetChnl(s.lo_chnl);
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
-%     Calibrator.q_delay = s.q_delay;
-
+    Calibrator.debug = args.debug;
+    Calibrator.pulse_ln = s.pulse_ln;
+    
     x = qes.expParam(Calibrator,'lo_freq');
     y = qes.expParam(Calibrator,'sb_freq');
     y_s = qes.expParam(Calibrator,'pulse_ln');
@@ -44,8 +45,8 @@ function varargout = iqChnl(varargin)
     s1 = qes.sweep(x);
 
     s1.vals = loFreq;
-    s2 = sweep({y_s,y});
-    ln = awgObj.samplingRate./sbFreq;
+    s2 = qes.sweep({y_s,y});
+    ln = awgObj.samplingRate./abs(sbFreq);
     ln = ceil(ln);
 %     for ii = 1:ln
 %         d = ceil(ln(ii)) - ln(ii);
@@ -56,20 +57,21 @@ function varargout = iqChnl(varargin)
 %     end
     ln(ln>30e3) = 30e3;
     s2.vals = {ln,sbFreq};
-    e = experiment();
+    e = qes.experiment();
     e.sweeps = [s1,s2];
 
     e.measurements = Calibrator;
     e.datafileprefix = 'iqChnlCal';
     e.savedata = true;
     e.addSettings({'fcn','args'},{fcn_name,args});
+    e.plotfcn = [];
     e.Run();
     data = cell2mat(e.data{1});
     iZeros = [data.iZeros];
     qZeros = [data.qZeros];
     sbCompensation = [data.sbCompensation];
-    iZeros=unique(iZeros);
-    qZeros=unique(qZeros);
+    iZeros=iZeros(1:numel(loFreq));
+    qZeros=qZeros(1:numel(loFreq));
     sbCompensation = reshape(sbCompensation,[numel(loFreq),numel(sbFreq)]); % Row is loFreq, Column is sbFreq
     iqAmp = data(1).iqAmp;
     loPower = data(1).loPower;
@@ -80,8 +82,14 @@ function varargout = iqChnl(varargin)
         if isempty(dir(dataFileDir))
             mkdir(dataFileDir);
         end
-        save(fullfile(timeStamp,datestr(now,'yymmTDDHHMMSS')),...
+        filename=fullfile(dataFileDir,datestr(timeStamp,'yymmDDTHHMMSS'));
+        save(filename,...
             'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
+        figure;plot(loFreq,iZeros,'-o',loFreq,qZeros,'-o','linewidth',2);legend('iZeros','qZeros');xlabel('LoFreq');ylabel('Amp')
+        saveas(gcf,[filename '_Zeros.fig']);
+        figure;subplot(2,1,1);surface(sbFreq,loFreq,real(sbCompensation),'edgecolor','none');ylabel('LoFreq');xlabel('SbFreq');title('Real');colorbar
+        subplot(2,1,2);surface(sbFreq,loFreq,imag(sbCompensation),'edgecolor','none');ylabel('LoFreq');xlabel('SbFreq');title('Image');colorbar
+        saveas(gcf,[filename '_Sb.fig']);
     end
     varargout{1} = e.data{1};
 end

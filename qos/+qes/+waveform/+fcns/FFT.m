@@ -31,14 +31,5 @@ function v = FFT(obj,f)
 %         v = interp1(UPSAMPLE*linspace(-0.5,0.5,NFFT),vi,f,'spline');
         v = interp1(f_,vi,f,'spline');
     end
- figure();plot(f_,vi,f,v);
-    
-%     v = g(f);
-    
-    figure();plot(real(fftshift(real(vi))));
-%    hold on;plot(real(fftshift(v)));plot(imag(fftshift(v)));
-    
-    figure();plot(real(ifft(ifftshift(vi))));
- hold on;plot(real(ifft(ifftshift(v))));plot(imag(ifft(ifftshift(v))));
     
 end
