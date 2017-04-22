@@ -16,7 +16,7 @@ function setZDC(qubits,dcLevel)
         end
         dcSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.z_dc.instru);
         dcChnl = dcSrc.GetChnl(q.channels.z_dc.chnl);
-        if ~isempty(dcLevel)
+        if nargin == 2 && ~isempty(dcLevel)
             dcChnl.dcval = dcLevel;
         else
             dcChnl.dcval = q.zdc_amp;
