@@ -9,9 +9,11 @@ QS = qSettings.GetInstance('D:\settings');
 % has beens changed, a reconfiguration will update the changes to the
 % hardware.
 ustcaddaObj = ustcadda_v1.GetInstance();
+%%
+ustcaddaObj.close()
 %% run all channels
-ustcaddaObj.runReps = 3e4;
-for ii = 1:40
+ustcaddaObj.runReps = 10e4;
+for ii = 1:16
     ustcaddaObj.SendWave(ii,[zeros(1,4000),65535*ones(1,4000)]);
 end
 ustcaddaObj.Run(false);
