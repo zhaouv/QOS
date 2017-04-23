@@ -14,7 +14,6 @@ classdef (Sealed = true) gaussian < qes.waveform.waveform
                 ln = 0;
             end
             obj = obj@qes.waveform.waveform(ln);
-            obj.iq = true;
         end
     end
     methods (Static = true, Hidden=true)

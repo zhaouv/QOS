@@ -69,6 +69,7 @@ s1.vals = args.biasAmp;
 s2 = sweep({y,y_s});
 s2.vals = {args.time,args.time};
 e = experiment();
+e.name = 'T1';
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.plotfcn = @qes.util.plotfcn.T1;

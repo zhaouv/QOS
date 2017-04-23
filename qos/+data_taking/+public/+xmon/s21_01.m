@@ -42,6 +42,7 @@ function varargout = s21_01(varargin)
     s1 = sweep(x);
     s1.vals = args.freq;
     e = experiment();
+    e.name = 'S21 - |0>,|1>';
     e.sweeps = s1;
     e.measurements = R;
     e.showctrlpanel = false;

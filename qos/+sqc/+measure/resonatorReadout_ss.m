@@ -11,7 +11,6 @@ classdef resonatorReadout_ss < sqc.measure.resonatorReadout
         function obj = resonatorReadout_ss(q)
             obj = obj@sqc.measure.resonatorReadout(q);
             obj.numericscalardata = true;
-            obj.name = ['P',obj.stateNames{obj.state}];
         end
         function set.state(obj,val)
 			val = round(val);
@@ -20,6 +19,7 @@ classdef resonatorReadout_ss < sqc.measure.resonatorReadout
 						'state should be an integer between 1 and %d.',2^obj.num_qs));
             end
             obj.state = val;
+            obj.name = ['P',obj.stateNames{obj.state}];
         end
         function Run(obj)
 			Run@sqc.measure.resonatorReadout(obj);

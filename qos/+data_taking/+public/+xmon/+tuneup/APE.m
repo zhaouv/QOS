@@ -31,10 +31,11 @@ function varargout = APE(varargin)
 	XY2 = op.XY2p(q,0);
 	I = (X2m*X2p)^args.numI;
     function proc = procFactory(phase)
-		X2.phase = phase;
+		XY2.phase = phase;
         proc = XY2*I*X2p;
     end
 	R = measure.resonatorReadout_ss(q);
+    R.state = 2;
 	R.delay = 2*X2p.length+I.length+3*X2p.gate_buffer;
 
     x = expParam(@procFactory);

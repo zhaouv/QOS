@@ -51,9 +51,9 @@ function varargout = spin_echo_dz(varargin)
     s2 = sweep({y,y_s});
     s2.vals = {args.time,args.time};
     e = experiment();
+    e.name = 'Spin Echo(Detune by Z)';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    e.name = 'spin_echo_dz';
     e.datafileprefix = sprintf('%s',q.name);
     if ~args.gui
         e.showctrlpanel = false;

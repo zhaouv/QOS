@@ -14,6 +14,8 @@ classdef (Sealed = true)RegEditor < handle
         guiHandles
         
         tblRefreshTmr
+        
+        keyAnnotation
     end
     properties (Constant = true, GetAccess = private)
         tblRefreshPeriond = 10
@@ -65,7 +67,61 @@ classdef (Sealed = true)RegEditor < handle
                 end
                 obj.sessionList = sessionList_;
             end
+            
+            anno = struct();
+            % load Q object key annotation
+            anno.qobject = [];
+            finfo = dir(fullfile(obj.qs.root,'_annotation','qobject'));
+            for ii = 1:numel(finfo)
+                if strcmp(finfo(ii).name,'.') || strcmp(finfo(ii).name,'..')...
+                        || ~finfo(ii).isdir
+                    continue;
+                end
+                try
+                    finfo_ = dir(fullfile(obj.qs.root,'_annotation','qobject',finfo(ii).name));
+                    for jj =  1:numel(finfo_)
+                        if finfo_(jj).isdir || ~qes.util.endsWith(finfo_(jj).name,'.key')
+                            continue;
+                        end
+                        s = qes.util.loadSettings(...
+                            fullfile(obj.qs.root,'_annotation','qobject',finfo(ii).name),finfo_(jj).name(1:end-4));
+                        if isempty(s)
+                            continue;
+                        else
+                            anno.qobject.(finfo(ii).name).(finfo_(jj).name(1:end-4)) = s;
+                        end
+                    end
+                catch ME
+                    warning(getReport(ME));
+                end
+            end
+            % load hardware key annotation
+            anno.hardware = [];
+            finfo = dir(fullfile(obj.qs.root,'_annotation','hardware'));
+            for ii = 1:numel(finfo)
+                if strcmp(finfo(ii).name,'.') || strcmp(finfo(ii).name,'..') ||...
+                       finfo(ii).isdir || ~qes.util.endsWith(finfo(ii).name,'.key')
+                    continue;
+                end
+                try
+                    s = qes.util.loadSettings(...
+                        fullfile(obj.qs.root,'_annotation','hardware'),finfo(ii).name(1:end-4));
+                    if isempty(s)
+                        continue;
+                    else
+                        anno.qobject.(finfo(ii).name(1:end-4)) = s;
+                    end
+                catch ME
+                    warning(getReport(ME));
+                end
+            end
+            obj.keyAnnotation = anno;
+            
             CreateGUI(obj);
+%             %%% to deal with a bug in MATLAB 2016b
+%             close(obj.guiHandles.reWin);
+%             CreateGUI(obj);
+%             %%%
         end
         function createUITree(obj)
             warning('off');
@@ -156,8 +212,10 @@ classdef (Sealed = true)RegEditor < handle
                     isvalid(obj.guiHandles.reWin)
                 close(obj.guiHandles.reWin);
             end
-            stop(obj.tblRefreshTmr);
-            delete(obj.tblRefreshTmr);
+            if ~isempty(obj.tblRefreshTmr)
+                stop(obj.tblRefreshTmr);
+                delete(obj.tblRefreshTmr);
+            end
         end
     end
     methods (Access = private)

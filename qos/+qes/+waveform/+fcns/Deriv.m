@@ -5,7 +5,7 @@ function Wv = Deriv(obj,dt)
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    obj = deepcopy(obj); % do make a copy!
+    obj = copy(obj); % do make a copy!
     if nargin == 1
         dt = 0.1;
     end
