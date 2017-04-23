@@ -59,5 +59,5 @@ function varargout = s21_zdc(varargin)
     e.addSettings({'fcn','args'},{fcn_name,args});
     e.Run();
     varargout{1} = e;
-    data_taking.public.util.setZDC(q,q.zdc_amp);
+    data_taking.public.util.setZDC(q);
 end

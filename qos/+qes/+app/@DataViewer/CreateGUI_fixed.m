@@ -34,7 +34,7 @@ function CreateGUI_fixed(obj)
     handles.dataviewwin = figure('Units','characters','MenuBar','none',...
         'ToolBar','none','NumberTitle','off','Name','QOS | Data Viewer',...
         'Resize','off','HandleVisibility','callback','Color',BkGrndColor,...
-        'DockControls','off');
+        'DockControls','off','Visible','off');
 	warning('off');
     jf = get(handles.dataviewwin,'JavaFrame');
     jf.setFigureIcon(javax.swing.ImageIcon(...
@@ -532,6 +532,7 @@ function CreateGUI_fixed(obj)
     function OpenFolderCallback(src,entdata)
         winopen( get(handles.DataFolder,'String'))
     end
+    set(handles.dataviewwin,'Visible','on');
 end
 
 

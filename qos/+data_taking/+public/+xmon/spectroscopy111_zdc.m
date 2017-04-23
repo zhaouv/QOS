@@ -83,6 +83,6 @@ e.notes = args.notes;
 e.addSettings({'fcn','args'},{fcn_name,args});
 e.Run();
 varargout{1} = e;
-data_taking.public.util.setZDC(biasQubit,biasQubit.zdc_amp);
+data_taking.public.util.setZDC(biasQubit);
 end
 

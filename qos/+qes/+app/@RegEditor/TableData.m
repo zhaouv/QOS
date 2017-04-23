@@ -7,33 +7,61 @@ function table_data = TableData(obj,name,parentName)
     switch parentName
         case 'hardware settings'
             s = obj.qs.loadHwSettings(name);
+            anno = struct();
+            if isfield(obj.keyAnnotation.hardware.(s.type),'comm')
+                anno = obj.keyAnnotation.hardware.comm;
+            end
+            if isfield(s,'name') && isfield(obj.keyAnnotation.hardware,s.name)
+                fname = fieldnames(obj.keyAnnotation.hardware.(s.name));
+                for ii = 1:numel(fname)
+                    anno.(fname{ii}) = obj.keyAnnotation.hardware.(s.name).(fname{ii});
+                end
+            end 
         case 'session settings'
             s = obj.qs.loadSSettings(name);
+            anno = struct();
+            if isfield(s, 'type') && isfield(obj.keyAnnotation.qobject,s.type)
+                if isfield(obj.keyAnnotation.qobject.(s.type),'comm')
+                    anno = obj.keyAnnotation.qobject.(s.type).comm;
+                end
+                if isfield(s, 'class') && isfield(obj.keyAnnotation.qobject.(s.type),s.class)
+                    fname = fieldnames(obj.keyAnnotation.qobject.(s.type).(s.class));
+                    for ii = 1:numel(fname)
+                        anno.(fname{ii}) = obj.keyAnnotation.qobject.(s.type).(s.class).(fname{ii});
+                    end
+                end
+            end 
         otherwise
             throw(MException('QOS_RegEditor:unrecognizedInput',...
                 '%s is an unrecognized parentName option.', parentName));
     end
-    
-    table_data = Struct2TableData(s,'');
+    table_data = Struct2TableData(s,anno,'');
 end
 
-function table_data = Struct2TableData(data,prefix)
+function table_data = Struct2TableData(data,anno,prefix)
     table_data = {};
     fn = fieldnames(data);
     for ww = 1:numel(fn)
         Value = data.(fn{ww});
         if isempty(Value)
-            table_data = [table_data;{[prefix,fn{ww}],''}];
+            key = [prefix,fn{ww}];
+            key_ = strrep(key,'.','__');
+            if isfield(anno,key_)
+                annotation = anno.(key_);
+            else
+                annotation = '';
+            end
+            table_data = [table_data;{key,'',annotation}];
         elseif isstruct(Value)
 			numElements = numel(Value);
 			if numElements == 1
-                table_data_ = Struct2TableData(Value,[prefix,fn{ww},'.']);
+                table_data_ = Struct2TableData(Value,anno,[prefix,fn{ww},'.']);
                 table_data = [table_data;table_data_];
 			else
 				table_data_ = {};
 				for ii = 1:numel(Value)
 					table_data_ = [table_data_;...
-						Struct2TableData(Value(ii),[prefix,fn{ww},...
+						Struct2TableData(Value(ii),anno,[prefix,fn{ww},...
 						'(',num2str(ii,'%0.0f'),').'])];
 				end
 				table_data = [table_data;table_data_];
@@ -43,16 +71,31 @@ function table_data = Struct2TableData(data,prefix)
 			table_data_ = '';
 			for uu = 1:numElements
 				if isstruct(Value{uu})
-					table_data_ = [table_data_; Struct2TableData(Value{uu},...
+					table_data_ = [table_data_; Struct2TableData(Value{uu},anno,...
 						[prefix,fn{ww},'{',num2str(uu,'%0.0f'),'}.'])];
-				else
-					table_data_ = [table_data_;...
-						[{[prefix,fn{ww},'{',num2str(uu,'%0.0f'),'}']},value2Str(Value{uu})]];
+                else
+                    key = [prefix,fn{ww},'{',num2str(uu,'%0.0f'),'}'];
+                    key_ = strrep(key,'.','__');
+                    if isfield(anno,key_)
+                        annotation = anno.(key_);
+                    else
+                        annotation = '';
+                    end
+% 					table_data_ = [table_data_;...
+% 						[{key},value2Str(Value{uu})]];
+                    table_data_ = [table_data_;{key,value2Str(Value{uu}),annotation}];
                 end
             end
 			table_data = [table_data;table_data_];
-		else
-			table_data = [table_data;{[prefix,fn{ww}],value2Str(Value)}];
+        else
+            key = [prefix,fn{ww}];
+            key_ = strrep(key,'.','__');
+            if isfield(anno,key_)
+                annotation = anno.(key_);
+            else
+                annotation = '';
+            end
+			table_data = [table_data;{[prefix,fn{ww}],value2Str(Value),annotation}];
 		end
     end
 end
