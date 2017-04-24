@@ -18,6 +18,7 @@ function varargout = correctf01byRamsey(varargin)
 % arguments order not important as long as they form correct pairs.
     
     % Yulin Wu, 2017/4/14
+    % resolution low, not recommended, use correctf01bySpc instead
     
     MAXFREQDRIFT = 10e6;
     DELAYTIMERANGE = 4e-6;

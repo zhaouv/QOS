@@ -123,11 +123,6 @@ e.sweeps = [s1,s2];
 e.measurements = R;
 e.name = 'rabi_amp111';
 e.datafileprefix = sprintf('[%s]_rabi', readoutQubit.name);
-if numel(s1.vals{1})>1 && numel(s2.vals{1})>1% add by GM, 20170413
-    e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp; 
-else
-    e.plotfcn = @util.plotfcn.OneMeasComplex_1D_Amp;
-end
 
 if ~args.gui
     e.showctrlpanel = false;

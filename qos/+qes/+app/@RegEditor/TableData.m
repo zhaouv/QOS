@@ -8,13 +8,13 @@ function table_data = TableData(obj,name,parentName)
         case 'hardware settings'
             s = obj.qs.loadHwSettings(name);
             anno = struct();
-            if isfield(obj.keyAnnotation.hardware.(s.type),'comm')
+            if isfield(obj.keyAnnotation.hardware,'comm')
                 anno = obj.keyAnnotation.hardware.comm;
             end
-            if isfield(s,'name') && isfield(obj.keyAnnotation.hardware,s.name)
-                fname = fieldnames(obj.keyAnnotation.hardware.(s.name));
+            if isfield(obj.keyAnnotation.hardware,name)
+                fname = fieldnames(obj.keyAnnotation.hardware.(name));
                 for ii = 1:numel(fname)
-                    anno.(fname{ii}) = obj.keyAnnotation.hardware.(s.name).(fname{ii});
+                    anno.(fname{ii}) = obj.keyAnnotation.hardware.(name).(fname{ii});
                 end
             end 
         case 'session settings'

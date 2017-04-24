@@ -86,7 +86,7 @@ classdef USTCDAC < handle
                 else
                    error('USTCDA:OpenError','Open DAC failed!');
                 end
-%                 obj.Init();
+                 obj.Init();
             end
         end
          

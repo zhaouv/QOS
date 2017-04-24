@@ -91,10 +91,12 @@ function varargout = xyGateAmpTuner(varargin)
 		ax = axes('parent',h);
 		plot(ax,amps,P,'-b');
 		hold(ax,'on');
-		plot(ax,[gateAmp,gateAmp],[min(P),maxP],'--r');
+        ylim = get(ax,'YLim');
+		plot(ax,[gateAmp,gateAmp],ylim,'--r');
 		xlabel(ax,'xy drive amplitude');
 		ylabel(ax,'P|1>');
-        legend(ax,{'data',sprintf('%s gate amplitude',args.gateTyp)})
+        legend(ax,{'data',sprintf('%s gate amplitude',args.gateTyp)});
+        set(ax,'YLim',ylim);
 	end
 	
     if args.save

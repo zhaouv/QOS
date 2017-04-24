@@ -1,12 +1,17 @@
-classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
-	properties (Dependent = true) % 20170414
+classdef signalCore5511a < qes.hwdriver.icinterface_compatible
+    % icinterface compatible interface for signalCore 5511a mw source
+    
+% Copyright 2017 Yulin Wu, USTC, China
+% mail4ywu@gmail.com/mail4ywu@icloud.com
+
+	properties (Dependent = true) 
         numChnls
     end
 	properties (SetAccess = private)
 		freqlimits
         powerlimits
     end
-    properties (SetAccess = private, GetAccess = private) % Yulin Wu
+    properties (SetAccess = private, GetAccess = private)
 		chnlName
     end
 	
@@ -52,7 +57,7 @@ classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinter
 			calllib('sc5511a','sc5511a_close_device',devicehandle); 
 		end
     end
-    methods (Access = private) % Yulin Wu
+    methods (Access = private)
         function obj = signalCore5511a()
 			QS = qes.qSettings.GetInstance();
             s = QS.loadHwSettings('signalCore5511a_bknd');
@@ -79,7 +84,7 @@ classdef signalCore5511a < qes.hwdriver.icinterface_compatible % extends icinter
     end
     
     methods (Static = true)
-        function obj = GetInstance() % Yulin Wu
+        function obj = GetInstance()
             persistent objlst;
             if isempty(objlst) || ~isvalid(objlst)
                 obj = qes.hwdriver.sync.signalCore5511a();

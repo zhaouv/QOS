@@ -1,4 +1,4 @@
-function [rPoint, ang, threshold, polarity] =...
+function [rPoint, ang, threshold, polarity, hf] =...
 			iq2prob_maxVisibilityProjectionLine(iq_raw_0,iq_raw_1,auto)
 % iq2prob_maxVisibilityProjectionLine: finds the raw iq
 % projection line which produces the maximum state probability visibility
@@ -26,6 +26,8 @@ function [rPoint, ang, threshold, polarity] =...
         ax1 = subplot(2,2,[1,3],'Parent',hf);
         ax2 = subplot(2,2,2,'Parent',hf);
         ax3 = subplot(2,2,4,'Parent',hf);
+    else
+        hf = [];
     end
 
     threshold = NaN;

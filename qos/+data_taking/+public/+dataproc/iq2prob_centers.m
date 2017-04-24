@@ -1,10 +1,10 @@
-function [center0, center1] =...
+function [center0, center1, hf] =...
 			iq2prob_centers(iq_raw_0,iq_raw_1,auto)
-% iq2prob_demodCenters: finds raw iq centers(where probability of distribution is maximum)
+% iq2prob_centers: finds raw iq centers(where probability of distribution is maximum)
 
 % Yulin Wu, 2017
 
-    [~, ang, ~, ~] =... 
+    [~, ang, ~, ~,hf] =... 
 		data_taking.public.dataproc.iq2prob_maxVisibilityProjectionLine(iq_raw_0,iq_raw_1,auto);
     iq_raw_0_ = iq_raw_0*exp(-1j*ang);
     iq_raw_1_ = iq_raw_1*exp(-1j*ang);
