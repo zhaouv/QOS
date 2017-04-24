@@ -26,17 +26,50 @@ function varargout = correctf01bySpc(varargin)
     args = qes.util.processArgs(varargin,{'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    f = q.f01-3*q.t_spcFWHM_est:q.t_spcFWHM_est/10:q.f01+3*q.t_spcFWHM_est;
+    f = q.f01-5*q.t_spcFWHM_est:q.t_spcFWHM_est/10:q.f01+5*q.t_spcFWHM_est;
     e = spectroscopy1_zpa('qubit',q,'driveFreq',f,'save',false,'gui',false);
     P = e.data{1};
+    
+    % to deal with a bug(firt point always wrong), may not be needed in future versions
+    f = f(2:end);
+    P = P(2:end);
+    
     rP = range(P);
     if rP < 0.15
         throw(MException('QOS_correctf01bySpc:visibilityTooLow',...
 				'visibility(%0.2f) too low, run correctf01bySpc at low visibility might produce wrong result, thus not supported.', rP));
     end
-    [~,idx] = max(smooth(P,5));
-    f01 = f(idx);
+
+    [pks,locs,~,p] = findpeaks(smooth(P,3),'SortStr','descend','MinPeakHeight',rP/2,...
+        'MinPeakProminence',rP/2,'MinPeakDistance',numel(P)/5,...
+        'WidthReference','halfprom');
+    if numel(pks)
+        [~,idx_] = sort(abs(locs - (numel(P)-1)/2),'descend');
+        [~,rnk_locs] = sort(idx_,'ascend');
+        [~,idx_] = sort(p,'descend');
+        [~,rnk_p] = sort(idx_,'ascend');
+        [~,pkIdx] = max(0.5*rnk_locs+rnk_p);
+        f01 = f(locs(pkIdx));
+    else
+        throw(MException('QOS_correctf01bySpc:noPeaksFound',...
+            'no peaks found.'));
+    end
     
+%     [~,idx] = max(smooth(P,5));
+%     f01 = f(idx);
+    
+    if args.gui
+        h = qes.ui.qosFigure(sprintf('Correct f01 by Spectroscopy | %s', q.name),true);
+		ax = axes('parent',h);
+		plot(ax,f,P,'-b');
+		hold(ax,'on');
+        ylim = get(ax,'YLim');
+		plot(ax,[f01,f01],ylim,'--r');
+		xlabel(ax,'xy drive frequency(Hz)');
+		ylabel(ax,'P|1>');
+        legend(ax,{'data',sprintf('f01:%0.5fGHz',f01/1e9)});
+        set(ax,'YLim',ylim);
+    end
 	if args.save
         QS = qes.qSettings.GetInstance();
         QS.saveSSettings({q.name,'f01'},f01);

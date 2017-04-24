@@ -76,6 +76,8 @@ function hwobj = hwCreator(s)
                             s.interface.chnlMap);
                     case {'sync.signalCore5511a'}
                         interfaceobj = feval(str2func(['@qes.hwdriver.', s.interface.class, '.GetInstance']));
+                    case {'sync.simuMwSrc'}
+                        interfaceobj = feval(str2func(['@qes.hwdriver.', s.interface.class, '.GetInstance']));
                     otherwise
                         error('HardwareCreator:UnrecognizedHaredwareSettings','unrecognized ''interface'' class ''%s''', s.interface.class);
                 end

@@ -8,7 +8,7 @@ function CreateGUI(obj)
 
     BkGrndColor = [0.941   0.941   0.941];
     if largeSreenSize
-        winSize = [0,0,140,70];
+        winSize = [0,0,150,70];
     else
         winSize = [0,0,105,45];
     end
@@ -150,7 +150,7 @@ function CreateGUI(obj)
          'ColumnWidth',{170,170,500},...
          'RowName',[],...
          'CellEditCallback',@saveValue,...
-         'Position',[210,5,500,910]);
+         'Position',[210,5,560,910]);
      
     if ~isempty(obj.sessionList)
         set(obj.guiHandles.SelectSession,'String',obj.sessionList,'Enable','on');

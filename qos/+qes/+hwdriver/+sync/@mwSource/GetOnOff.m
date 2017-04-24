@@ -15,7 +15,7 @@ function On = GetOnOff(obj,chnl)
             else
                 On = false;
             end
-		case {'sc5511a'}
+		case {'sc5511a','simulatedmwsrc'}
 			On = obj.interfaceobj.getOnOff(chnl);
         otherwise
              error('DCSource:GetOnOff', ['Unsupported instrument: ',TYP]);

@@ -50,7 +50,7 @@ function varargout = iq2prob_01(varargin)
     end
     iq_raw_0 = iq_raw_0(:).';
 
-    [center0, center1] =... 
+    [center0, center1, hf] =... 
 		data_taking.public.dataproc.iq2prob_centers(iq_raw_0,iq_raw_1,~args.gui);
 
     if args.save
@@ -61,6 +61,7 @@ function varargout = iq2prob_01(varargin)
         % QS.saveSSettings({q.name,'r_iq2prob_01angle'},ang);
         % QS.saveSSettings({q.name,'r_iq2prob_01threshold'},threshold);
         % QS.saveSSettings({q.name,'r_iq2prob_01polarity'},num2str(polarity,'%0.0f'));
+        if ~isempty(hf) && isvalid()
     end
 
 	varargout{1} = center0;
