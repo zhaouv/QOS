@@ -69,6 +69,10 @@ classdef ustc_ad_v1 < qes.hwdriver.hardware
 		
 		function delete(obj)
 			obj.ustcaddaObj.ReleaseADChnls(obj.chnlMap);
+            if isempty(obj.ustcaddaObj.adTakenChnls) &&...
+                    isempty(obj.ustcaddaObj.daTakenChnls)
+                obj.ustcaddaObj.delete();
+            end
 		end
     end
     
