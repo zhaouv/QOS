@@ -1,35 +1,35 @@
 % bring up qubits one by one
 % GM, 2017/4/14
-%%
 import qes.*
 import qes.hwdriver.sync.*
 QS = qSettings.GetInstance('D:\Dropbox\MATLAB GUI\USTC Measurement System\settings');
 QS.SU('Ming');
 QS.SS('s170405');
 QS.CreateHw();
+ustcaddaObj = ustcadda_v1.GetInstance();
 import data_taking.public.util.*
 import data_taking.public.xmon.*
 qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-dips = [6.9017 6.7981 6.8634 6.334 6.7099 6.6174 6.6578  6.6791 6.6361 6.5638]*1e9; % by qubit index
+dips = [6.9017 6.7981 6.8634 6.334 6.7099 6.6174 6.6578  6.6791 6.6371 6.5638]*1e9; % by qubit index
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
 
-amps=[logspace(log10(2000),log10(30000),41)];
-for ii = 2
+amps=[logspace(log10(3000),log10(30000),41)];
+for ii = 8
 s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
       'notes',['RT attenuation:23dB; ' qubits{ii}],'gui',true,'save',true);
 end
 %%
 
-for II=2
+for II=8
 s21_zdc('qubit', qubits{II},...
       'freq',[dips(II)-2e6:0.1e6:dips(II)+1e6],'amp',[-3e4:1e3:3e4],...
       'notes',[qubits{II}],'gui',true,'save',true);
 end
 
 %%
-for ii=2:2
+for ii=8
 s21_zpa('qubit', qubits{ii},...
-      'freq',[dips(ii)-2e6:0.2e6:dips(ii)+1e6],'amp',[-3e4:1e3:3e4],...
+      'freq',[dips(ii)-1e6:0.1e6:dips(ii)+2e6],'amp',[-3e4:3e3:3e4],...
       'notes',[qubits{ii} ', S21 vs Z pulse'],'gui',true,'save',true);
 end
 
@@ -40,11 +40,11 @@ end
 
 %% spectroscopy1_zpa_s21
 
-for ii=2:2
+for ii=8
     QS.saveSSettings({qubits{ii},'spc_driveAmp'},5000)
     spectroscopy1_zpa_s21('qubit',qubits{ii},...
-       'biasAmp',[-1500:500:1500],'driveFreq',[5.7e9:2e6:6e9],...
-       'r_avg',1000,'notes','zdc=3000','gui',true,'save',true);
+       'biasAmp',[-3e4:2e3:3e4],'driveFreq',[5e9:2e6:5.5e9],...
+       'r_avg',1000,'notes','','gui',true,'save',true);
 end
 %%
 amp=5e3;
