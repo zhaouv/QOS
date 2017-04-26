@@ -12,7 +12,7 @@ classdef ustc_ad_v1 < qes.hwdriver.hardware
 		samplingRate
     end
     properties (Dependent = true)
-        delayStep
+        delayStep % unit: DA sampling points
     end
     properties (SetAccess = private, GetAccess = private)
         chnlMap

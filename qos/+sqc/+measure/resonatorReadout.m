@@ -111,7 +111,7 @@ classdef resonatorReadout < qes.measurement.prob
             ad = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',ad_i_names);
             da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',da_i_names);
             rs = ad.samplingRate/da.samplingRate;
-            ad.recordLength = ceil(rs*qubits{1}.r_ln)+ad.delayStep; % maximum startidx increment is ad.delayStep
+            ad.recordLength = ceil(rs*(qubits{1}.r_ln+ad.delayStep)); % maximum startidx increment is ad.delayStep
             iq_obj = sqc.measure.iq_ustc_ad(ad);
             iq_obj.n = qubits{1}.r_avg;
             iq_obj.upSampleNum = 1/rs;
@@ -231,8 +231,8 @@ classdef resonatorReadout < qes.measurement.prob
 		function set.delay(obj,val)
  			obj.delay = val;
             dd = obj.delay - obj.adDelayStep*floor(obj.delay/obj.adDelayStep);
-            obj.iq_obj.startidx = obj.qubits{1}.r_truncatePts(1)+dd+1;
-            obj.iq_obj.endidx = obj.ad.recordLength-obj.qubits{1}.r_truncatePts(2)...
+            obj.iq_obj.startidx = obj.qubits{1}.r_truncatePts(1)/obj.rs+dd+1;
+            obj.iq_obj.endidx = (obj.ad.recordLength-obj.qubits{1}.r_truncatePts(2))/obj.rs...
                 -obj.adDelayStep+dd;
             
 %             disp('recordLn');
