@@ -128,9 +128,9 @@ classdef iq_ustc_ad < qes.measurement.iq
 %             obj.data = mean(IQ);
 %             obj.extradata = IQ;
 
-%             tic
+%              tic
             obj.Run_BothChnl(Vi,Vq);
-%              toc 
+%               toc 
             obj.data = mean(obj.IQ);
             obj.extradata = obj.IQ;
             
@@ -166,16 +166,14 @@ classdef iq_ustc_ad < qes.measurement.iq
 %             else
 %                 eidx = obj.endidx;
 %             end
-            disp('====')
-            obj.selectidx(1)
-            obj.selectidx(end)
+%             disp('====')
+%             obj.selectidx(1)
+%             obj.selectidx(end)
             
-             tic
             Vi = qes.util.upsample_c(Vi,obj.upSampleNum);
             Vq = qes.util.upsample_c(Vq,obj.upSampleNum);
             Vi = Vi(:,obj.selectidx);
             Vq = Vq(:,obj.selectidx);
-             toc
 
             for ii = 1:numel(obj.freq)
                 for jj = 1:obj.n
