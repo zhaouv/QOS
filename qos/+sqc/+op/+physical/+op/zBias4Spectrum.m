@@ -30,7 +30,7 @@ classdef zBias4Spectrum < sqc.op.physical.gate.Z_z_base
 			obj.z_wv{1} = sqc.wv.rect_cos(obj.length);
             obj.z_wv{1}.amp = obj.amp;
             persistent da
-            if isempty(da)
+            if isempty(da) || ~isvalid(da)
                 da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name',obj.qubits{1}.channels.z_pulse.instru);
             end

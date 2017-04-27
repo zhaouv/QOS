@@ -35,6 +35,10 @@ classdef resonatorReadout < qes.measurement.prob
 		jpa_pump_wv
         
         stateNames
+        
+        iq_obj
+        ad
+        rs % ad da sampling ratio
     end
     methods
         function obj = resonatorReadout(qubits)
@@ -107,23 +111,27 @@ classdef resonatorReadout < qes.measurement.prob
             ad = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',ad_i_names);
             da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',da_i_names);
             rs = ad.samplingRate/da.samplingRate;
-            ad.recordLength = ceil(rs*qubits{1}.r_ln);
+            ad.recordLength = ceil(rs*(qubits{1}.r_ln+ad.delayStep)); % maximum startidx increment is ad.delayStep
             iq_obj = sqc.measure.iq_ustc_ad(ad);
             iq_obj.n = qubits{1}.r_avg;
+            iq_obj.upSampleNum = 1/rs;
             num_qubits = numel(qubits);
             demod_freq = zeros(1,num_qubits);
             for ii = 1:num_qubits
                 demod_freq(ii) = qubits{ii}.r_freq- qubits{1}.r_fc;
             end
             iq_obj.freq = demod_freq;
-            iq_obj.startidx = qubits{1}.r_truncatePts(1)+1;
-            iq_obj.endidx = ad.recordLength-qubits{1}.r_truncatePts(2);
+%             iq_obj.startidx = qubits{1}.r_truncatePts(1)+1;
+%             iq_obj.endidx = ad.recordLength-qubits{1}.r_truncatePts(2);
             
             prob_obj = sqc.measure.prob_iq_ustc_ad_j(iq_obj,qubits);
             obj = obj@qes.measurement.prob(prob_obj);
             obj.n = prob_obj.n;
             obj.qubits = qubits;
             obj.stateNames = prob_obj.stateNames;
+            obj.iq_obj = iq_obj;
+            obj.ad = ad;
+            obj.rs = rs;
 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',qubits{1}.channels.r_mw.instru);
             if isempty(uSrc)
                 throw(MException('QOS_resonatorReadout:hwNotFound',...
@@ -221,11 +229,28 @@ classdef resonatorReadout < qes.measurement.prob
             obj.r_amp = val;
         end
 		function set.delay(obj,val)
-            % as the awg only knows the da output delay step, here it is necessary to ceil the 
-            % readout waveform output delay to a multiple of adDelayStep
-			obj.delay = obj.adDelayStep*ceil((val)/obj.adDelayStep);
+ 			obj.delay = val;
+            dd = obj.delay - obj.adDelayStep*floor(obj.delay/obj.adDelayStep);
+            obj.iq_obj.startidx = obj.qubits{1}.r_truncatePts(1)/obj.rs+dd+1;
+            obj.iq_obj.endidx = (obj.ad.recordLength-obj.qubits{1}.r_truncatePts(2))/obj.rs...
+                -obj.adDelayStep+dd;
+            
+%             disp('recordLn');
+%             disp(obj.ad.recordLength)
+%             disp('delay');
+%             disp(obj.delay)
+%             disp('startidx');
+%             disp(obj.iq_obj.startidx)
+%             disp('endidx');
+%             disp(obj.iq_obj.endidx)
+            
+            
             if ~isempty(obj.qubits{1}.r_jpa)
-                obj.jpa.startDelay = obj.delay-obj.qubits{1}.r_jpa_longer;
+%                 jpaStartDelay = obj.delay-obj.qubits{1}.r_jpa_longer;
+%                 if jpaStartDelay < 0 % handled in GenWave
+%                     throw(MException('QOS_resonatorReadtou:negativeJPAStartDelay','negative jpa start delay, readout delay too short.'));
+%                 end
+                obj.jpa.startDelay = obj.delay-obj.qubits{1}.r_jpa_longer; % all qubits has the same r_jpa_longer value, asserted during object construction.
             end
 		end
         function Run(obj)
@@ -233,7 +258,10 @@ classdef resonatorReadout < qes.measurement.prob
             obj.Prep();
             Run@qes.measurement.prob(obj); % important
             wvObj = obj.r_wv;
-            wvObj.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
+
+            delay_ = obj.adDelayStep*floor((obj.delay)/obj.adDelayStep);
+            wvObj.awg.SetTrigOutDelay(obj.r_wv.awgchnl,delay_);
+            
 % 			obj.r_wv.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
             obj.r_wv.SendWave();
             if ~isempty(obj.jpa)
@@ -267,8 +295,9 @@ classdef resonatorReadout < qes.measurement.prob
             obj.r_wv.awg = obj.da;
             obj.r_wv.awgchnl = [obj.da_i_chnl,obj.da_q_chnl];
             obj.r_wv.hw_delay = true; % important
+
             obj.r_wv.output_delay = obj.delay+obj.qubits{1}.syncDelay_r; % syncDelay_z is added as a small calibration.
-			
+
 			if ~isempty(obj.qubits{1}.r_jpa)
 				obj.jpa_pump_wv = sqc.wv.rect_cos(obj.jpa.opDuration);
 				obj.jpa_pump_wv.amp = obj.jpa.pumpAmp;

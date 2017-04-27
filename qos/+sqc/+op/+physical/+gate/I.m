@@ -26,7 +26,7 @@ classdef I < sqc.op.physical.operator
             obj.xy_wv{1} = qes.waveform.spacer(obj.length);
             obj.z_wv{1} = qes.waveform.spacer(obj.length);
             persistent da_xy
-            if isempty(da_xy)
+            if isempty(da_xy) || ~isvalid(da_xy)
                 da_xy = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name',obj.qubits{1}.channels.xy_i.instru);
             end
@@ -34,7 +34,7 @@ classdef I < sqc.op.physical.operator
             obj.xy_wv{1}.awg = da_xy;
             obj.xy_wv{1}.awgchnl = [obj.qubits{1}.channels.xy_i.chnl,obj.qubits{1}.channels.xy_q.chnl];
             persistent da_z
-            if isempty(da_z)
+            if isempty(da_z) || ~isvalid(da_z)
                 da_z = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                     'name',obj.qubits{1}.channels.z_pulse.instru);
             end

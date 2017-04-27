@@ -31,7 +31,7 @@ classdef (Abstract = true) XY_base < sqc.op.physical.operator
                                             obj.qubits{1}.f02);
             end
             persistent da
-            if isempty(da)
+            if isempty(da) || ~isvalid(da)
                 da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name',obj.qubits{1}.channels.xy_i.instru);
             end
