@@ -37,8 +37,8 @@ classdef resonatorReadout < qes.measurement.prob
         stateNames
         
         iq_obj
-        ad
-        rs % ad da sampling ratio
+        adSamplingRate
+        daSamplingRate
     end
     methods
         function obj = resonatorReadout(qubits)
@@ -114,7 +114,7 @@ classdef resonatorReadout < qes.measurement.prob
             ad.recordLength = ceil(rs*(qubits{1}.r_ln+ad.delayStep)); % maximum startidx increment is ad.delayStep
             iq_obj = sqc.measure.iq_ustc_ad(ad);
             iq_obj.n = qubits{1}.r_avg;
-            iq_obj.upSampleNum = 1/rs;
+            iq_obj.upSampleNum = lcm(ad.samplingRate,da.samplingRate)/ad.samplingRate;
             num_qubits = numel(qubits);
             demod_freq = zeros(1,num_qubits);
             for ii = 1:num_qubits
@@ -130,8 +130,8 @@ classdef resonatorReadout < qes.measurement.prob
             obj.qubits = qubits;
             obj.stateNames = prob_obj.stateNames;
             obj.iq_obj = iq_obj;
-            obj.ad = ad;
-            obj.rs = rs;
+            obj.adSamplingRate = ad.samplingRate;
+            obj.daSamplingRate = da.samplingRate;
 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',qubits{1}.channels.r_mw.instru);
             if isempty(uSrc)
                 throw(MException('QOS_resonatorReadout:hwNotFound',...
@@ -190,7 +190,6 @@ classdef resonatorReadout < qes.measurement.prob
                 obj.setupJPA = true;
                 obj.numericscalardata = false;
             end
-            
             obj.delay = 0;
         end
         function set.qubits(obj,val)
@@ -230,10 +229,13 @@ classdef resonatorReadout < qes.measurement.prob
         end
 		function set.delay(obj,val)
  			obj.delay = val;
-            dd = obj.delay - obj.adDelayStep*floor(obj.delay/obj.adDelayStep);
-            obj.iq_obj.startidx = obj.qubits{1}.r_truncatePts(1)/obj.rs+dd+1;
-            obj.iq_obj.endidx = (obj.ad.recordLength-obj.qubits{1}.r_truncatePts(2))/obj.rs...
-                -obj.adDelayStep+dd;
+            vSamplingRate = lcm(obj.adSamplingRate,obj.daSamplingRate);
+            dd = (obj.delay - obj.adDelayStep*floor(obj.delay/obj.adDelayStep))*...
+                vSamplingRate/obj.daSamplingRate;
+            obj.iq_obj.startidx = obj.qubits{1}.r_truncatePts(1)*obj.iq_obj.upSampleNum+dd+1;
+            obj.iq_obj.endidx = (obj.ad.recordLength-obj.qubits{1}.r_truncatePts(2))*...
+                obj.iq_obj.upSampleNum...
+                -obj.adDelayStep*vSamplingRate/obj.daSamplingRate+dd;
             
 %             disp('recordLn');
 %             disp(obj.ad.recordLength)

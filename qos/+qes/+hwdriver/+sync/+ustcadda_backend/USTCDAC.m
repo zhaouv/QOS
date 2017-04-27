@@ -512,7 +512,7 @@ classdef USTCDAC < handle
         function set(obj,properties,value)
              switch lower(properties)
                 case 'isblock';obj.isblock = value;
-                case 'channel_amount'; 
+                case 'channel_amount'
                     obj.channel_amount = value;
                     obj.offset = zeros(1,obj.channel_amount);
                     obj.gain = zeros(1,obj.channel_amount);
