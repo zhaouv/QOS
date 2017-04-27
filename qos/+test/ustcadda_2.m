@@ -12,12 +12,17 @@ ustcaddaObj = ustcadda_v1.GetInstance();
 %%
 ustcaddaObj.close()
 %% run all channels
-ustcaddaObj.runReps = 2e4;
-for ii = 16:16
-    ustcaddaObj.SendWave(ii,[zeros(1,4000),65535*ones(1,4000)]);
-    ustcaddaObj.SendWave(3,[zeros(1,4000),65535*ones(1,4000)]);
+wavedata=[zeros(1,4000),65535*ones(1,4000)];
+nn=0;
+while true
+    nn=nn+1
+ustcaddaObj.runReps = 1e3;
+% for ii = 1:16
+%     ustcaddaObj.SendWave(ii,wavedata);
+%     ustcaddaObj.SendWave(ii,wavedata);
+% end
+[datai,dataq] = ustcaddaObj.Run(true)
 end
-ustcaddaObj.Run(false);
 %% sync test, and use the mimimum oscillascope vertical range to check zero offset
 ustcaddaObj.runReps = 1e4;
 ustcaddaObj.SendWave(37,[32768*ones(1,200),33768*ones(1,200)]+0); % 620

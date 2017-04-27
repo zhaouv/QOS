@@ -61,7 +61,7 @@ function varargout = iq2prob_01(varargin)
         % QS.saveSSettings({q.name,'r_iq2prob_01angle'},ang);
         % QS.saveSSettings({q.name,'r_iq2prob_01threshold'},threshold);
         % QS.saveSSettings({q.name,'r_iq2prob_01polarity'},num2str(polarity,'%0.0f'));
-        if ~isempty(hf) && isvalid()
+%         if ~isempty(hf) && isvalid()
     end
 
 	varargout{1} = center0;

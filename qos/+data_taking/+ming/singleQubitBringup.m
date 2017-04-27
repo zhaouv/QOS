@@ -15,7 +15,7 @@ dips = [6.9017 6.7981 6.8634 6.334 6.7099 6.6174 6.6578  6.6791 6.6371 6.5638]*1
 
 amps=[logspace(log10(3000),log10(30000),41)];
 for ii = 8
-s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
+s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2.5e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
       'notes',['RT attenuation:23dB; ' qubits{ii}],'gui',true,'save',true,'r_avg',1000);
 end
 %%
