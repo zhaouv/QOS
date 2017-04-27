@@ -39,6 +39,7 @@ classdef resonatorReadout < qes.measurement.prob
         iq_obj
         adSamplingRate
         daSamplingRate
+        adRecordLength
     end
     methods
         function obj = resonatorReadout(qubits)
@@ -149,6 +150,7 @@ classdef resonatorReadout < qes.measurement.prob
                 r_amp_(ii) = obj.qubits{ii}.r_amp;
             end
             obj.r_amp = r_amp_;
+            obj.adRecordLength = ad.recordLength;
             obj.adDelayStep = ad.delayStep;
 
             if ~isempty(qubits{1}.r_jpa)
@@ -233,7 +235,7 @@ classdef resonatorReadout < qes.measurement.prob
             dd = (obj.delay - obj.adDelayStep*floor(obj.delay/obj.adDelayStep))*...
                 vSamplingRate/obj.daSamplingRate;
             obj.iq_obj.startidx = obj.qubits{1}.r_truncatePts(1)*obj.iq_obj.upSampleNum+dd+1;
-            obj.iq_obj.endidx = (obj.ad.recordLength-obj.qubits{1}.r_truncatePts(2))*...
+            obj.iq_obj.endidx = (obj.adRecordLength-obj.qubits{1}.r_truncatePts(2))*...
                 obj.iq_obj.upSampleNum...
                 -obj.adDelayStep*vSamplingRate/obj.daSamplingRate+dd;
             

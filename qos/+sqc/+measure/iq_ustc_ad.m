@@ -67,20 +67,20 @@ classdef iq_ustc_ad < qes.measurement.iq
             calcCachedVar(obj);
         end
         function set.startidx(obj,val)
-            val = ceil(val);
-            if val < 1 || val > obj.instrumentObject.recordLength || (~isempty(obj.endidx) && val >= obj.endidx)
-                throw(MException('iq_ustc_ad:InvalidInput',...
-                    'startidx should be an interger greater than 0 and smaller than AD recordLength and endidx!'));
-            end
+%             val = ceil(val);
+%             if val < 1 || val > obj.instrumentObject.recordLength || (~isempty(obj.endidx) && val >= obj.endidx)
+%                 throw(MException('iq_ustc_ad:InvalidInput',...
+%                     'startidx should be an interger greater than 0 and smaller than AD recordLength and endidx!'));
+%             end
             obj.startidx = val;
             calcCachedVar(obj);
         end
         function set.endidx(obj,val)
-            val = ceil(val);
-            if val <= obj.startidx || val > obj.instrumentObject.recordLength
-                throw(MException('iq_ustc_ad:InvalidInput',...
-                    'endidx should be an interger greater than startidx and not exceeding AD recordLength!'));
-            end
+%             val = ceil(val);
+%             if val <= obj.startidx || val > obj.instrumentObject.recordLength
+%                 throw(MException('iq_ustc_ad:InvalidInput',...
+%                     'endidx should be an interger greater than startidx and not exceeding AD recordLength!'));
+%             end
             obj.endidx = val;
             calcCachedVar(obj);
         end
@@ -127,9 +127,10 @@ classdef iq_ustc_ad < qes.measurement.iq
 % %             toc 
 %             obj.data = mean(IQ);
 %             obj.extradata = IQ;
-            
+
+%             tic
             obj.Run_BothChnl(Vi,Vq);
-%             toc 
+%              toc 
             obj.data = mean(obj.IQ);
             obj.extradata = obj.IQ;
             
@@ -169,16 +170,13 @@ classdef iq_ustc_ad < qes.measurement.iq
             obj.selectidx(1)
             obj.selectidx(end)
             
-            if obj.upSampleNum ~= 1
-                dLn = size(Vi,2);
-                xi = 1:obj.upSampleNum:obj.upSampleNum*dLn;
-                x = 1:obj.upSampleNum*dLn;
-                Vi = interp1(xi,Vi,x,'linear');
-                Vq = interp1(xi,Qi,x,'linear');
-            end
+             tic
+            Vi = qes.util.upsample_c(Vi,obj.upSampleNum);
+            Vq = qes.util.upsample_c(Vq,obj.upSampleNum);
             Vi = Vi(:,obj.selectidx);
             Vq = Vq(:,obj.selectidx);
-            
+             toc
+
             for ii = 1:numel(obj.freq)
                 for jj = 1:obj.n
                     IQ_ = obj.kernel(ii,:).*(Vi(jj,:)+1j*Vq(jj,:));
