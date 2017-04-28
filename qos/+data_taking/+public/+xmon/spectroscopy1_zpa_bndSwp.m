@@ -23,7 +23,7 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],...
+args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'driveFreq',[],...
     'swpBandCenterFcn',[],'swpBandWdth',10e6,'gui',false,'notes','','save',true});
 q = data_taking.public.util.getQubits(args,{'qubit'});
 if isempty(args.driveFreq)
@@ -33,6 +33,9 @@ end
 if isempty(args.swpBandCenterFcn)
     args.swpBandCenterFcn = @(x_)1;
     args.swpBandWdth = Inf;
+end
+if ~isempty(args.r_avg)
+    q.r_avg=args.r_avg;
 end
 
 X = op.mwDrive4Spectrum(q);

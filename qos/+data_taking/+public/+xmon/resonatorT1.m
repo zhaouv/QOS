@@ -1,13 +1,13 @@
-function varargout = T1_111(varargin)
-% T1_111: T1
+function varargout = resonatorT1(varargin)
+% resonatorT1: resonator T1
 % bias qubit q1, drive qubit q2 and readout qubit q3,
 % q1, q2, q3 can be the same qubit or diferent qubits,
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % 
-% <_o_> = T1_111('biasQubit',_c&o_,'biasAmp',<[_f_]>,'biasDelay',<_i_>,...
-%       'backgroundWithZBias',<_b_>,...
-%       'driveQubit',_c&o_,'readoutQubit',_c&o_,...
-%       'time',[_i_],...
+% <_o_> = resonatorT1('qubit',_c&o_,...
+%       'swpPiAmp',_f_,'biasDelay',biasDelay,'swpPiLn',_i_,...
+%       'backgroundWithZBias',b,...
+%       'time',[_i_],'r_avg',<_i_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -20,36 +20,37 @@ function varargout = T1_111(varargin)
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as they form correct pairs.
 
-% Yulin Wu, 2016/12/27
+% Yulin Wu, 2017/4/28
 
-fcn_name = 'data_taking.public.xmon.T1_111'; % this and args will be saved with data
+fcn_name = 'data_taking.public.xmon.resonatorT1'; % this and args will be saved with data
 import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'r_avg',0,'biasAmp',0,'biasDelay',0,'backgroundWithZBias',true,...
+args = util.processArgs(varargin,{'r_avg',[],'biasDelay',0,'backgroundWithZBias',true,...
     'gui',false,'notes',''});
-[readoutQubit, biasQubit, driveQubit] =...
-    data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
+q = data_taking.public.util.getQubits(args,{'qubit'});
 
-if args.r_avg~=0 %add by GM, 20170416
-    readoutQubit.r_avg=args.r_avg;
+if ~isempty(args.r_avg) %add by GM, 20170416
+    q.r_avg=args.r_avg;
 end
 
-X = gate.X(driveQubit);
-I = gate.I(biasQubit);
-I.ln = X.length+args.biasDelay;
-Z = op.zBias4Spectrum(biasQubit);
+X = gate.X(q);
+I1 = gate.I(q);
+I1.ln = X.length+args.biasDelay;
+I2 = gate.I(q);
+I2.ln = X.length+args.biasDelay;
+Z = op.zBias4Spectrum(q);
+Z.amp = args.swpPiAmp;
+Z.ln = args.swpPiLn;
 function proc = procFactory(delay)
-	Z.ln = delay;
-	proc = Z*I;
+	I2.ln = delay;
+	proc = Z*I2*Z*I1;
 end
-R = measure.rReadout4T1(readoutQubit,X.mw_src{1});
+R = measure.rReadout4T1(q,X.mw_src{1},false);
 
-x = expParam(Z,'amp');
-x.name = [biasQubit.name,' z bias amplitude'];
 y = expParam(@procFactory);
-y.name = [driveQubit.name,' decay time(da sampling interval)'];
+y.name = [q.name,' decay time(da sampling interval)'];
 y.auxpara = X;
 y.callbacks ={@(x_) x_.expobj.Run(); @(x_) x_.auxpara.Run()};
 
@@ -64,16 +65,13 @@ end
 y_s = expParam(R,'delay');
 y_s.offset = X.length;
 
-s1 = sweep(x);
-s1.vals = args.biasAmp;
-s2 = sweep({y,y_s});
-s2.vals = {args.time,args.time};
+s1 = sweep({y,y_s});
+s1.vals = {args.time,args.time};
 e = experiment();
-e.name = 'T1';
-e.sweeps = [s1,s2];
+e.name = 'Resonator T1';
+e.sweeps = s1;
 e.measurements = R;
-e.plotfcn = @qes.util.plotfcn.T1;
-e.datafileprefix = sprintf('%s%s[%s]',biasQubit.name, driveQubit.name,readoutQubit.name);
+e.datafileprefix = sprintf('%s',q.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

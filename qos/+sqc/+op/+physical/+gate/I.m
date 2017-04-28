@@ -30,7 +30,7 @@ classdef I < sqc.op.physical.operator
                 da_xy = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name',obj.qubits{1}.channels.xy_i.instru);
             end
-            obj.xy_wv{1}.iq = true;
+            obj.xy_wv{1}.df = 0;
             obj.xy_wv{1}.awg = da_xy;
             obj.xy_wv{1}.awgchnl = [obj.qubits{1}.channels.xy_i.chnl,obj.qubits{1}.channels.xy_q.chnl];
             persistent da_z

@@ -5,7 +5,7 @@ function varargout = T1_1_s21(varargin)
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % 
 % <_o_> = T1_111('qubit',_c&o_,'biasAmp',<[_f_]>,...
-%       'time',[_i_],...
+%       'time',[_i_],'r_avg',<_i_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -25,10 +25,10 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'r_avg',0,'biasAmp',0,'gui',false,'notes',''});
+args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'gui',false,'notes',''});
 q = data_taking.public.util.getQubits(args,{'qubit'});
 
-if args.r_avg~=0 %add by GM, 20170416
+if ~isempty(args.r_avg) %add by GM, 20170416
     q.r_avg=args.r_avg;
 end
 
