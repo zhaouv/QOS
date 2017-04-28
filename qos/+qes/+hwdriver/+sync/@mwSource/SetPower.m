@@ -18,7 +18,7 @@ function SetPower(obj,val,chnl)
         case {'rohde&schwarz sma100', 'r&s sma100','rssma100'}
             fprintf(obj.interfaceobj,[':SOUR:POW ',num2str(val(1),'%0.2f')]);
             obj.power(chnl) = val;
-		case {'sc5511a'}
+		case {'sc5511a','simulatedmwsrc'}
 			obj.interfaceobj.setPower(val,chnl);
 			obj.power(chnl) = val;
         otherwise

@@ -8,14 +8,21 @@ function CreateGUI(obj)
 
     BkGrndColor = [0.941   0.941   0.941];
     if largeSreenSize
-        winSize = [0,0,112,70];
+        winSize = [0,0,150,70];
     else
         winSize = [0,0,105,45];
     end
+%     obj.guiHandles.reWin = figure('Units','characters','MenuBar','none',...
+%         'ToolBar','none','NumberTitle','off','Name','QOS | Registry Editor',...
+%         'Resize','off','HandleVisibility','callback','Color',BkGrndColor,...
+%         'DockControls','off','Position',winSize,'CloseRequestFcn',@exitFcn);
     obj.guiHandles.reWin = figure('Units','characters','MenuBar','none',...
         'ToolBar','none','NumberTitle','off','Name','QOS | Registry Editor',...
         'Resize','off','HandleVisibility','callback','Color',BkGrndColor,...
-        'DockControls','off','Position',winSize);
+        'DockControls','off','Position',winSize,'Visible','off');
+%     function exitFcn(~,~)
+%         obj.delete();
+%     end
     warning('off');
     jf = get(obj.guiHandles.reWin,'JavaFrame');
     jf.setFigureIcon(javax.swing.ImageIcon(...
@@ -137,13 +144,13 @@ function CreateGUI(obj)
 
     obj.guiHandles.regTable = uitable('Parent',obj.guiHandles.reWin,...
          'Data',[],...
-         'ColumnName',{'Key','Value'},...
+         'ColumnName',{'Key','Value','Annotation'},...
          'ColumnFormat',{'char','char'},...
-         'ColumnEditable',[false,true],...
-         'ColumnWidth',{170,170},...
+         'ColumnEditable',[false,true,false],...
+         'ColumnWidth',{170,170,500},...
          'RowName',[],...
          'CellEditCallback',@saveValue,...
-         'Position',[210,5,360,910]);
+         'Position',[210,5,560,910]);
      
     if ~isempty(obj.sessionList)
         set(obj.guiHandles.SelectSession,'String',obj.sessionList,'Enable','on');
@@ -187,7 +194,7 @@ function CreateGUI(obj)
     start(obj.tblRefreshTmr);
     
     function refreshTableData(~,~)
-        if isempty(obj.nodeName) || isempty(obj.nodeParent)
+        if ~isvalid(obj.guiHandles.regTable) || isempty(obj.nodeName) || isempty(obj.nodeParent)
             return;
         end
         set(obj.guiHandles.regTable,'Data',obj.TableData(obj.nodeName,obj.nodeParent));
@@ -315,5 +322,7 @@ function CreateGUI(obj)
 
     if obj.qs.hwCreated
 		set(obj.guiHandles.iniBtn,'String','Initialization Done','Enable','off');
-	end
+    end
+    
+    set(obj.guiHandles.reWin,'Visible','on');
 end

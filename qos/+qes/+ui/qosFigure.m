@@ -12,7 +12,7 @@ function varargout =qosFigure(figureTitle,autoClose, autoCloseTime)
     end
 
     h = figure('NumberTitle','off','Name',['QOS | ',figureTitle],...
-        'HandleVisibility','callback','Color',[1,1,1],'DockControls','off');
+        'Color',[1,1,1],'DockControls','off');
     warning('off');
     jf = get(h,'JavaFrame');
     jf.setFigureIcon(javax.swing.ImageIcon(...

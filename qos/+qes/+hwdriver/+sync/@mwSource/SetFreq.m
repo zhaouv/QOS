@@ -18,7 +18,7 @@ function SetFreq(obj,val,chnl)
         case {'rohde&schwarz sma100', 'r&s sma100','rssma100'}
             fprintf(obj.interfaceobj,[':SOUR:FREQ ',num2str(val(1),'%0.3f'),'Hz']);
             obj.frequency(chnl) = val;
-		case {'sc5511a'}
+		case {'sc5511a','simulatedmwsrc'}
 			obj.interfaceobj.setFrequency(val,chnl);
 			obj.frequency(chnl) = val;
         otherwise

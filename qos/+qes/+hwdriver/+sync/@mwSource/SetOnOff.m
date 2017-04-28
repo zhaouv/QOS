@@ -13,7 +13,7 @@ function SetOnOff(obj,On,chnl)
             else
                 fprintf(obj.interfaceobj,':OUTP OFF ');
             end
-		case {'sc5511a'}
+		case {'sc5511a','simulatedmwsrc'}
 			obj.interfaceobj.setOnOff(On,chnl);
         otherwise
               error('MWSource:SetOnOff', ['Unsupported instrument: ',TYP]);

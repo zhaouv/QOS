@@ -5,19 +5,26 @@
 % 	Modified: 2017.2.26
 %   Description:The class of ADC
 classdef USTCADC < handle
+    properties % Yulin Wu, 170427
+        mac = zeros(1,6)   %上位机网卡地址
+        name = ''
+        channel_amount = 2     %ADC通道，未使用，实际使用I、Q两个通道。
+        sample_rate = 1e9      %ADC采样率，未使用
+    end
+    
     properties(SetAccess = private)
-        netcard_no;         %上位机网卡号
-        mac = zeros(1,6);   %上位机网卡地址
-        isopen;             %打开标识
-        status;             %打开状态
+        netcard_no         %上位机网卡号
+        % mac = zeros(1,6)   %上位机网卡地址 % Yulin Wu, 170427
+        isopen             %打开标识
+        status             %打开状态
     end
 
     properties(SetAccess = private)
-        name = '';              %ADC名字
-        sample_rate = 1e9;      %ADC采样率，未使用
-        channel_amount = 2;     %ADC通道，未使用，实际使用I、Q两个通道。
+        % name = ''              %ADC名字 % Yulin Wu, 170427
+        % sample_rate = 1e9      %ADC采样率，未使用 % Yulin Wu, 170427
+        % channel_amount = 2     %ADC通道，未使用，实际使用I、Q两个通道。 % Yulin Wu, 170427
         sample_depth = 2000;    %ADC采样深度
-        sample_count = 100;     %ADC使能后采样次数
+        sample_count = 100     %ADC使能后采样次数
     end
     
     properties (GetAccess = private,Constant = true)
@@ -34,6 +41,12 @@ classdef USTCADC < handle
             if(~libisloaded(obj.driver))
                 loadlibrary(driverfilename,obj.driverh);
             end
+        end
+        
+        function set.mac(obj,val)
+            % Yulin Wu, 170427
+            mac_str = regexp(val,'-', 'split');
+            obj.mac = hex2dec(mac_str);
         end
         
         function Open(obj)
@@ -142,24 +155,25 @@ classdef USTCADC < handle
             end
         end
         
-        function set(obj,properties,value)
-            switch properties
-                case 'mac'
-                    mac_str = regexp(value,'-', 'split');
-                    obj.mac = hex2dec(mac_str);
-                case 'name'; obj.name = value;
-                case 'sample_rate'; obj.sample_rate = value;
-                case 'channel_amount';obj.channel_amount = value;
-            end
-        end
-        
-        function value = get(obj,properties)
-            switch properties
-                case 'mac';value = obj.mac;
-                case 'name'; value = obj.name;
-                case 'sample_rate'; value = obj.sample_rate;
-                case 'channel_amount';value = obj.channel_amount;
-            end
-        end
+        % removed by Yulin Wu, 170427
+%         function set(obj,properties,value)
+%             switch properties
+%                 case 'mac'
+%                     mac_str = regexp(value,'-', 'split');
+%                     obj.mac = hex2dec(mac_str);
+%                 case 'name'; obj.name = value;
+%                 case 'sample_rate'; obj.sample_rate = value;
+%                 case 'channel_amount';obj.channel_amount = value;
+%             end
+%         end
+%         
+%         function value = get(obj,properties)
+%             switch properties
+%                 case 'mac';value = obj.mac;
+%                 case 'name'; value = obj.name;
+%                 case 'sample_rate'; value = obj.sample_rate;
+%                 case 'channel_amount';value = obj.channel_amount;
+%             end
+%         end
      end
 end

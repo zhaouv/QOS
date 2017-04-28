@@ -1,6 +1,6 @@
 %% test mw source signalcore
 import qes.*
-import qes.hwdriver.sync.*
+import qes.hwdriver.sync.signalCore5511a
 QS = qSettings.GetInstance('D:\settings');
 %%
 iobj = signalCore5511a.GetInstance();

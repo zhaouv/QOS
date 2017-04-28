@@ -74,7 +74,8 @@ function data = loadSettings(spath, fields)
                     if isvarname(fieldname)
 %                        data.(fieldname) = strsplit(strtrim(fileinfo(ii).name(cidx(end)+1:end-4)),',');
                         if isfield(data,fieldname)
-                            throw(MException('QOS_loadSettings:duplicateSettingsEntry','duplicate settings entry: %s', fieldname));
+                            throw(MException('QOS_loadSettings:duplicateSettingsEntry',...
+                                'duplicate settings entry: %s', fieldname));
                         end
 						data.(fieldname) = strtrim(fileinfo(ii).name(cidx(end)+1:end-4));
 					end
