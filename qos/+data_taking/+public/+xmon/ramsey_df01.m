@@ -57,7 +57,6 @@ function varargout = ramsey_df01(varargin)
     y_s = expParam(R,'delay');
 	y_s.offset = 2*X2.length+3*X2.gate_buffer;
     y_s.offset = y_s.offset;
-    y_s.snap_val = R.adDelayStep;
     s1 = sweep(x);
     s1.vals = args.detuning;
     s2 = sweep({y,y_s});
