@@ -4,17 +4,19 @@ import qes.*
 import qes.hwdriver.sync.*
 QS = qSettings.GetInstance('D:\Dropbox\MATLAB GUI\USTC Measurement System\settings');
 QS.SU('Ming');
-QS.SS('s170405');
+QS.SS('s170502');
 QS.CreateHw();
 ustcaddaObj = ustcadda_v1.GetInstance();
 import data_taking.public.util.*
 import data_taking.public.xmon.*
-qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-dips = [6.9017 6.7981 6.8634 6.334 6.7099 6.6174 6.6578  6.6791 6.6371 6.5638]*1e9; % by qubit index
+%%
+% qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
+qubits = {'q2','q3'};
+dips = [6.74230e+09 6.80480e+09]; % by qubit index
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
 
 amps=[logspace(log10(3000),log10(30000),41)];
-for ii = 8
+for ii = 1
 s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2.5e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
       'notes',['RT attenuation:23dB; ' qubits{ii}],'gui',true,'save',true,'r_avg',1000);
 end
