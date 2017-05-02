@@ -28,12 +28,16 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
+args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] = data_taking.public.util.getQubits(...
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
     args.driveFreq = driveQubit.f01-3*driveQubit.t_spcFWHM_est:...
         driveQubit.t_spcFWHM_est/10:driveQubit.f01+3*driveQubit.t_spcFWHM_est;
+end
+
+if ~isempty(args.r_avg)
+    readoutQubit.r_avg=args.r_avg;
 end
 
 X = op.mwDrive4Spectrum(driveQubit);

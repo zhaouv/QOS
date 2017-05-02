@@ -14,5 +14,4 @@ function Wv = Deriv(obj,dt)
     freqfcn = @obj.FreqFcn;
     freqfcn = @(f)2j*pi*f.*freqfcn(f);
     Wv = qes.waveform.arbFcn(obj.length, timefcn, freqfcn);
-    Wv.t0 = obj.t0;
 end

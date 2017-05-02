@@ -22,7 +22,7 @@ classdef rr_ring < qes.waveform.waveform
             obj = obj@qes.waveform.waveform(ln);
             obj.flattopwv = sqc.wv.flattop(ln);
             obj.gauswv = sqc.wv.gaussian(obj.ring_w);
-            obj.iq = true;
+            obj.df = 0; % make it iq waveform
         end
     end
     methods (Static = true, Hidden=true)
