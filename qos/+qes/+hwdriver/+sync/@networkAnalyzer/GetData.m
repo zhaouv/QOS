@@ -50,6 +50,9 @@ function [Freq, S] = GetData(obj)
 %             fprintf(obj.interfaceobj,[':SENSe1:AVERage:COUNt ',num2str(50)]); 
 %             fprintf(obj.interfaceobj,':INIT:IMM; *WAI');
 
+%             fprintf(obj.interfaceobj,'SENS:AVER:MODE POIN');
+%             fprintf(obj.interfaceobj,'SENS:AVER ON');
+
             fprintf(obj.interfaceobj,':SENSe1:AVERage:CLEar');
             tic;
             if obj.averaging
@@ -62,10 +65,10 @@ function [Freq, S] = GetData(obj)
                 end
             end
             
-            
-            
+%             fprintf(obj.interfaceobj,'TRIGger:SOURce MANual');
+%             fprintf(obj.interfaceobj,'INITiate:CONTinuous OFF');
+%             fprintf(obj.interfaceobj,'INItiate:IMMediate;*wai');
 
-            
             textdata = query(obj.interfaceobj, ':CALCulate:DATA? SDATA');
             S = eval(['[',textdata,']']);
             S = S(1:2:end) + 1i*S(2:2:end);
