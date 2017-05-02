@@ -11,27 +11,30 @@ import data_taking.public.util.*
 import data_taking.public.xmon.*
 %%
 % qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-qubits = {'q2','q3'};
-dips = [6.74230e+09 6.80480e+09]; % by qubit index
+qubits = {'q2','q3','q4'};
+dips = [6.74230e+09 6.80480e+09 6.616e9]; % by qubit index
+%% S21
+s21_zdc('qubit', qubits{1},...
+      'freq',6.5e9:2e6:7e9,'amp',0,...
+      'notes','','gui',true,'save',true);
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
-
 amps=[logspace(log10(3000),log10(30000),41)];
-for ii = 1
-s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2.5e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
+for ii = 3
+s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2e6:0.1e6:dips(ii)+2e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
       'notes',['RT attenuation:23dB; ' qubits{ii}],'gui',true,'save',true,'r_avg',1000);
 end
 %%
 
-for II=8
+for II=3
 s21_zdc('qubit', qubits{II},...
-      'freq',[dips(II)-2e6:0.1e6:dips(II)+1e6],'amp',[-3e4:1e3:3e4],...
+      'freq',[dips(II)-5e6:0.5e6:dips(II)+2e6],'amp',[-3e4:1e3:3e4],...
       'notes',[qubits{II}],'gui',true,'save',true);
 end
 
 %%
-for ii=8
+for ii=3
 s21_zpa('qubit', qubits{ii},...
-      'freq',[dips(ii)-1e6:0.1e6:dips(ii)+2e6],'amp',[-3e4:3e3:3e4],...
+      'freq',[dips(ii)-2e6:0.2e6:dips(ii)+2e6],'amp',[-3e4:3e3:3e4],...
       'notes',[qubits{ii} ', S21 vs Z pulse'],'gui',true,'save',true);
 end
 

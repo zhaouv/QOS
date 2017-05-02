@@ -44,6 +44,16 @@ classdef iq_ustc_ad < qes.measurement.iq
                 throw(MException('iq_ustc_ad:InvalidInput','n should be a positive integer!'));
             end
             obj.n = val;
+            if ~isempty(obj.freq)
+                obj.IQ = NaN*zeros(numel(obj.freq),obj.n);
+            end
+        end
+        function set.freq(obj,val)
+            obj.freq = val;
+            if ~isempty(obj.n)
+                obj.IQ = NaN*zeros(numel(obj.freq),obj.n);
+            end
+            calcCachedVar(obj);
         end
         function set.upSampleNum(obj,val)
             if isempty(val)
@@ -63,6 +73,7 @@ classdef iq_ustc_ad < qes.measurement.iq
 %                     'startidx should be an interger greater than 0 and smaller than AD recordLength and endidx!'));
 %             end
             obj.startidx = val;
+            calcCachedVar(obj);
         end
         function set.endidx(obj,val)
 %             val = ceil(val);
@@ -71,19 +82,28 @@ classdef iq_ustc_ad < qes.measurement.iq
 %                     'endidx should be an interger greater than startidx and not exceeding AD recordLength!'));
 %             end
             obj.endidx = val;
+            calcCachedVar(obj);
+        end
+        function set.eps_a(obj,val)
+            obj.eps_a = val;
+            obj.Mc = [1-obj.eps_a/2, -obj.eps_p; -obj.eps_p, 1+obj.eps_a/2]; 
+        end
+        function set.eps_p(obj,val)
+            obj.eps_p = val;
+            obj.Mc = [1-obj.eps_a/2, -obj.eps_p; -obj.eps_p, 1+obj.eps_a/2];
         end
         function ShowVoltSignal(obj,ax)
             % plot the I Q raw voltage signals, you may need this to
             % choose startidx and endidx
             [VI,VQ] = obj.instrumentObject.Run(1);
-            t = 1e9*(0:length(VI)-1)/obj.instrumentObject.samplingRate;
+            t_ = 1e9*(0:length(VI)-1)/obj.instrumentObject.samplingRate;
 %             plotyy(t,VI,t,VQ);
             if nargin < 2
                 hf = qes.ui.qosFigure('AD Voltage Signal',true);
                 ax = axes('Parent',hf);
                 hold(ax,'on');
             end
-            plot(ax,t,VI,t,VQ);
+            plot(ax,t_,VI,t_,VQ);
             drawnow;
             xlabel('Time (1/sampling rate)');
             ylabel('Digitizer Voltage Signal');
@@ -157,13 +177,13 @@ classdef iq_ustc_ad < qes.measurement.iq
 
             for ii = 1:numel(obj.freq)
                 for jj = 1:obj.n
-                    IQ_ = kernel.*(Vi(jj,:)+1j*Vq(jj,:));
-                    IQ_ = mean(Mc*[real(IQ_);imag(IQ_)],2); % correct mixer imballance
-                    IQ(ii,jj) = IQ_(1)+1j*IQ_(2);
+                    IQ_ = obj.kernel(ii,:).*(Vi(jj,:)+1j*Vq(jj,:));
+                    IQ_ = mean(obj.Mc*[real(IQ_);imag(IQ_)],2); % correct mixer imballance
+                    obj.IQ(ii,jj) = IQ_(1)+1j*IQ_(2);
                 end
             end
         end
-        function Amp = Amp(obj,Vi, Vq)
+        function Amp = Amp(obj, Vi, Vq)
             Amp = sum(abs(Vi(:)))+ sum(abs(Vq(:)));
         end
     end
