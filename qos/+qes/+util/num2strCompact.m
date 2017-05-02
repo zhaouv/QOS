@@ -44,7 +44,14 @@ function Value = num2strCompact(Value,numDigits)
     end
     if ~isempty(regexp(Value,'\.\d+', 'once')) && isempty(regexp(Value,'[eE]', 'once'))
         while numel(Value) && (strcmp(Value(end),'0') || strcmp(Value(end),'.'))
+			removeDot = false;
+			if strcmp(Value(end),'.')
+				removeDot = true;
+			end
             Value(end) = [];
+			if removeDot
+				break;
+			end
         end
     end
 end
