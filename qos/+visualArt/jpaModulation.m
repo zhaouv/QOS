@@ -1,4 +1,4 @@
-function Ramsey_d()
+function jpaModulation()
     load('D:\170502_demo\jpa_modulation.mat');
     hf = qes.ui.qosFigure('JPA Modulation',false);
     set(hf,'ToolBar','none','MenuBar','none','Position',[100,100,1200,700]);
@@ -12,7 +12,7 @@ function Ramsey_d()
     colormap(qes.ui.colormap.haxby(128));
     view(ax,-25,80);
     az = [-35:0.3:-15,-15:-0.3:-35];
-    r = linspace(0.5,1,numel(az));
+    r = linspace(0.3,1,numel(az));
     zlim = [0,max(max(z))];
     swpsz = [100,200];
     lo = qes.util.looper(1:swpsz(1),1:swpsz(1));
@@ -27,7 +27,8 @@ function Ramsey_d()
         xlabel('JPA Bias Voltage(V)');
         ylabel('Signal Frequency(GHz)');
         colormap(qes.ui.colormap.haxby(128));
-        view(ax,az(ii),80);
+        % view(ax,az(ii),80);
+        view(ax,-25,80);
         drawnow;
         if lo.isDone
             startTime = now;

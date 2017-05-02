@@ -14,6 +14,7 @@ function processAnimation(gates,initialState)
     end
     state = initialState;
     vs = initialState.v;
+    gNames = {''};
     numGates = numel(gates);
     for ii = 1:numGates
         if ~isa(gates{ii},'sqc.op.logical.operator') &&...
@@ -45,6 +46,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-1i*sin(theta/2);-1i*sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'X'}];
                 end
             case 'X2m'
                 A = -pi/2;
@@ -54,6 +56,7 @@ function processAnimation(gates,initialState)
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
                 end
+                gNames = [gNames,{'-X/2'}];
             case 'X2p'
                 A = pi/2;
                 numSteps = ceil(A/rotStep);
@@ -62,6 +65,7 @@ function processAnimation(gates,initialState)
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
                 end
+                gNames = [gNames,{'X/2'}];
             case 'X4m'
                 A = -pi/4;
                 numSteps = ceil(abs(A)/rotStep);
@@ -69,6 +73,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-1i*sin(theta/2);-1i*sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'-X/4'}];
                 end
             case 'X4p'
                 A = pi/4;
@@ -77,6 +82,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-1i*sin(theta/2);-1i*sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'X/4'}];
                 end
             case 'Y'
                 A = pi;
@@ -85,6 +91,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-sin(theta/2);sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'Y'}];
                 end
             case 'Y2m'
                 A = -pi/2;
@@ -93,6 +100,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-sin(theta/2);sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'-Y/2'}];
                 end
             case 'Y2p'
                 A = pi/2;
@@ -101,6 +109,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-sin(theta/2);sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'Y/2'}];
                 end
             case 'Y4m'
                 A = -pi/4;
@@ -109,6 +118,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-sin(theta/2);sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'-Y/4'}];
                 end
             case 'Y4p'
                 A = pi/4;
@@ -117,6 +127,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-sin(theta/2);sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'Y/4'}];
                 end
             case 'Z'
                 A = pi;
@@ -125,6 +136,7 @@ function processAnimation(gates,initialState)
                 m = [exp(-1i*theta/2),0;0,exp(1i*theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'Z'}];
                 end
             case 'Z2m'
                 A = -pi/2;
@@ -133,6 +145,7 @@ function processAnimation(gates,initialState)
                 m = [exp(-1i*theta/2),0;0,exp(1i*theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'-Z/2'}];
                 end
             case 'Z2p'
                 A = pi/2;
@@ -141,6 +154,7 @@ function processAnimation(gates,initialState)
                 m = [exp(-1i*theta/2),0;0,exp(1i*theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'Z/2'}];
                 end
             case 'H'
                 % Y4m(qubit)*X(qubit)*Y4p(qubit)
@@ -150,6 +164,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-sin(theta/2);sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'H'}];
                 end
                 A = pi;
                 numSteps = ceil(A/rotStep);
@@ -157,6 +172,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-1i*sin(theta/2);-1i*sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'H'}];
                 end
                 A = -pi/4;
                 numSteps = ceil(abs(A)/rotStep);
@@ -164,6 +180,7 @@ function processAnimation(gates,initialState)
                 m = [cos(theta/2),-sin(theta/2);sin(theta/2),cos(theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'H'}];
                 end
             case 'T'
                 A = pi/4;
@@ -172,6 +189,7 @@ function processAnimation(gates,initialState)
                 m = [exp(-1i*theta/2),0;0,exp(1i*theta/2)];
                 for ii = 1:numSteps
                     vs = [vs,m*vs(:,end)];
+                    gNames = [gNames,{'T'}];
                 end
                 
             otherwise
@@ -186,13 +204,29 @@ function processAnimation(gates,initialState)
 %         vs(:,end),vs(:,end),vs(:,end),vs(:,end),vs(:,end)];
     
     vs = [vs,vs(:,end)];
-    
+    gNames = [gNames,gNames(end)];
+    states = cell(1,size(vs,2));
     for ii = 1:size(vs,2)
         a = angle(vs(1,ii));
         theta = 2*acos(vs(1,ii)*exp(-1j*a));
         phi = log((vs(2,ii)*exp(-1j*a))/sin(theta/2))/1j;
         vs(:,ii) = [real(theta);real(phi)];
         
+%         a = vs(1,ii)*exp(-1j*a);
+%         b = vs(2,ii)*exp(-1j*a);
+%         if a < 0.01
+%             states{ii} = '|1>';
+%         elseif b < 0.01
+%             states{ii} = '|0>';
+%         else
+%             a = qes.util.num2strCompact(a);
+%             b = qes.util.num2strCompact(b);
+%             if qes.util.startsWith(b,'-')
+%                 states{ii} = sprintf('%sf|0>%s|1>',a,b);
+%             else
+%                 states{ii} = sprintf('%s|0>+%s|1>',a,b);
+%             end
+%         end
     end
     
     persistent fpos
@@ -222,6 +256,8 @@ function processAnimation(gates,initialState)
 %         else
 %             ax = qes.ui.blochSpherePlot_t(ax, vs(1,ii), vs(2,ii));
 %         end
+        text(-2.2,-1.2,0,['Gate: ',gNames{ii}],'FontSize',16,'Parent',ax);
+%        text(0,0,0,['State: ',states{ii}],'FontSize',16,'Parent',ax);
         drawnow;
 %         pause(0.002);
     end

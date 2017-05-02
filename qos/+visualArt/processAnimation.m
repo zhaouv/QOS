@@ -1,4 +1,4 @@
-function processAnimationDemo()
+function processAnimation()
 
     import sqc.op.logical.gate.*
     initialState = sqc.qs.state('|0>');

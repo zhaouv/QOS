@@ -173,12 +173,12 @@ if mode == modePlot
     line( [-1.2 1.2], [0 0],  [0 0],  'Color', 'b', 'LineStyle', '-','parent',ax);
     line( [0 0],  [-1.2 1.2], [0 0],  'Color', 'b', 'LineStyle', '-','parent',ax);
     line( [0 0],  [0 0],  [-1.2 1.2], 'Color', 'b', 'LineStyle', '-','parent',ax);
-    text(1.4,0,0,'|0>+|1>','parent',ax);
-    text(-1.4,0,0,'|0>-|1>','parent',ax);
-    text(0,1.4,0,'|0>+i|1>','parent',ax);
-    text(0,-1.4,0,'|0>-i|1>','parent',ax);
-    text(0,0,1.4,'|0>','parent',ax);
-    text(0,0,-1.4,'|1>','parent',ax);
+    text(1.3,0,0,'|0>+|1>','parent',ax,'FontSize',14);
+    text(-1.4,0,0,'|0>-|1>','parent',ax,'FontSize',14);
+    text(0,1.4,0,'|0>+i|1>','parent',ax,'FontSize',14);
+    text(0,-1.4,0,'|0>-i|1>','parent',ax,'FontSize',14);
+    text(0,0,1.4,'|0>','parent',ax,'FontSize',14);
+    text(0,0,-1.4,'|1>','parent',ax,'FontSize',14);
     
 %     text(1.4,0,0,'X','parent',ax);
 %     text(0,1.4,0,'Y','parent',ax);
