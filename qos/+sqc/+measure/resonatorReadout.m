@@ -35,6 +35,11 @@ classdef resonatorReadout < qes.measurement.prob
 		jpa_pump_wv
         
         stateNames
+        
+        iq_obj
+        adSamplingRate
+        daSamplingRate
+        adRecordLength
     end
     methods
         function obj = resonatorReadout(qubits)
@@ -110,6 +115,7 @@ classdef resonatorReadout < qes.measurement.prob
             ad.recordLength = ceil(rs*qubits{1}.r_ln);
             iq_obj = sqc.measure.iq_ustc_ad(ad);
             iq_obj.n = qubits{1}.r_avg;
+            iq_obj.upSampleNum = lcm(ad.samplingRate,da.samplingRate)/ad.samplingRate;
             num_qubits = numel(qubits);
             demod_freq = zeros(1,num_qubits);
             for ii = 1:num_qubits
@@ -124,6 +130,9 @@ classdef resonatorReadout < qes.measurement.prob
             obj.n = prob_obj.n;
             obj.qubits = qubits;
             obj.stateNames = prob_obj.stateNames;
+            obj.iq_obj = iq_obj;
+            obj.adSamplingRate = ad.samplingRate;
+            obj.daSamplingRate = da.samplingRate;
 			uSrc = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',qubits{1}.channels.r_mw.instru);
             if isempty(uSrc)
                 throw(MException('QOS_resonatorReadout:hwNotFound',...
@@ -141,6 +150,7 @@ classdef resonatorReadout < qes.measurement.prob
                 r_amp_(ii) = obj.qubits{ii}.r_amp;
             end
             obj.r_amp = r_amp_;
+            obj.adRecordLength = ad.recordLength;
             obj.adDelayStep = ad.delayStep;
 
             if ~isempty(qubits{1}.r_jpa)
@@ -182,7 +192,6 @@ classdef resonatorReadout < qes.measurement.prob
                 obj.setupJPA = true;
                 obj.numericscalardata = false;
             end
-            
             obj.delay = 0;
         end
         function set.qubits(obj,val)
@@ -221,9 +230,25 @@ classdef resonatorReadout < qes.measurement.prob
             obj.r_amp = val;
         end
 		function set.delay(obj,val)
-            % as the awg only knows the da output delay step, here it is necessary to ceil the 
-            % readout waveform output delay to a multiple of adDelayStep
-			obj.delay = obj.adDelayStep*ceil((val)/obj.adDelayStep);
+ 			obj.delay = val;
+            vSamplingRate = lcm(obj.adSamplingRate,obj.daSamplingRate);
+            dd = (obj.delay - obj.adDelayStep*floor(obj.delay/obj.adDelayStep))*...
+                vSamplingRate/obj.daSamplingRate;
+            obj.iq_obj.startidx = obj.qubits{1}.r_truncatePts(1)*obj.iq_obj.upSampleNum+dd+1;
+            obj.iq_obj.endidx = (obj.adRecordLength-obj.qubits{1}.r_truncatePts(2))*...
+                obj.iq_obj.upSampleNum...
+                -obj.adDelayStep*vSamplingRate/obj.daSamplingRate+dd;
+            
+%             disp('recordLn');
+%             disp(obj.ad.recordLength)
+%             disp('delay');
+%             disp(obj.delay)
+%             disp('startidx');
+%             disp(obj.iq_obj.startidx)
+%             disp('endidx');
+%             disp(obj.iq_obj.endidx)
+            
+            
             if ~isempty(obj.qubits{1}.r_jpa)
                 obj.jpa.startDelay = obj.delay-obj.qubits{1}.r_jpa_longer;
             end
