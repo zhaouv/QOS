@@ -7,10 +7,23 @@ classdef randBenchMarking < qes.measurement.measurement
     properties
         qubits % qubit objects or qubit names
     end
-	properties (SetAccess = private, GetAccess = privatem, Constant = true)
-        gateSetNames
-		gateSet
-		numGate
+    properties (GetAccess = private, SetAccess = private)
+    end
+	properties (GetAccess = private, Constant = true)
+		singleQGateSet = {{'I'},{'X'},{'Y'},{'Y','X'},...
+					{'X2p','Y2p'},{'X2p','Y2m'},{'X2m','Y2p'},{'X2m','Y2m'},...
+                    {'Y2p','X2p'},{'Y2p','X2m'},{'Y2m','X2p'},{'Y2m','X2m'},...
+					{'X2p'},{'X2m'},{'Y2p'},{'Y2m'},...
+                    {'X2m','Y2p','X2p'},{'X2m','Y2m','X2p'},...
+                    {'X','Y2p'},{'X','Y2m'},{'Y','X2p'},{'Y','X2m'},...
+                    {'X2p','Y2p','X2p'},{'X2m','Y2p','X2m'}}
+        numSingleQGates = 24
+        s1Gates = {{'I'},{'Y2p','X2p'},{'X2m','Y2m'}}
+        numS1Gates = 3;
+        s1X2pGates = {{'X2p'},{'X2p','Y2p','X2p'},{'Y2m'}}
+        numS1X2pGates = 3;
+        s1Y2pGates = {{'Y2p'},{'Y','X2p'},{'Y2p','X2m','Y2m'}}
+        numS1Y2pGates = 3;
     end
     properties (SetAccess = private, GetAccess = private)
         
@@ -18,13 +31,6 @@ classdef randBenchMarking < qes.measurement.measurement
     methods
         function obj = randBenchMarking()
             obj = obj@qes.measurement.measurement([]);
-            obj.gateSetNames = {};
-			obj.gateSet = [{'I'},{'X'},{'Y'},{'Y','X'},...
-					'X2p','Y2p',...
-					'X','Y','X2m','Y2m'];
-			obj.numGate = numel(obj.gateSetNames);
-			error('todo...');
-            
             obj.numericscalardata = false;
         end
 		function finalGate()
@@ -35,7 +41,19 @@ classdef randBenchMarking < qes.measurement.measurement
 		function gs = randGates(m)
 			
 		end
-		function g = finalGate(gs);
-		end
+		function g = finalGate(gs)
+            
+        end
+        function g = getRndSingleQGate(obj,q)
+            gc = obj.singleQGateSet{randi(obj.numSingleQGates)};
+            g = feval(gc{1},q);
+            for ii = 2:numel(gc)
+                g = feval(gc{ii},q)*g;
+            end
+        end
+        function gs = cNotGates(obj)
+            % 5184 gates
+            
+        end
 	end
 end

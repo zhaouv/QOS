@@ -207,26 +207,37 @@ function processAnimation(gates,initialState)
     gNames = [gNames,gNames(end)];
     states = cell(1,size(vs,2));
     for ii = 1:size(vs,2)
-        a = angle(vs(1,ii));
-        theta = 2*acos(vs(1,ii)*exp(-1j*a));
-        phi = log((vs(2,ii)*exp(-1j*a))/sin(theta/2))/1j;
+        ang = angle(vs(1,ii));
+        a = vs(1,ii)*exp(-1j*ang);
+        b = vs(2,ii)*exp(-1j*ang);
+        theta = 2*acos(a);
+        phi = log(b/sin(theta/2))/1j;
         vs(:,ii) = [real(theta);real(phi)];
         
-%         a = vs(1,ii)*exp(-1j*a);
-%         b = vs(2,ii)*exp(-1j*a);
-%         if a < 0.01
-%             states{ii} = '|1>';
-%         elseif b < 0.01
-%             states{ii} = '|0>';
-%         else
-%             a = qes.util.num2strCompact(a);
-%             b = qes.util.num2strCompact(b);
-%             if qes.util.startsWith(b,'-')
-%                 states{ii} = sprintf('%sf|0>%s|1>',a,b);
-%             else
-%                 states{ii} = sprintf('%s|0>+%s|1>',a,b);
-%             end
-%         end
+        if abs(a) < 0.01
+            states{ii} = '|1>';
+        elseif abs(b) < 0.01
+            states{ii} = '|0>';
+        else
+            a = qes.util.num2strCompact(real(a),2);
+            if abs(vs(2,ii)) < 0.01
+                b =  qes.util.num2strCompact(abs(b),2);
+            else
+                ba = qes.util.num2strCompact(vs(2,ii)/pi,2);
+                if strcmp(ba,'1') || strcmp(ba,'-1')
+                    ba(end) = [];
+                end
+                b =  sprintf('e^{%si\\pi}%s',ba,...
+                    qes.util.num2strCompact(abs(b),2));
+            end
+            if qes.util.startsWith(b,'-')
+                states{ii} = sprintf('%sf|0>%s|1>',a,b);
+            else
+                states{ii} = sprintf('%s|0>+%s|1>',a,b);
+            end
+%             a = qes.util.num2strCompact(a,2);
+%             states{ii} = sprintf('%sf|0>%s|1>',a,b);
+        end
     end
     
     persistent fpos
@@ -257,7 +268,8 @@ function processAnimation(gates,initialState)
 %             ax = qes.ui.blochSpherePlot_t(ax, vs(1,ii), vs(2,ii));
 %         end
         text(-2.2,-1.2,0,['Gate: ',gNames{ii}],'FontSize',16,'Parent',ax);
-%        text(0,0,0,['State: ',states{ii}],'FontSize',16,'Parent',ax);
+       text(0.2,-0.1,-1.35,['State: ',states{ii}],'FontSize',16,...
+           'Parent',ax,'Interpreter','tex');
         drawnow;
 %         pause(0.002);
     end
