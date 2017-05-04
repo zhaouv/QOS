@@ -21,13 +21,13 @@ classdef mwDrive4Spectrum < sqc.op.physical.operator
             obj.xy_wv{1} = sqc.wv.rect_cos(obj.qubits{1}.spc_driveLn);
             obj.xy_wv{1}.amp = obj.amp;
             obj.xy_wv{1}.rise_time = obj.qubits{1}.spc_driveRise;
-            obj.xy_wv{1}.phase = 0;
 			persistent da
             if isempty(da) || ~isvalid(da)
 				da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                     'name',obj.qubits{1}.channels.xy_i.instru);
 			end
             obj.xy_wv{1}.df = obj.qubits{1}.spc_sbFreq/da.samplingRate;
+			obj.xy_wv{1}.phase = 0;
 			S = qes.waveform.spacer(obj.qubits{1}.spc_zLonger);
 			obj.xy_wv{1} = [S,obj.xy_wv{1},S];
             obj.xy_wv{1}.awg = da;

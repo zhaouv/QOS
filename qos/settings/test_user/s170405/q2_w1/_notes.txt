@@ -1,1 +1,0 @@
-all other qubit dc biased at zdc = -1.7e4
