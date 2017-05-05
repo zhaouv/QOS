@@ -3,6 +3,8 @@ function Value = num2strCompact(Value,numDigits)
     % num2str(1e8,'%e'):	'1.000000e+08'
     % num2str(1e8):         '1e8'
     % num2str(1e-8):        '1e-8'
+    % numDigits: number of digits to the left of the decimal point
+    % complex value OK.
 
 % Copyright 2016 Yulin Wu, USTC, China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
@@ -14,8 +16,21 @@ function Value = num2strCompact(Value,numDigits)
         numDigits = 5;
     end
     if ~isreal(Value)
-        re = qes.util.num2strCompact(real(Value),numDigits);
-        im = qes.util.num2strCompact(imag(Value),numDigits);
+        re = real(Value);
+        im = imag(Value);
+        if abs(re) < 10^-numDigits && abs(im) < 10^-numDigits
+            Value = '0';
+            return;
+        elseif abs(re) < 10^-numDigits
+            im = qes.util.num2strCompact(im,numDigits);
+            Value = [im,'i'];
+            return;
+        elseif abs(im) < 10^-numDigits
+            Value = qes.util.num2strCompact(re,numDigits);
+            return;
+        end
+        re = qes.util.num2strCompact(re,numDigits);
+        im = qes.util.num2strCompact(im,numDigits);
         if qes.util.startsWith(im,'-')
             Value = [re,im,'i'];
         else
