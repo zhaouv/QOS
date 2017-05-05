@@ -1,9 +1,16 @@
 function processAnimation()
 
-    import sqc.op.logical.gate.*
-    initialState = sqc.qs.state('|0>');
-%     gates = {Z2m};
-    gates = {H,Y,H,X,Y4p,Y2m,Z,Y2p,X4m,Y,X4p,H,X4m,Y};
-    sqc.util.processAnimation(gates,initialState);
+    hf = qes.ui.qosFigure('Process Animation Test',false);
+    set(hf,'ToolBar','none','MenuBar','none');
+    ax = axes('Parent',hf,'Position',[-0.25,-0.25,1.5,1.5]);
+    pa = sqc.util.processAnimator(ax);
+    pa.drawHistory = true;
+    pa.initialState = '|0>+(1+1i)|1>';
+    pa.process = {'Y','X','Z',{'Y', pi/3}};
+    % pa.process = {'H','-X/2',{'Y', pi/3},'X',{'Z', -pi/5}};
+%     pa.process = {'H','Y','H','X','Y/4','-Y/2','Z',...
+%         'Y/2','-X/4','Y','X/4','H','-X/4','Y'}; 
+    pa.start();
 
 end
+

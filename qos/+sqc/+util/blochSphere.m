@@ -9,14 +9,15 @@ classdef blochSphere < handle
         showMenubar = false
         drawHistory = false % draw history or not
         arrorTransparency
+        historyMarkerSize = 2
         color % numStates by 3 to specify color for each state, default is all red
         title = 'Bloch Sphere'
     end
     properties (SetAccess = private)
+        ax
         numStates
     end
-    properties (GetAccess = private, SetAccess = private)
-        ax       
+    properties (GetAccess = private, SetAccess = private)   
         states = {}
 
         theta
@@ -65,7 +66,7 @@ classdef blochSphere < handle
                 for ii = 1:obj.numStates
                     obj.historyLine(ii) = line(NaN, NaN, NaN,...
                         'Marker','.','Color', obj.color(ii,:),...
-                        'LineStyle','none');
+                        'LineStyle','none','MarkerSize',obj.historyMarkerSize);
                 end
             end
             obj.drawHistory = val;
@@ -87,11 +88,12 @@ classdef blochSphere < handle
                 end
                 return;
             end
-            if ~isa(state,'sqc.qs.state')
+            if ~isa(state,'sqc.qs.state') && (~isnumeric(state) ||...
+                    (isnumeric(state) && ~(numel(state)== 2)))
                 throw(MException('QOS_blochSphere:invalidInput',...
                     'sate not a quantum state.'));
             end
-            if size(state.v,2) ~= 2
+            if isa(state,'sqc.qs.state') && size(state.v,2) ~= 2
                 throw(MException('QOS_blochSphere:invalidInput',...
                     'state not a single qubit quantum state.'));
             end
@@ -102,18 +104,12 @@ classdef blochSphere < handle
             end
             obj.states{stateIdx} = state;
             
-            vs = obj.states{stateIdx}.v;
+            if isa(state,'sqc.qs.state')
+                vs = obj.states{stateIdx}.v;
+            else
+                vs = obj.states{stateIdx};
+            end
             a = angle(vs(1));
-%             if obj.drawHistory
-%                 idx = find(~isnan(obj.theta_his(:,stateIdx)),1,'last');
-%                 if isempty(idx)
-%                     obj.theta_his = [obj.theta_his;NaN*ones(1,ns)];
-%                     obj.phi_his = [obj.phi_his;NaN*ones(1,ns)];
-%                     idx = size(obj.phi_his,1);
-%                 end
-%                 obj.theta_his(idx,stateIdx) = obj.theta(stateIdx);
-%                 obj.phi_his(idx,stateIdx) = obj.phi(stateIdx);
-%             end
             obj.theta(stateIdx) = real(2*acos(vs(1)*exp(-1j*a)));
             obj.phi(stateIdx) = real(...
                 log((vs(2)*exp(-1j*a))/sin(obj.theta(stateIdx)/2))/1j);
@@ -177,6 +173,10 @@ classdef blochSphere < handle
             if ~isfield(obj.handles,'sphere') || isempty(obj.handles.sphere) ||...
                     ~ishghandle(obj.handles.sphere)
                 obj.plotSphere(obj);
+                if obj.drawHistory % replot the the lost trace lines
+                    obj.drawHistory = false;
+                    obj.drawHistory = true;
+                end
             end
         end
         function plotState(obj,stateIdx)
@@ -193,7 +193,7 @@ classdef blochSphere < handle
             obj.arrows(stateIdx) = qes.ui.mArrow3([0,0,0],[xCur,yCur,zCur],...
                     'color',obj.color(stateIdx,:),'stemWidth',0.015,...
                     'facealpha',obj.arrorTransparency(stateIdx));
-            if obj.drawHistory
+            if obj.drawHistory && ishghandle(obj.historyLine(stateIdx))
                 xData = get(obj.historyLine(stateIdx),'XData');
                 yData = get(obj.historyLine(stateIdx),'YData');
                 zData = get(obj.historyLine(stateIdx),'ZData');
