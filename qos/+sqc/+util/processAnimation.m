@@ -234,7 +234,7 @@ function processAnimation(gates,initialState)
         fpos = [0,0,700,700];
     end
     
-    hf = qes.ui.qosFigure('Pcocess Animation',false);
+    hf = qes.ui.qosFigure('Prcocess Animation',false);
     set(hf,'ToolBar','none','MenuBar','none','Position',[0,0,800,800]);
     ax = axes('Parent',hf,'Position',[-0.25,-0.25,1.5,1.5]);
     while 1
@@ -245,7 +245,7 @@ function processAnimation(gates,initialState)
             ax = qes.ui.blochSpherePlot(ax, vs(1,ii), vs(2,ii));
         catch
             if ~isvalid(ax)
-                hf = qes.ui.qosFigure('Pcocess Animation',false);
+                hf = qes.ui.qosFigure('Prcocess Animation',false);
                 set(hf,'ToolBar','none','MenuBar','none','Position',fpos);
                 ax = axes('Parent',hf,'Position',[-0.25,-0.25,1.5,1.5]);
                 ax = qes.ui.blochSpherePlot(ax, vs(1,ii), vs(2,ii));
