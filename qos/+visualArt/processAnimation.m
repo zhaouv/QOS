@@ -10,7 +10,8 @@ function processAnimation()
     % pa.process = {'H','-X/2',{'Y', pi/3},'X',{'Z', -pi/5}};
 %     pa.process = {'H','Y','H','X','Y/4','-Y/2','Z',...
 %         'Y/2','-X/4','Y','X/4','H','-X/4','Y'}; 
-    pa.start();
+    pa.playDuration = 5; % play time in seconds
+    pa.play();
 
 end
 

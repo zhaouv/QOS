@@ -21,7 +21,7 @@ classdef processAnimator < handle
         color = [1,0,0] % state arrow color, default red
         title = 'Process Animation'
         resolution = 2*pi/150
-        speed
+        playDuration = 10 % the amount of time in seconds to play the animation for one pass
     end
     properties (Constant = true)
         supportedGates = {'X','X/2','-X/2','X/4','-X/4',...
@@ -37,9 +37,13 @@ classdef processAnimator < handle
         gateText
         stateText
         
+        numFrames
+        frameIdx = 1
         vsTrace
         gnTrace
         stateTrace
+        
+        playTmr
     end
     methods
         function obj = processAnimator(ax_)
@@ -48,6 +52,46 @@ classdef processAnimator < handle
             end
             obj.blochSphere = sqc.util.blochSphere(ax_);
             obj.blochSphere.drawHistory = false;
+            obj.playTmr = timer('BusyMode','drop','ExecutionMode','fixedRate',...
+                'ObjectVisibility','off',...
+                'TimerFcn',{@drawFrame});
+            function drawFrame(~,~)
+                if obj.frameIdx < obj.numFrames
+                    obj.blochSphere.addState(obj.vsTrace(:,obj.frameIdx));
+                    obj.blochSphere.draw();
+                    if obj.showText
+                        if ishghandle(obj.gateText)
+                            delete(obj.gateText);
+                        end
+                        if ishghandle(obj.stateText)
+                            delete(obj.stateText);
+                        end
+                        obj.gateText = text(-2.2,-1.2,0,['Gate: ',...
+                            obj.gnTrace{obj.frameIdx}],'FontSize',10,'Parent',obj.ax);
+                        obj.stateText = text(0.2,-0.1,-1.35,...
+                            ['State: ',obj.stateTrace{obj.frameIdx}],'FontSize',10,...
+                            'Parent',obj.ax,'Interpreter','tex');
+                    end
+                    obj.frameIdx = obj.frameIdx + 1;
+                else
+                    stop(obj.playTmr);
+                end
+            end
+        end
+        function set.playDuration(obj,val)
+            obj.playDuration = val;
+            if isempty(obj.numFrames)
+                return;
+            end
+            isPalying = false;
+            if strcmp(obj.playTmr.Running,'on')
+                isPalying = true;
+                stop(obj.playTmr);
+            end
+            set(obj.playTmr,'Period',ceil(1000*val/obj.numFrames)/1000);
+            if isPalying
+                start(obj.playTmr);
+            end
         end
         function set.showText(obj,val)
             val = logical(val);
@@ -104,7 +148,7 @@ classdef processAnimator < handle
             s = sqc.qs.state(val);
             obj.initialState = s.v;
         end
-        function start(obj,loop)
+        function play(obj,loop)
             % start run animation
             % loop: run forever or just once(default)
             if nargin == 1
@@ -112,26 +156,16 @@ classdef processAnimator < handle
             end
             obj.prepareAnimationData();
             while 1
-                for ii = 1:size(obj.vsTrace,2)
-                    obj.blochSphere.addState(obj.vsTrace(:,ii));
-                    obj.blochSphere.draw();
-                    if obj.showText
-                        if ishghandle(obj.gateText)
-                            delete(obj.gateText);
-                        end
-                        if ishghandle(obj.stateText)
-                            delete(obj.stateText);
-                        end
-                        obj.gateText = text(-2.2,-1.2,0,['Gate: ',obj.gnTrace{ii}],'FontSize',10,'Parent',obj.ax);
-                        obj.stateText = text(0.2,-0.1,-1.35,['State: ',obj.stateTrace{ii}],'FontSize',10,...
-                            'Parent',obj.ax,'Interpreter','tex');
-                    end
-                    pause(0.05);
-                end
+                obj.frameIdx = 1;
+                start(obj.playTmr);
                 if ~loop
                     break;
                 end
             end
+        end
+        function delete(obj)
+            stop(obj.playTmr);
+            delete(obj.playTmr);
         end
     end
     methods (Access = private)
@@ -371,6 +405,16 @@ classdef processAnimator < handle
             obj.vsTrace = vs;
             obj.gnTrace = gNames;
             obj.stateTrace = states;
+            obj.numFrames = numel(obj.stateTrace);
+            isPalying = false;
+            if strcmp(obj.playTmr.Running,'on')
+                isPalying = true;
+                stop(obj.playTmr);
+            end
+            set(obj.playTmr,'Period',ceil(1000*obj.playDuration/obj.numFrames)/1000);
+            if isPalying
+                start(obj.playTmr);
+            end
         end
     end
 end

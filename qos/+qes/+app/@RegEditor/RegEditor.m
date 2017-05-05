@@ -209,7 +209,7 @@ classdef (Sealed = true)RegEditor < handle
         function delete(obj)
             if ~isempty(obj.guiHandles) &&...
                     isfield(obj.guiHandles,'reWin') &&...
-                    isvalid(obj.guiHandles.reWin)
+                    ishghandle(obj.guiHandles.reWin)
                 close(obj.guiHandles.reWin);
             end
             if ~isempty(obj.tblRefreshTmr)
