@@ -1,8 +1,8 @@
 function Value = num2strCompact(Value,numDigits)
     % a compact and smarter version of MATLAB num2str
     % num2str(1e8,'%e'):	'1.000000e+08'
-    % num2str(1e8):         '1e8'
-    % num2str(1e-8):        '1e-8'
+    % num2strCompact(1e8):         '1e8'
+    % num2strCompact(1e-8):        '1e-8'
     % numDigits: number of digits to the left of the decimal point
     % complex value OK.
 
@@ -40,7 +40,7 @@ function Value = num2strCompact(Value,numDigits)
     end
     
     formatspecf = ['%0.',num2str(numDigits,'%0.0f'),'f'];
-    formatspece = ['%0.',num2str(numDigits,'%0.0f'),'f'];
+    formatspece = ['%0.',num2str(numDigits,'%0.0f'),'e'];
     if abs(Value) > 1e3 ||...
             (abs(Value) < 1e-3 && round(Value) ~= Value)
         Value = num2str(Value,formatspece);
