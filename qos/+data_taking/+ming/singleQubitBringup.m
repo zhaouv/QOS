@@ -12,7 +12,7 @@ import data_taking.public.xmon.*
 %%
 % qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
 qubits = {'q2','q3','q4'};
-dips = [6.74230e+09 6.80480e+09 6.616e9]; % by qubit index
+dips = [6.74230e+09 6.80680e+09 6.616e9]; % by qubit index
 %%
 ustcaddaObj.close()
 %% S21
@@ -22,7 +22,7 @@ s21_zdc('qubit', qubits{1},...
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
 amps=[logspace(log10(3000),log10(30000),41)];
 for ii = 2
-s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2e6:0.1e6:dips(ii)+2e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
+s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-3e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
       'notes',['RT attenuation:23dB; ' qubits{ii}],'gui',true,'save',true,'r_avg',1000);
 end
 %%
@@ -48,10 +48,10 @@ end
 %% spectroscopy1_zpa_s21
 
 for ii=2
-    QS.saveSSettings({qubits{ii},'spc_driveAmp'},2000)
+    QS.saveSSettings({qubits{ii},'spc_driveAmp'},3000)
     spectroscopy1_zpa_s21('qubit',qubits{ii},...
-       'biasAmp',[-3e4:1e3:3e4],'driveFreq',[5.65e9:2e6:6.5e9],...
-       'r_avg',1000,'notes','','gui',true,'save',true);
+       'biasAmp',0,'driveFreq',[6.35e9:2e6:6.6e9],...
+       'r_avg',5000,'notes','','gui',true,'save',true);
 end
 %%
 amp=5e3;
@@ -61,8 +61,8 @@ spectroscopy1_zpa_s21('qubit',qubits{2},...
        'notes',[qubits{2} ', spc amp: ' num2str(amp)],'r_avg',1000,'gui',true,'save',true);
 %%
 % setZDC('q2',-2000);
-rabi_amp1('qubit','q8','biasAmp',[0],'biasLonger',0,...
-      'xyDriveAmp',[0:300:3e4],'detuning',[0],'driveTyp','X','notes','20dB',...
+rabi_amp1('qubit','q3','biasAmp',[0],'biasLonger',10,...
+      'xyDriveAmp',[0:300:3e4],'detuning',[0],'driveTyp','X','notes','       20dB',...
       'dataTyp','S21','r_avg',10000,'gui',true,'save',true);
 % rabi_amp1('qubit','q2','xyDriveAmp',[0:500:3e4]);  % lazy mode
 %% To do

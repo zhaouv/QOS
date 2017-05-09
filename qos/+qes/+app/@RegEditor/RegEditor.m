@@ -18,7 +18,7 @@ classdef (Sealed = true)RegEditor < handle
         keyAnnotation
     end
     properties (Constant = true, GetAccess = private)
-        tblRefreshPeriond = 10
+        tblRefreshPeriond = 30
     end
     methods
         function obj = RegEditor()

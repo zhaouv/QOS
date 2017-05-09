@@ -24,6 +24,9 @@ function varargout = spin_echo_df01(varargin)
     import sqc.op.physical.*
 
     args = util.processArgs(varargin,{'gui',false,'notes','','detuning',0,'save',true});
+    if any(mod(args.time,2)~=0)
+        throw(MException('QOS_spinEcho:invalidInput','time not even integers.'));
+    end
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
     da =  qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.xy_i.instru);

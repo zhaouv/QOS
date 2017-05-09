@@ -41,28 +41,48 @@ end
 
 function proc = procFactory(amp_)
     g.amp = amp_;
-    proc = g*g;
+    proc = g^n;
 end
 switch args.driveTyp
 	case 'X'
 		XY = gate.X(driveQubit);
 	case {'X/2','X2p'}
 		g = gate.X2p(driveQubit);
+        n = 2;
 		XY = @procFactory;
 	case {'-X/2','X2m'}
 		g = gate.X2m(driveQubit);
+        n = 2;
+		XY = @procFactory;
+    case {'X/4','X4p'}
+		g = gate.X4p(driveQubit);
+        n = 4;
+		XY = @procFactory;
+    case {'-X/4','X4m'}
+		g = gate.X4m(driveQubit);
+        n = 4;
 		XY = @procFactory;
 	case 'Y'
 		XY = gate.Y(driveQubit);
 	case {'Y/2', 'Y2p'}
 		g = gate.Y2p(driveQubit);
+        n = 2;
 		XY = @procFactory;
 	case {'-Y/2', 'Y2m'}
 		g = gate.Y2m(driveQubit);
+        n = 2;
+		XY = @procFactory;
+    case {'Y/4','Y4p'}
+		g = gate.Y4p(driveQubit);
+        n = 4;
+		XY = @procFactory;
+    case {'-Y/4','Y4m'}
+		g = gate.Y4m(driveQubit);
+        n = 4;
 		XY = @procFactory;
 	otherwise
 		throw(MException('QOS_rabi_amp111:illegalDriverTyp',...
-			sprintf('the given drive type %s is not one of the allowed drive types: X, X/2, -X/2, Y, Y/2, -Y/2',...
+			sprintf('the given drive type %s is not one of the allowed drive types: X, X/2, -X/2, X/4, -X/4, Y, Y/2, -Y/2, Y/4, -Y/4',...
 			args.driveTyp)));
 end
 switch args.driveTyp
@@ -91,7 +111,7 @@ switch args.dataTyp
         R.name = '|S21|';
         R.datafcn = @(x)mean(abs(x));
     otherwise
-        throw(MException('QOS_rabi_amp111',...
+        throw(MException('QOS_rabi_amp111:unsupportedDataTyp',...
 			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
 			args.dataTyp));
 end
