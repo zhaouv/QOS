@@ -68,24 +68,32 @@ rWv = [spacer(START_OFFSET),rWv,spacer(D)];
 
 X = gate.X(q);
 I = gate.I(q);
-    function proc = processFactory(delay)
+    function proc = procFactory(delay)
         I.ln = delay;
         proc = X*I;
     end
 R = measure.resonatorReadout_ss(q);
 R.delay = rWv.length;
+R.state = 2;
 R.startWv = rWv;
 
-x = expParam(X,'f01');
+x = expParam(X,'mw_src{1}.frequency');
 x.name = [q.name,' pi pulse freq. detuning(Hz)'];
-x.offset = q.f01;
-y = expParam(@processFactory);
+x.offset = q.qr_xy_fc;
+y = expParam(@procFactory);
 y.offset = START_OFFSET;
 y.name = [q.name,' pi pulse delay time(da sampling interval)'];
 y.callbacks ={@(x_) x_.expobj.Run()};
 
+X.Run(); % by doing so, the mw source will be set, from this point on,
+         % any operators drived from X will assume that the corresponding
+         % mw source has been set and will not set it again, this is
+         % important here because if not so, the setting mw frequency
+         % operation of x will be undo by y.
+         % use I.Run() here also ok.
+
 s1 = sweep(x);
-s1.vals = args.detuning;
+s1.vals = -args.detuning;
 s2 = sweep(y);
 s2.vals = args.time;
 e = experiment();

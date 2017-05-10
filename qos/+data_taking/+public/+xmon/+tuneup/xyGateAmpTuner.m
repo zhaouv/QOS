@@ -47,16 +47,24 @@ function varargout = xyGateAmpTuner(varargin)
 	elseif rP < 5/sqrt(q.r_avg)
 		throw(MException('QOS_xyGateAmpTuner:rAvgTooLow',...
 				'readout average number %d too small.', q.r_avg));
-	end
-	[maxP,maxIdx] = max(P);
-	if maxIdx < NUM_RABI_SAMPLING_PTS/3 ||...
-		range(P(max(1,round(maxIdx-NUM_RABI_SAMPLING_PTS/6)):...
-		min(NUM_RABI_SAMPLING_PTS,round(maxIdx+NUM_RABI_SAMPLING_PTS/6))))...
-		> range(P)/2
+    end
+    
+    [pks,locs,~,~] = findpeaks(P,'MinPeakHeight',2*rP/3,...
+        'MinPeakProminence',rP/2,'MinPeakDistance',numel(P)/4,...
+        'WidthReference','halfprom');
+    if isempty(pks)
+        throw(MException('QOS_xyGateAmpTuner:SNRLow',...
+				'no peaks detected, data SNR probabality too low.'));
+    end
+    [locs,idx] = sort(locs,'ascend');
+    pks = pks(idx);
+    
+	maxIdx = locs(1);
+	if numel(pks) > 3
 		throw(MException('QOS_xyGateAmpTuner:tooManyOscCycles',...
 				'too many oscillation cycles or data SNR too low.'));
 	end
-	dP = maxP-P;
+	dP = pks(1)-P;
 	idx1 = find(dP(maxIdx:-1:1)>rP/4,1,'first');
 	if isempty(idx1)
 		idx1 = 1;
