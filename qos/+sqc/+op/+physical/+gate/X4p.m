@@ -25,7 +25,7 @@ classdef X4p < sqc.op.physical.gate.XY_base
 %                     end
 %                 end
 %             end
-            obj.length = obj.qubits{1}.g_XY_ln;
+            obj.length = obj.qubits{1}.g_XY4_ln;
             obj.amp = obj.qubits{1}.g_X4p_amp;
         end
     end

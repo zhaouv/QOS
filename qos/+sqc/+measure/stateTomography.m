@@ -20,15 +20,17 @@ classdef stateTomography < qes.measurement.measurement
         function obj = stateTomography(qubits)
 			import sqc.op.physical.gate.*
 			if ~iscell(qubits)
-				if ischar(qubits) % single qubit name
-					qubits = {qubits};
-				else
-					throw(MException('QOS_stateTomography:invalidInput',...
-						'the input qubits should be a cell array of qubit objects or qubit names.'));
+                qubits = {qubits};
+            end
+            numTomoQs = numel(qubits);
+            for ii = 1:numTomoQs
+                if ischar(qubits{ii})
+                    qs = sqc.util.loadQubits();
+                    qubits{ii} = qs{qes.util.find(qubits{ii},qs)};
 				end
-			end
+            end
+            obj = obj@qes.measurement.measurement([]);
 			obj.qubits = qubits;
-			numTomoQs = numel(obj.qubits);
 			obj.readoutGates = cell(numTomoQs);
 			for ii = 1:numTomoQs
 				obj.readoutGates{ii} = {I(obj.qubits{ii}),...
@@ -72,7 +74,7 @@ classdef stateTomography < qes.measurement.measurement
         end
     end
 	methods(Hidden = true)
-		function setProcess(p)
+		function setProcess(obj,p)
 			% for process tomography
 			if ~isa(p,'sqc.op.physical.operator')
 				throw(MException('QOS_stateTomography:invalidInput',...

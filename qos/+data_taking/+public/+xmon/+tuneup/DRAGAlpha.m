@@ -2,7 +2,7 @@ function varargout = DRAGAlpha(varargin)
 % finds the optimal DRAGAlpha by APE
 %
 % <[_f_]> = DRAGAlpha('qubit',_c&o_,...
-%       'gui',<_b_>,'save',<_b_>)
+%       'numI',<_i_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
 % _c_: char or char string
@@ -22,7 +22,7 @@ function varargout = DRAGAlpha(varargin)
 	MINIMUMVISIBILITY1 = 0.35;
 	MINIMUMVISIBILITY2 = 0.25;
 	
-    args = qes.util.processArgs(varargin,{'gui',false,'save',true});
+    args = qes.util.processArgs(varargin,{numI,10,'gui',false,'save',true});
 	q = copy(getQubits(args,{'qubit'})); % we need to modify the qubit properties, better make a copy to avoid unwanted modifications to the original.
 	if ~q.qr_xy_dragPulse
 		q.qr_xy_dragPulse = true;
@@ -34,7 +34,7 @@ function varargout = DRAGAlpha(varargin)
 	P0 = e.data{1};
 	visibility = range(P0);
 	if visibility < MINIMUMVISIBILITY1
-		throw(MException('QOS_DRAGAlpha：visibilityTooLow',...
+		throw(MException('QOS_DRAGAlpha:visibilityTooLow',...
 			'visibility(%0.2f) too low, run DRAGAlpha at low visibility might produce wrong result, thus not supported.', P0));
 	end
 	function f__ = fitFcn(param_,x_)
@@ -47,22 +47,17 @@ function varargout = DRAGAlpha(varargin)
 		throw(MException('QOS_DRAGAlpha:fittingFailed','fitting failed.'));
 	end
 	
-	e = APE('qubit',q,'numI',10);
+	e = APE('qubit',q,'numI',args.numI);
 	PN = e.data{1};
 	visibility = range(PN);
 	if visibility < MINIMUMVISIBILITY2
-		e = APE('qubit',q,'numI',5);
-		PN = e.data{1};
-		visibility = range(PN);
-		if visibility < MINIMUMVISIBILITY2
-			throw(MException('QOS_DRAGAlpha：visibilityTooLow',...
+		throw(MException('QOS_DRAGAlpha:visibilityTooLow',...
 				'visibility(%0.2f) too low, run DRAGAlpha at low visibility might produce wrong result, thus not supported.', PN));
-		end
 	end
 
-    if args.save
-        QS.saveSSettings({q.name,'zdc_amp2f01'},param);
-    end
-	
-	varargout{1} = q.zdc_amp2f01;
+%     if args.save
+%         QS.saveSSettings({q.name,'zdc_amp2f01'},param);
+%     end
+% 	
+% 	varargout{1} = q.zdc_amp2f01;
 end

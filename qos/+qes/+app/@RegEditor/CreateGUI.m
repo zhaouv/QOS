@@ -191,7 +191,7 @@ function CreateGUI(obj)
     obj.tblRefreshTmr = timer('BusyMode','drop','ExecutionMode','fixedSpacing',...
             'ObjectVisibility','off','Period',obj.tblRefreshPeriond,...
             'TimerFcn',{@refreshTableData});
-    start(obj.tblRefreshTmr);
+    % start(obj.tblRefreshTmr);
     
     function refreshTableData(~,~)
         if ~isvalid(obj.guiHandles.regTable) || isempty(obj.nodeName) || isempty(obj.nodeParent)

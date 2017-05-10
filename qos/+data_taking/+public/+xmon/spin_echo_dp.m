@@ -24,12 +24,15 @@ function varargout = spin_echo_dp(varargin)
     import sqc.op.physical.*
 
     args = util.processArgs(varargin,{'gui',false,'notes','','detuning',0,'save',true});
+    if any(mod(args.time,2)~=0)
+        throw(MException('QOS_spinEcho:invalidInput','time not even integers.'));
+    end
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
     da =  qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.xy_i.instru);
     daSamplingRate = da.samplingRate;
 
-    X = op.XY(q,0);
+    X = gate.X(q);
     X2 = op.XY2p(q,0);
     I = gate.I(q);
     R = measure.resonatorReadout_ss(q);
@@ -38,7 +41,6 @@ function varargout = spin_echo_dp(varargin)
     function proc = procFactory(delay)
         I.ln = delay/2;
 		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
-        X.phase = X2.phase/2;
         proc = X2*I*X*I*X2_;
     end
 
