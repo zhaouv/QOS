@@ -46,7 +46,7 @@ wave2=32768+32768/2*sin(2*pi*t/10);
 ustcaddaObj.SendContinuousWave(2,wave1)
 ustcaddaObj.SendContinuousWave(1,wave2)
 %% sin wave
-for ii = 16
+for ii = 12
     ustcaddaObj.SendWave(ii,32768+32768*sin((1:8000)/1000*2*pi));
 end
 ustcaddaObj.Run(false);

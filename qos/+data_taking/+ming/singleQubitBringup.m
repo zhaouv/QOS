@@ -4,26 +4,30 @@ import qes.*
 import qes.hwdriver.sync.*
 QS = qSettings.GetInstance('D:\Dropbox\MATLAB GUI\USTC Measurement System\settings');
 QS.SU('Ming');
-QS.SS('s170502');
+QS.SS('s170509');
 QS.CreateHw();
 ustcaddaObj = ustcadda_v1.GetInstance();
 import data_taking.public.util.*
 import data_taking.public.xmon.*
 %%
 % qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-qubits = {'q2','q3','q4'};
-dips = [6.74230e+09 6.80680e+09 6.616e9]; % by qubit index
+qubits = {'q1','q3','q4','q5'};
+dips = [6.6903e+09 6.80580e+09 6.6163e9 6.577e9 ]; % by qubit index
 %%
 ustcaddaObj.close()
+%%
+for ii=3:3
+s21_zdc_networkAnalyzer('qubit',qubits{ii},'NAName',[],'startFreq',dips(ii)-10e6,'stopFreq',dips(ii)+2e6,'numFreqPts',500,'avgcounts',30,'NApower',-15,'amp',[-3e4:1e3:3e4],'bandwidth',10000,'notes','','gui',true,'save',true)
+end
 %% S21
 s21_zdc('qubit', qubits{1},...
       'freq',6.5e9:2e6:7e9,'amp',0,...
       'notes','','gui',true,'save',true);
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
-amps=[logspace(log10(3000),log10(30000),41)];
-for ii = 2
-s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-3e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
-      'notes',['RT attenuation:23dB; ' qubits{ii}],'gui',true,'save',true,'r_avg',1000);
+amps=[logspace(log10(300),log10(30000),41)];
+for ii = 1:2
+s21_rAmp('qubit',qubits{ii},'freq',[dips(ii)-2e6:0.1e6:dips(ii)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
+      'notes',['RT attenuation:23dB; ' qubits{ii}],'gui',true,'save',true,'r_avg',3000);
 end
 %%
 
@@ -40,10 +44,7 @@ s21_zpa('qubit', qubits{ii},...
       'notes',[qubits{ii} ', S21 vs Z pulse'],'gui',true,'save',true);
 end
 
-%%
-for ii=10:10
-s21_zdc_networkAnalyzer('qubit','q1','NAName',[],'startFreq',dips(ii)-3e6,'stopFreq',dips(ii)+3e6,'numFreqPts',500,'avgcounts',10,'NApower',-10,'amp',[-3e4:1e3:3e4],'bandwidth',20000,'notes',['DC4, Dip ' num2str(ii)],'gui',true,'save',true)
-end
+
 
 %% spectroscopy1_zpa_s21
 
