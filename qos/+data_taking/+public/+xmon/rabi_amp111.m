@@ -119,8 +119,6 @@ end
 switch args.driveTyp
 	case {'X','Y'}
         x = expParam(XY,'f01');
-        x.callbacks ={@(x_) x_.expobj.Run()};
-        x.deferCallbacks = true;
     otherwise
         x = expParam(g,'f01');
 end
@@ -131,8 +129,7 @@ y = expParam(XY,'amp');
 y.name = [driveQubit.name,' xyDriveAmp'];
 y.auxpara = Z;
 y.callbacks ={@(x_) x_.expobj.Run();...
-    @(x_) x_.auxpara.Run();...
-    @(x_)expParam.RunCallbacks(x)};
+    @(x_) x_.auxpara.Run()};
 
 s1 = sweep(x);
 s1.vals = args.detuning;

@@ -1,6 +1,6 @@
 function processAnimation()
-
-    hf = qes.ui.qosFigure('Process Animation Test',false);
+% demonstration of processAnimation
+    hf = qes.ui.qosFigure('Process Animation Demo',false);
     set(hf,'ToolBar','none','MenuBar','none');
     ax = axes('Parent',hf,'Position',[-0.25,-0.25,1.5,1.5]);
     pa = sqc.util.processAnimator(ax);
