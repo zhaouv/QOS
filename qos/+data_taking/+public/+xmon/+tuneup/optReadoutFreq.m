@@ -77,6 +77,7 @@ function varargout = optReadoutFreq(varargin)
         title(ax,sprintf('Maximum IQ separation frequency: %0.5fGHHz',optFreq/1e9));
         set(ax,'PlotBoxAspectRatio',[1,1,1]);
         pbaspect(ax,[1,1,1]);
+        drawnow;
     end
     if args.save
         QS = qes.qSettings.GetInstance();

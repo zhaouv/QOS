@@ -33,7 +33,7 @@ args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'driveFreq',[],'gui',fa
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
     args.driveFreq = driveQubit.f01-3*driveQubit.t_spcFWHM_est:...
-        driveQubit.t_spcFWHM_est/10:driveQubit.f01+3*driveQubit.t_spcFWHM_est;
+        driveQubit.t_spcFWHM_est/15:driveQubit.f01+3*driveQubit.t_spcFWHM_est;
 end
 
 if ~isempty(args.r_avg)
