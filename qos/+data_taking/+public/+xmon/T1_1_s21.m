@@ -32,29 +32,24 @@ if ~isempty(args.r_avg) %add by GM, 20170416
     q.r_avg=args.r_avg;
 end
 
-X = gate.X(q);
-Z = op.zBias4Spectrum(q);
-Z.ln = X.length; % GM, 20170416
-
-
-
-% R = measure.rReadout4T1(q,X.mw_src{1});
-% R.swapdata = true;
-% R.name = '|S21|';
-
-
+X = gate.X(driveQubit);
+I = gate.I(biasQubit);
+I.ln = args.biasDelay;
+Z = op.zBias4Spectrum(biasQubit);
+function proc = procFactory(delay)
+	Z.ln = delay;
+	proc = Z*I*X;
+end
 R = measure.resonatorReadout_ss(q);
 R.swapdata = true;
 R.name = 'iq';
 R.datafcn = @(x)mean(abs(x));
 
-
 x = expParam(Z,'amp');
 x.name = [q.name,' z bias amplitude'];
 y = expParam(Z,'ln');
 y.name = [q.name,' decay time(da sampling interval)'];
-y.auxpara = X;
-y.callbacks ={ @(x_) x_.expobj.Run(); @(x_) x_.auxpara.Run()};
+y.callbacks ={ @(x_) x_.expobj.Run(); @(x_) X.Run()};
 y_s = expParam(R,'delay');
 y_s.offset = X.length;
 s1 = sweep(x);

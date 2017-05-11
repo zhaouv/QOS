@@ -69,6 +69,7 @@ function varargout = correctf01bySpc(varargin)
 		ylabel(ax,'P|1>');
         legend(ax,{'data',sprintf('f01:%0.5fGHz',f01/1e9)});
         set(ax,'YLim',ylim);
+        drawnow;
     end
 	if args.save
         QS = qes.qSettings.GetInstance();

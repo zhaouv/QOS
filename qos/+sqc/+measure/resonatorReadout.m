@@ -7,10 +7,12 @@ classdef resonatorReadout < qes.measurement.prob
     
     properties
         n
-        delay % syncDelay is add automatically, this is just a logical dely
+        delay = 0 % syncDelay is add automatically, this is just a logical dely
         r_amp % expose qubit setting r_amp for tunning
         mw_src_power % expose qubit setting r_uSrcPower for tunning
         mw_src_frequency % expose qubit setting r_fc for tunning
+        
+        startWv % wave object to be add before the start of readout waveform
     end
     properties (SetAccess = protected)
         qubits
@@ -40,6 +42,7 @@ classdef resonatorReadout < qes.measurement.prob
         adSamplingRate
         daSamplingRate
         adRecordLength
+        
     end
     methods
         function obj = resonatorReadout(qubits)
@@ -230,6 +233,11 @@ classdef resonatorReadout < qes.measurement.prob
             obj.r_amp = val;
         end
 		function set.delay(obj,val)
+            if ~isempty(obj.startWv) && wvObj.length > obj.delay
+                throw(MException('QOS_resonatorReadout:delayTooShort',...
+                    sprintf('startWv length(%0.0f) exceeding delay(%0.0f).',...
+                    wvObj.length,val)));
+            end
  			obj.delay = val;
             vSamplingRate = lcm(obj.adSamplingRate,obj.daSamplingRate);
             dd = (obj.delay - obj.adDelayStep*floor(obj.delay/obj.adDelayStep))*...
@@ -239,20 +247,23 @@ classdef resonatorReadout < qes.measurement.prob
                 obj.iq_obj.upSampleNum...
                 -obj.adDelayStep*vSamplingRate/obj.daSamplingRate+dd;
             
-%             disp('recordLn');
-%             disp(obj.ad.recordLength)
-%             disp('delay');
-%             disp(obj.delay)
-%             disp('startidx');
-%             disp(obj.iq_obj.startidx)
-%             disp('endidx');
-%             disp(obj.iq_obj.endidx)
-            
-            
             if ~isempty(obj.qubits{1}.r_jpa)
                 obj.jpa.startDelay = obj.delay-obj.qubits{1}.r_jpa_longer;
             end
-		end
+        end
+        function set.startWv(obj,wvObj)
+            % append a waveform to the start of the readout waveform
+            if ~isa(wvObj,'qes.waveform.waveform')
+                throw(MException('QOS_resonatorReadout:invalidInput',...
+                    sprintf('startWv should be a waveform object, %s given',...
+                    class(wvObj))));
+            elseif wvObj.length > obj.delay
+                throw(MException('QOS_resonatorReadout:startWvTooLong',...
+                    sprintf('startWv length(%0.0f) exceeding delay(%0.0f).',...
+                    wvObj.length,obj.delay)));
+            end
+            obj.startWv = wvObj;
+        end
         function Run(obj)
             obj.GenWave();
             obj.Prep();
@@ -289,11 +300,16 @@ classdef resonatorReadout < qes.measurement.prob
             for ii = 2:num_qubits
                 obj.r_wv = obj.r_wv + wv_{ii};
             end
+            if ~isempty(obj.startWv)
+                obj.r_wv = [obj.startWv, obj.r_wv];
+            end
             obj.r_wv.awg = obj.da;
             obj.r_wv.awgchnl = [obj.da_i_chnl,obj.da_q_chnl];
             obj.r_wv.hw_delay = true; % important
             obj.r_wv.output_delay = obj.delay+obj.qubits{1}.syncDelay_r; % syncDelay_z is added as a small calibration.
-			
+            if ~isempty(obj.startWv)
+                obj.r_wv.output_delay = obj.r_wv.output_delay-obj.startWv.length;
+            end
 			if ~isempty(obj.qubits{1}.r_jpa)
 				obj.jpa_pump_wv = sqc.wv.rect_cos(obj.jpa.opDuration);
 				obj.jpa_pump_wv.amp = obj.jpa.pumpAmp;

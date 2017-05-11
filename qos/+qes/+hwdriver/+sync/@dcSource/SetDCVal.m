@@ -28,4 +28,8 @@ function SetDCVal(obj,val,chnl)
         otherwise
              error('DCSource:SetDCVal', ['Unsupported instrument: ',TYP]);
     end
+    
+%     % to have things flushing out on screen, keep for occassions like TV interviews 
+%     disp(sprintf('setting power of dc src [%s] to %0.3f on chnl %0.0f',...
+%                 obj.name,val,chnl));
 end
