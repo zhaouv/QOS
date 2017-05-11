@@ -82,7 +82,7 @@ classdef stateTomography < qes.measurement.measurement
 			end
 			if ~qes.util.identicalArray(p.qubits,obj.qubits)
 				throw(MException('QOS_stateTomography:differentQubtSet',...
-						'the input process acts on a different qubit set than the state tomography object.'));
+						'the input process acts on a different qubit set than the state tomography qubits.'));
 			end
 			obj.process = p;
 		end
