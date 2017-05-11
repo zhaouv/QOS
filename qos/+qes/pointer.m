@@ -11,15 +11,47 @@ classdef pointer < handle
     %
     %d(10,1)=pointer; ok
     %f{2,1}=pointer; ok
+    %
+    %g=struct('a',1,'b',2)
+    %h=pointer(g)
+    %i=pointer(h)
+    %a.copy(g)
+    %j=h.struct()
+    %isa(j,'struct')
     
-% zhaouv https://zhaouv.github.io/
+    % zhaouv https://zhaouv.github.io/
     
-    properties(Access = private)
+    properties (Access = private)
         handles
     end
     
     
     methods
+        function obj=pointer(struct_)
+            if nargin
+                obj=pointer;
+                copy(obj,struct_);
+            end
+        end
+        
+        function obj=copy(obj,struct_)
+            if ~isa(struct_,'pointer')
+                struct_=struct(struct_);
+            end
+            if ~isa(struct_,'struct')
+                error('not a struct or pointer')
+            end
+            names = fieldnames(struct_);
+            for i=1:length(names)
+               name = char(names(i));
+               eval(['obj.handles.' name '=struct_.' name ';'])
+            end
+        end
+        
+        function handles=struct(obj)
+            handles=obj.handles;
+        end
+        
         function disp(objs)
             if size(objs,1)~=1 || size(objs,2)~=1 || size(size(objs),2)~=2
                 sstr=sprintf('%d   ',size(objs));
@@ -40,7 +72,7 @@ classdef pointer < handle
         function obj=subsasgn(obj,s,val)
             if size(s,1)~=1 || size(s,2)~=1
                 sobj=obj;
-                obj=subsasgn(subsref(obj,s(1:end-1)),s(end),val);
+                obj=subsasgn(subsref(obj,s(1:end-1)),s(end),val); %#ok<NASGU>
                 obj=sobj;
             else
                 switch s.type
@@ -60,7 +92,7 @@ classdef pointer < handle
                                         num=num * s.subs{i};
                                     end
                                     for i=1:num-1
-                                        forreshape=[forreshape pointer()];
+                                        forreshape=[forreshape pointer()]; %#ok<AGROW>
                                     end
                                     forreshape=[forreshape val];
                                     obj=reshape(forreshape,cell2mat(s.subs));
@@ -71,8 +103,14 @@ classdef pointer < handle
         end
         function sref=subsref(obj,s)
             if size(s,1)~=1 || size(s,2)~=1
+                if ismember(s(1).subs,{'copy'})
+                    sref=copy(obj,s(2).subs{1});
+                elseif ismember(s(1).subs,{'struct'})
+                    sref=struct(obj);
+                else
                 tobj=subsref(obj,s(1));
                 sref=subsref(tobj,s(2:end));
+                end
             else
                 switch s.type
                     case '.'

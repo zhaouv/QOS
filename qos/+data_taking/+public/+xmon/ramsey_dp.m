@@ -48,23 +48,22 @@ function varargout = ramsey_dp(varargin)
 		q.channels.xy_i.instru);
 	daSamplingRate = da.samplingRate;
 	X2_ = copy(X2);
-    function proc = procFactory(delay)
+    function procFactory(delay)
         I.ln = delay;
 		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
         proc = X2*I*X2_;
+        proc.Run();
+        R.delay = proc.length;
     end
 
     x = expParam(detuning,'val');
 	x.name = [q.name,' detuning(Hz)'];
     y = expParam(@procFactory);
     y.name = [q.name,' time'];
-    y.callbacks ={@(x_) x_.expobj.Run()};
-    y_s = expParam(R,'delay');
-	y_s.offset = 2*X2.length+3*X2.gate_buffer;
 	s1 = sweep(x);
     s1.vals = args.detuning;
-    s2 = sweep({y,y_s});
-    s2.vals = {args.time,args.time};
+    s2 = sweep(y);
+    s2.vals = args.time;
     e = experiment();
     e.name = 'Ramsey(Detune by Phase)';
     e.sweeps = [s1,s2];

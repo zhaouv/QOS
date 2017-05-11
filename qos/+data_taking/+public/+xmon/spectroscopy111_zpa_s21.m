@@ -43,16 +43,17 @@ R.swapdata = true;
 R.name = 'iq';
 R.datafcn = @(x)mean(abs(x));
 Z = op.zBias4Spectrum(biasQubit);
+function proc = procFactory(amp)
+    Z.amp = amp;
+    proc = X.*Z;
+end
 
-x = expParam(Z,'amp');
+x = expParam(@procFactory,true);
 x.name = [biasQubit.name,' z bias amplitude'];
-x.callbacks ={@(x_) x_.expobj.Run()};
-x.deferCallbacks = true;
 y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.auxpara = X;
-y.callbacks ={@(x_)expParam.RunCallbacks(x),@(x_)x_.auxpara.Run()};
+y.callbacks ={@(x_)x.fcnval.Run()};
 
 s1 = sweep(x);
 s1.vals = args.biasAmp;

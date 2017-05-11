@@ -38,36 +38,33 @@ end
 
 X = gate.X(driveQubit);
 I = gate.I(biasQubit);
-I.ln = X.length+args.biasDelay;
+I.ln = args.biasDelay;
 Z = op.zBias4Spectrum(biasQubit);
-function proc = procFactory(delay)
-	Z.ln = delay;
-	proc = Z*I;
+function procFactory(delay)
+    Z.ln = delay;
+    proc = Z*I*X;
+    proc.Run();
+    R.delay = proc.length;
 end
 R = measure.rReadout4T1(readoutQubit,X.mw_src{1});
-
-x = expParam(Z,'amp');
-x.name = [biasQubit.name,' z bias amplitude'];
-y = expParam(@procFactory);
-y.name = [driveQubit.name,' decay time(da sampling interval)'];
-y.auxpara = X;
-y.callbacks ={@(x_) x_.expobj.Run(); @(x_) x_.auxpara.Run()};
-
 function rerunZ()
-    proc_ = procFactory(y.val);
-    proc_.Run();
+    piAmpBackup = X.amp;
+    X.amp = 0;
+    procFactory(y.val);
+    X.amp = piAmpBackup;
 end
 if args.backgroundWithZBias
     R.postRunFcns = @rerunZ;
 end
 
-y_s = expParam(R,'delay');
-y_s.offset = X.length;
-
+x = expParam(Z,'amp');
+x.name = [biasQubit.name,' z bias amplitude'];
+y = expParam(@procFactory);
+y.name = [driveQubit.name,' decay time(da sampling interval)'];
 s1 = sweep(x);
 s1.vals = args.biasAmp;
-s2 = sweep({y,y_s});
-s2.vals = {args.time,args.time};
+s2 = sweep(y);
+s2.vals = args.time;
 e = experiment();
 e.name = 'T1';
 e.sweeps = [s1,s2];

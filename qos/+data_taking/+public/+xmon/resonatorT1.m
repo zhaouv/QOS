@@ -37,7 +37,7 @@ end
 
 X = gate.X(q);
 I1 = gate.I(q);
-I1.ln = X.length+args.biasDelay;
+I1.ln = args.biasDelay;
 I2 = gate.I(q);
 I2.ln = X.length+args.biasDelay;
 Z = op.zBias4Spectrum(q);
@@ -45,28 +45,25 @@ Z.amp = args.swpPiAmp;
 Z.ln = args.swpPiLn;
 function proc = procFactory(delay)
 	I2.ln = delay;
-	proc = Z*I2*Z*I1;
+	proc = Z*I2*Z*I1*X;
+    proc.Run();
+    R.delay = proc.length;
 end
 R = measure.rReadout4T1(q,X.mw_src{1},false);
-
-y = expParam(@procFactory);
-y.name = [q.name,' decay time(da sampling interval)'];
-y.auxpara = X;
-y.callbacks ={@(x_) x_.expobj.Run(); @(x_) x_.auxpara.Run()};
-
 function rerunZ()
-    proc_ = procFactory(y.val);
-    proc_.Run();
+    piAmpBackup = X.amp;
+    X.amp = 0;
+    procFactory(y.val);
+    X.amp = piAmpBackup;
 end
 if args.backgroundWithZBias
     R.postRunFcns = @rerunZ;
 end
 
-y_s = expParam(R,'delay');
-y_s.offset = X.length;
-
-s1 = sweep({y,y_s});
-s1.vals = {args.time,args.time};
+y = expParam(@procFactory);
+y.name = [q.name,' decay time(da sampling interval)'];
+s1 = sweep(y);
+s1.vals = args.time;
 e = experiment();
 e.name = 'Resonator T1';
 e.sweeps = s1;

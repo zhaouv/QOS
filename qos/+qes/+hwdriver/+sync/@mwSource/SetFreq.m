@@ -24,4 +24,8 @@ function SetFreq(obj,val,chnl)
         otherwise
             error('MWSource:SetError', ['Unsupported instrument: ',TYP]);
     end
+    
+%     % to have things flushing out on screen, keep for occassions like TV interviews 
+%     disp(sprintf('setting frequency of mw src [%s] to %0.3fGHz on chnl %0.0f',...
+%                 obj.name,val/1e9,chnl));
 end

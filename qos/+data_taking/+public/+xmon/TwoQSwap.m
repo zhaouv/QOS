@@ -38,36 +38,12 @@ end
 
 X = gate.X(qs{args.driveQubit});
 Z = op.zBias4Spectrum(qs{args.biasQubit}); % todo: use iSwap gate
+function procFactory(delay)
+	Z.ln = delay;
+	proc = Z*I*X;
+    proc.Run();
+end
 
 error('todo...');
 
-Z.delay = X.length;
-R = measure.resonatorReadout({q1, q2});
-
-x = expParam(Z,'amp');
-x.name = [biasQubit.name,' z bias amplitude'];
-y = expParam(Z,'ln');
-y.name = [driveQubit.name,' decay time(da sampling interval)'];
-y.callbacks ={ @(x_) x_.expobj.Run()};
-y_s = expParam(R,'delay');
-y_s.offset = X.length;
-s1 = sweep(x);
-s1.vals = args.biasAmp;
-s2 = sweep({y,y_s});
-s2.vals = {args.time,args.time};
-e = experiment();
-e.name = 'Two Qubit Swap';
-e.sweeps = [s1,s2];
-e.measurements = R;
-e.datafileprefix = sprintf('%s%s',q1.name,q2.name);
-if ~args.gui
-    e.showctrlpanel = false;
-    e.plotdata = false;
-end
-if ~args.save
-    e.savedata = false;
-end
-e.notes = args.notes;
-e.addSettings({'fcn','args'},{fcn_name,args});
-e.Run();
 end

@@ -39,8 +39,14 @@ X = op.mwDrive4Spectrum(q);
 X.amp = args.xyDriveAmp;
 Z = op.zBias4Spectrum(q);
 Z.amp = args.biasAmp;
-
 R = measure.resonatorReadout_ss(q);
+function procFactory(ln)
+	X.ln = ln;
+	Z.ln = ln+2*args.biasLonger;
+    proc = X.*Z;
+    proc.Run();
+    R.delay = proc.length;
+end
 
 switch args.dataTyp
     case 'P'
@@ -56,17 +62,10 @@ switch args.dataTyp
 			args.dataTyp));
 end
 
-y = expParam(X,'ln');
+y = expParam(@procFactory);
 y.name = [q.name,' xy Drive Pulse Length'];
-y.callbacks ={@(x_) x_.expobj.Run()};
-y_s1 = expParam(Z,'ln');
-y_s1.offset = 2*args.biasLonger;
-y_s1.callbacks ={@(x_) x_.expobj.Run()};
-y_s2 = expParam(R,'delay');
-y_s2.offset = 2*args.biasLonger;
-
-s2 = sweep([y,y_s1,y_s2]);
-s2.vals = {args.xyDriveLength,args.xyDriveLength,args.xyDriveLength};
+s2 = sweep(y);
+s2.vals = args.xyDriveLength;
 e = experiment();
 e.sweeps = s2;
 e.measurements = R;

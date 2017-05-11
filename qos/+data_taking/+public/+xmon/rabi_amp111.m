@@ -38,69 +38,55 @@ args = util.processArgs(varargin,{'biasAmp',0,'biasLonger',0,'detuning',0,'drive
 if args.r_avg~=0 %add by GM, 20170414
     readoutQubit.r_avg=args.r_avg;
 end
-
-function proc = procFactory(amp_)
-    g.amp = amp_;
-    proc = g^n;
-end
 switch args.driveTyp
 	case 'X'
-		XY = gate.X(driveQubit);
+		g = gate.X(driveQubit);
+        n = 1;
 	case {'X/2','X2p'}
 		g = gate.X2p(driveQubit);
         n = 2;
-		XY = @procFactory;
 	case {'-X/2','X2m'}
 		g = gate.X2m(driveQubit);
         n = 2;
-		XY = @procFactory;
     case {'X/4','X4p'}
 		g = gate.X4p(driveQubit);
         n = 4;
-		XY = @procFactory;
     case {'-X/4','X4m'}
 		g = gate.X4m(driveQubit);
         n = 4;
-		XY = @procFactory;
 	case 'Y'
-		XY = gate.Y(driveQubit);
+		g = gate.Y(driveQubit);
+        n = 1;
 	case {'Y/2', 'Y2p'}
 		g = gate.Y2p(driveQubit);
         n = 2;
-		XY = @procFactory;
 	case {'-Y/2', 'Y2m'}
 		g = gate.Y2m(driveQubit);
         n = 2;
-		XY = @procFactory;
     case {'Y/4','Y4p'}
 		g = gate.Y4p(driveQubit);
         n = 4;
-		XY = @procFactory;
     case {'-Y/4','Y4m'}
 		g = gate.Y4m(driveQubit);
         n = 4;
-		XY = @procFactory;
 	otherwise
 		throw(MException('QOS_rabi_amp111:illegalDriverTyp',...
 			sprintf('the given drive type %s is not one of the allowed drive types: X, X/2, -X/2, X/4, -X/4, Y, Y/2, -Y/2, Y/4, -Y/4',...
 			args.driveTyp)));
 end
-switch args.driveTyp
-	case {'X','Y'}
-        XY.delay_xy_i = args.biasLonger;
-        XY.delay_xy_q = args.biasLonger;
-        XYLength = XY.length;
-    otherwise
-        g.delay_xy_i = args.biasLonger;
-        g.delay_xy_q = args.biasLonger;
-        XYLength = 2*g.length+g.gate_buffer;
-end
+I = gate.I(driveQubit);
+I.ln = args.biasLonger;
 Z = op.zBias4Spectrum(biasQubit);
 Z.amp = args.biasAmp;
-Z.ln = XYLength + 2*args.biasLonger;
-
+function procFactory(amp_)
+    g.amp = amp_;
+    XY = g^n;
+    Z.ln = XY.length + 2*args.biasLonger;
+    proc = Z.*(XY*I);
+    R.delay = proc.length;
+    proc.Run();
+end
 R = measure.resonatorReadout_ss(readoutQubit);
-R.delay = Z.length;
 
 switch args.dataTyp
     case 'P'
@@ -116,20 +102,11 @@ switch args.dataTyp
 			args.dataTyp));
 end
 
-switch args.driveTyp
-	case {'X','Y'}
-        x = expParam(XY,'f01');
-    otherwise
-        x = expParam(g,'f01');
-end
+x = expParam(g,'f01');
 x.offset = driveQubit.f01;
 x.name = [driveQubit.name,' detunning(f-f01, Hz)'];
-
-y = expParam(XY,'amp');
+y = expParam(@procFactory);
 y.name = [driveQubit.name,' xyDriveAmp'];
-y.auxpara = Z;
-y.callbacks ={@(x_) x_.expobj.Run();...
-    @(x_) x_.auxpara.Run()};
 
 s1 = sweep(x);
 s1.vals = args.detuning;

@@ -7,7 +7,7 @@ classdef resonatorReadout < qes.measurement.prob
     
     properties
         n
-        delay % syncDelay is add automatically, this is just a logical dely
+        delay = 0 % syncDelay is add automatically, this is just a logical dely
         r_amp % expose qubit setting r_amp for tunning
         mw_src_power % expose qubit setting r_uSrcPower for tunning
         mw_src_frequency % expose qubit setting r_fc for tunning
@@ -309,15 +309,13 @@ classdef resonatorReadout < qes.measurement.prob
             end
             if ~isempty(obj.startWv)
                 obj.r_wv = [obj.startWv, obj.r_wv];
-                
             end
             obj.r_wv.awg = obj.da;
             obj.r_wv.awgchnl = [obj.da_i_chnl,obj.da_q_chnl];
             obj.r_wv.hw_delay = true; % important
+            obj.r_wv.output_delay = obj.delay+obj.qubits{1}.syncDelay_r; % syncDelay_z is added as a small calibration.
             if ~isempty(obj.startWv)
-                obj.r_wv.output_delay = obj.delay-obj.startWv.length+obj.qubits{1}.syncDelay_r; % syncDelay_z is added as a small calibration.
-            else
-                obj.r_wv.output_delay = obj.delay+obj.qubits{1}.syncDelay_r; % syncDelay_z is added as a small calibration.
+                obj.r_wv.output_delay = obj.r_wv.output_delay-obj.startWv.length;
             end
 
 			if ~isempty(obj.qubits{1}.r_jpa)

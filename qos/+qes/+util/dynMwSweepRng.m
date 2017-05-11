@@ -18,6 +18,7 @@ classdef (Abstract = true) dynMwSweepRng < handle
             if ~isa(TrgtSweepObj,'qes.sweep')
                 error('TrgtSweepObj is not a Sweep class object.');
             end
+            CtrlSweepObj.poststepcallbacks = @(x)obj.UpdateRng();
             obj.ctrlsweepobj = CtrlSweepObj;
             obj.trgtsweepobj = TrgtSweepObj;
         end

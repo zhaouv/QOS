@@ -51,6 +51,11 @@ function varargout = optReadoutFreq(varargin)
     optFreq = frequency(idx);
     
     if args.gui
+        figure(51);
+        plot(frequency,abs(data(:,1)),'--.r',frequency,abs(data(:,2)),'--.b');legend('|1>','|0>');
+        hf = qes.ui.qosFigure(sprintf('Opt. Readout Freq. | %s', q.name),true);
+        ax_ = axes('parent',hf);
+        plot(ax_,frequency,abs(data(:,1)),'--.r',frequency,abs(data(:,2)),'--.b');legend('|1>','|0>');
         hf = qes.ui.qosFigure(sprintf('Opt. Readout Freq. | %s', q.name),true);
         ax = axes('parent',hf);
         plot(ax,data(:,1),'--.r');
