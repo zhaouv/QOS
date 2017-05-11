@@ -78,12 +78,13 @@ I = gate.I(driveQubit);
 I.ln = args.biasLonger;
 Z = op.zBias4Spectrum(biasQubit);
 Z.amp = args.biasAmp;
-function proc = procFactory(amp_)
+function procFactory(amp_)
     g.amp = amp_;
     XY = g^n;
     Z.ln = XY.length + 2*args.biasLonger;
     proc = Z.*(XY*I);
     R.delay = proc.length;
+    proc.Run();
 end
 R = measure.resonatorReadout_ss(readoutQubit);
 
@@ -106,7 +107,6 @@ x.offset = driveQubit.f01;
 x.name = [driveQubit.name,' detunning(f-f01, Hz)'];
 y = expParam(@procFactory);
 y.name = [driveQubit.name,' xyDriveAmp'];
-y.callbacks ={@(x_) x_.expobj.Run()};
 
 s1 = sweep(x);
 s1.vals = args.detuning;

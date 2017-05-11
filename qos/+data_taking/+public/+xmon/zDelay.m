@@ -44,9 +44,10 @@ I2 = copy(I1);
 I2.ln = padLn12;
 XY = I2*X*I1;
 I3 = copy(I1);
-function proc = procFactory(delay)
+function procFactory(delay)
     I3.ln = ceil(X.length/2 + padLn11 - Z.length/2 + delay);
 	proc = (Z*I3).*XY;
+    proc.Run();
 end
 R = measure.resonatorReadout_ss(q);
 R.state = 2;
@@ -54,7 +55,6 @@ R.delay = XY.length;
 
 y = expParam(@procFactory);
 y.name = [q.name,' z Pulse delay(da sampling points)'];
-y.callbacks ={@(x_) x_.expobj.Run()};
 
 s2 = sweep(y);
 s2.vals = {args.zDelay};
