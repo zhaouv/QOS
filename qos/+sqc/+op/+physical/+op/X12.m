@@ -28,7 +28,7 @@ classdef X12 < sqc.op.physical.operator
             obj.xy_wv{1}.amp = obj.amp;
             obj.xy_wv{1}.phase = 0;
             persistent da
-            if isempty(da)
+            if isempty(da) || ~isvalid(da)
                 da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name',obj.qubits{1}.channels.xy_i.instru);
             end

@@ -29,7 +29,7 @@ classdef mwDrive4Spectrum < sqc.op.physical.operator
             obj.xy_wv{1}.amp = obj.amp;
             obj.xy_wv{1}.rise_time = obj.qubits{1}.spc_driveRise;
 			persistent da
-            if isempty(da)
+            if isempty(da) || ~isvalid(da)
 				da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                     'name',obj.qubits{1}.channels.xy_i.instru);
 			end

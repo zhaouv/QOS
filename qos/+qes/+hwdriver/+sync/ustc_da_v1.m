@@ -82,6 +82,10 @@ classdef ustc_da_v1 < qes.hwdriver.icinterface_compatible
         end
 		function delete(obj)
 			obj.ustcaddaObj.ReleaseDAChnls(obj.chnlMap);
+            if isempty(obj.ustcaddaObj.adTakenChnls) &&...
+                    isempty(obj.ustcaddaObj.daTakenChnls)
+                obj.ustcaddaObj.delete();
+            end
 		end
 
     end

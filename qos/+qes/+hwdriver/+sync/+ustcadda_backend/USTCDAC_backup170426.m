@@ -2,7 +2,7 @@
 % 	Author:GuoCheng
 % 	E-mail:fortune@mail.ustc.edu.cn
 % 	All right reserved @ GuoCheng.
-% 	Modified: 2017.4.26
+% 	Modified: 2017.2.26
 %   Description:The class of DAC
 
 classdef USTCDAC < handle
@@ -15,7 +15,7 @@ classdef USTCDAC < handle
         isblock = 0;        %æ˜¯å?¦ä»¥é˜»å¡žæ¨¡å¼?è¿?è¡?
     end
     
-    properties % (SetAccess = private) % changed to public, Yulin Wu, 170427
+    properties (SetAccess = private)
         name = '';              %DACå??å­—
         channel_amount = 4;     %DACé€šé?“æ•°ç›®
         sample_rate = 2e9;      %é‡‡æ ·çŽ?
@@ -28,8 +28,7 @@ classdef USTCDAC < handle
         
         trig_sel = 0;           %è§¦å?‘æº?é?æ‹?
         trig_interval = 200e-6; %ä¸»æ?¿è¿žç»­è§¦å?‘è¾“å‡ºæ—¶é—´é—´éš”
-%         ismaster = 0;           %ä¸»æ?¿æ ‡è¯†
-        ismaster = false;           %Yulin Wu
+        ismaster = 0;           %ä¸»æ?¿æ ‡è¯†
         daTrigDelayOffset = 0;  %æœªä½¿ç”?
     end
     
@@ -45,8 +44,7 @@ classdef USTCDAC < handle
                 driverfilename = [USTCDAC.driver,'.dll'];
                 loadlibrary(driverfilename,USTCDAC.driverh);
             end
-            str = libpointer('cstring',blanks(50));
-            [ret,version] = calllib(USTCDAC.driver,'GetSoftInformation',str);
+            [ret,version] = calllib(USTCDAC.driver,'GetSoftInformation','');
             if(ret == 0)
                 info = version;
             else
@@ -499,44 +497,43 @@ classdef USTCDAC < handle
             obj.SetTrigStop(floor((obj.trig_delay+ num)/8)+ 10);
         end
         
-        % removed by Yulin Wu, 170427
-%         function value = get(obj,properties)
-%             switch lower(properties)
-%                 case 'isblock';value = obj.isblock ;
-%                 case 'channel_amount';value = obj.channel_amount;
-%                 case 'gain';value = obj.gain;
-%                 case 'offset';value = obj.offset;
-%                 case 'name';value = obj.name;
-%                 case 'ismaster';value = obj.ismaster;
-%                 case 'trig_sel';value = obj.trig_sel;
-%                 case 'trig_interval';value = obj.trig_interval;
-%                 case 'sync_delay';value = obj.sync_delay;
-%                 case 'trig_delay';value = obj.trig_delay;
-%                 case 'sample_rate';value = obj.sample_rate;
-%                 otherwise; error('USTCDAC:get','do not exsis the properties')
-%             end
-%         end
-%         
-%         function set(obj,properties,value)
-%              switch lower(properties)
-%                 case 'isblock';obj.isblock = value;
-%                 case 'channel_amount'
-%                     obj.channel_amount = value;
-%                     obj.offset = zeros(1,obj.channel_amount);
-%                     obj.gain = zeros(1,obj.channel_amount);
-%                 case 'gain';obj.gain = value;
-%                 case 'offset';obj.offset = value;
-%                 case 'name';obj.name = value;
-%                 case 'ismaster';obj.ismaster = value;
-%                 case 'trig_sel';obj.trig_sel = value;
-%                 case 'trig_interval';obj.trig_interval = value;
-%                 case 'sync_delay';obj.sync_delay = value;
-%                 case 'trig_delay';obj.trig_delay = value;
-%                 case 'sample_rate';obj.sample_rate = value;
-%                 case 'datrigdelayoffset'; obj.daTrigDelayOffset = value;
-%                 case 'offsetcorr';obj.offsetcorr = value;
-%                 otherwise; error('USTCDAC:get','do not exsis the properties')
-%             end
-%         end
+        function value = get(obj,properties)
+            switch lower(properties)
+                case 'isblock';value = obj.isblock ;
+                case 'channel_amount';value = obj.channel_amount;
+                case 'gain';value = obj.gain;
+                case 'offset';value = obj.offset;
+                case 'name';value = obj.name;
+                case 'ismaster';value = obj.ismaster;
+                case 'trig_sel';value = obj.trig_sel;
+                case 'trig_interval';value = obj.trig_interval;
+                case 'sync_delay';value = obj.sync_delay;
+                case 'trig_delay';value = obj.trig_delay;
+                case 'sample_rate';value = obj.sample_rate;
+                otherwise; error('USTCDAC:get','do not exsis the properties')
+            end
+        end
+        
+        function set(obj,properties,value)
+             switch lower(properties)
+                case 'isblock';obj.isblock = value;
+                case 'channel_amount'
+                    obj.channel_amount = value;
+                    obj.offset = zeros(1,obj.channel_amount);
+                    obj.gain = zeros(1,obj.channel_amount);
+                case 'gain';obj.gain = value;
+                case 'offset';obj.offset = value;
+                case 'name';obj.name = value;
+                case 'ismaster';obj.ismaster = value;
+                case 'trig_sel';obj.trig_sel = value;
+                case 'trig_interval';obj.trig_interval = value;
+                case 'sync_delay';obj.sync_delay = value;
+                case 'trig_delay';obj.trig_delay = value;
+                case 'sample_rate';obj.sample_rate = value;
+                case 'datrigdelayoffset'; obj.daTrigDelayOffset = value;
+                case 'offsetcorr';obj.offsetcorr = value;
+                otherwise; error('USTCDAC:get','do not exsis the properties')
+            end
+        end
     end
 end
