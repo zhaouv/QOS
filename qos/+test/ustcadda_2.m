@@ -17,11 +17,11 @@ nn=0;
 while true
     nn=nn+1
 ustcaddaObj.runReps = 1e3;
-% for ii = 1:16
-%     ustcaddaObj.SendWave(ii,wavedata);
-%     ustcaddaObj.SendWave(ii,wavedata);
-% end
-[datai,dataq] = ustcaddaObj.Run(true)
+for ii = 1:16
+    ustcaddaObj.SendWave(ii,wavedata);
+    ustcaddaObj.SendWave(ii,wavedata);
+end
+[datai,dataq] = ustcaddaObj.Run(true);
 end
 %% sync test, and use the mimimum oscillascope vertical range to check zero offset
 ustcaddaObj.runReps = 1e4;
@@ -46,7 +46,7 @@ wave2=32768+32768/2*sin(2*pi*t/10);
 ustcaddaObj.SendContinuousWave(2,wave1)
 ustcaddaObj.SendContinuousWave(1,wave2)
 %% sin wave
-for ii = 12
+for ii = 10
     ustcaddaObj.SendWave(ii,32768+32768*sin((1:8000)/1000*2*pi));
 end
 ustcaddaObj.Run(false);
