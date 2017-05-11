@@ -57,10 +57,6 @@ classdef ustc_dc_v1 < qes.hwdriver.icinterface_compatible
 % 				obj.ustcaddaObj.StopContinuousWave(obj.chnlMap(ii));
 % 			end
 			obj.ustcaddaObj.ReleaseDAChnls(obj.chnlMap);
-            if isempty(obj.ustcaddaObj.adTakenChnls) &&...
-                    isempty(obj.ustcaddaObj.daTakenChnls)
-                obj.ustcaddaObj.delete();
-            end
 		end
     end
 end

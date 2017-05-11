@@ -25,7 +25,7 @@ classdef (Abstract = true) Z_z_base < sqc.op.physical.operator
             obj.z_wv{1}.amp = obj.zpulse_amp;
             
             persistent da
-            if isempty(da) || ~isvalid(da)
+            if isempty(da)
                 da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name',obj.qubits{1}.channels.z_pulse.instru);
             end

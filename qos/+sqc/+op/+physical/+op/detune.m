@@ -51,7 +51,7 @@ classdef detune < sqc.op.physical.gate.Z_z_base
                 end
             end
             persistent da
-            if isempty(da) || ~isvalid(da)
+            if isempty(da)
                 da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name',obj.qubits{1}.channels.z_pulse.instru);
             end
