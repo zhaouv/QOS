@@ -46,38 +46,8 @@ function table_data = Struct2TableData(data,anno,prefix)
         if isempty(Value)
             key = [prefix,fn{ww}];
             key_ = strrep(key,'.','__');
-			[startIndex,endIndex] = regexp(key_,'{\d+}');
-            startIndex = startIndex + 1;
-            endIndex = endIndex - 1;
-			key__ = regexprep(key_,'{\d+}','');
-			% the following is handle a bad settings design in ustcadda, may be removed in future versions 
-			if qes.util.startsWith(key__,'da_chnl_map__')
-				key__  = 'da_chnl_map__';
-			elseif qes.util.startsWith(key__,'ad_chnl_map__')
-				key__  = 'ad_chnl_map__';
-			end
-            if isfield(anno,key__)
-                annotation = anno.(key__);
-				if ~isempty(startIndex)
-					startIndex_ = strfind(annotation,'%s');
-					if numel(startIndex_) == numel(startIndex)
-						switch numel(startIndex)
-							case 1
-								annotation = sprintf(annotation,key_(startIndex(1):endIndex(1)));
-							case 2
-								annotation = sprintf(annotation,...
-									key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)));
-							case 3
-								annotation = sprintf(annotation,...
-									key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)),...
-									key_(startIndex(3):endIndex(3)));
-							case 4
-								annotation = sprintf(annotation,...
-									key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)),...
-									key_(startIndex(3):endIndex(3)),key_(startIndex(4):endIndex(4)));
-						end
-					end
-				end
+            if isfield(anno,key_)
+                annotation = anno.(key_);
             else
                 annotation = '';
             end
@@ -106,38 +76,8 @@ function table_data = Struct2TableData(data,anno,prefix)
                 else
                     key = [prefix,fn{ww},'{',num2str(uu,'%0.0f'),'}'];
                     key_ = strrep(key,'.','__');
-                    [startIndex,endIndex] = regexp(key_,'{\d+}');
-                    startIndex = startIndex + 1;
-                    endIndex = endIndex - 1;
-                    key__ = regexprep(key_,'{\d+}','');
-					% the following is handle a bad settings design in ustcadda, may be removed in future versions 
-                    if qes.util.startsWith(key__,'da_chnl_map__')
-                        key__  = 'da_chnl_map__';
-                    elseif qes.util.startsWith(key__,'ad_chnl_map__')
-                        key__  = 'ad_chnl_map__';
-                    end
-                    if isfield(anno,key__)
-                        annotation = anno.(key__);
-                        if ~isempty(startIndex)
-                            startIndex_ = strfind(annotation,'%s');
-                            if numel(startIndex_) == numel(startIndex)
-                                switch numel(startIndex)
-                                    case 1
-                                        annotation = sprintf(annotation,key_(startIndex(1):endIndex(1)));
-                                    case 2
-                                        annotation = sprintf(annotation,...
-                                            key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)));
-                                    case 3
-                                        annotation = sprintf(annotation,...
-                                            key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)),...
-                                            key_(startIndex(3):endIndex(3)));
-                                    case 4
-                                        annotation = sprintf(annotation,...
-                                            key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)),...
-                                            key_(startIndex(3):endIndex(3)),key_(startIndex(4):endIndex(4)));
-                                end
-                            end
-                        end
+                    if isfield(anno,key_)
+                        annotation = anno.(key_);
                     else
                         annotation = '';
                     end
@@ -150,38 +90,8 @@ function table_data = Struct2TableData(data,anno,prefix)
         else
             key = [prefix,fn{ww}];
             key_ = strrep(key,'.','__');
-			[startIndex,endIndex] = regexp(key_,'{\d+}');
-            startIndex = startIndex + 1;
-            endIndex = endIndex - 1;
-			key__ = regexprep(key_,'{\d+}','');
-			% the following is handle a bad settings design in ustcadda, may be removed in future versions 
-			if qes.util.startsWith(key__,'da_chnl_map__')
-				key__  = 'da_chnl_map__';
-			elseif qes.util.startsWith(key__,'ad_chnl_map__')
-				key__  = 'ad_chnl_map__';
-			end
-            if isfield(anno,key__)
-                annotation = anno.(key__);
-				if ~isempty(startIndex)
-					startIndex_ = strfind(annotation,'%s');
-					if numel(startIndex_) == numel(startIndex)
-						switch numel(startIndex)
-							case 1
-								annotation = sprintf(annotation,key_(startIndex(1):endIndex(1)));
-							case 2
-								annotation = sprintf(annotation,...
-									key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)));
-							case 3
-								annotation = sprintf(annotation,...
-									key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)),...
-									key_(startIndex(3):endIndex(3)));
-							case 4
-								annotation = sprintf(annotation,...
-									key_(startIndex(1):endIndex(1)),key_(startIndex(2):endIndex(2)),...
-									key_(startIndex(3):endIndex(3)),key_(startIndex(4):endIndex(4)));
-						end
-					end
-				end
+            if isfield(anno,key_)
+                annotation = anno.(key_);
             else
                 annotation = '';
             end

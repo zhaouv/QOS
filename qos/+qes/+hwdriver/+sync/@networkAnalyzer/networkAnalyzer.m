@@ -108,7 +108,8 @@ classdef networkAnalyzer < qes.hwdriver.sync.instrument
         end
         
         function val = get.avgcounts(obj)
-            val = str2double(query(obj.interfaceobj,[cmd ':SENSe1:AVERage:COUNt?']));
+%             val = str2double(query(obj.interfaceobj,[cmd ':SENSe1:AVERage:COUNt?']));
+            val = str2double(query(obj.interfaceobj,[':SENSe1:AVERage:COUNt?']));
         end
         function set.avgcounts(obj, value)
             if value > 1

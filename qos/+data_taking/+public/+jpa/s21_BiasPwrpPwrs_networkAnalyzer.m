@@ -86,7 +86,7 @@ function varargout = s21_BiasPwrpPwrs_networkAnalyzer(varargin)
     end
     
     if isempty(s) % we need at least one sweep
-        x = expParam(biasSrc,'dcval');
+        x = expParam(biasChnl,'dcval');
         x.name = 'JPA dc bias';
         x.callbacks = {@(x) x.expobj.On(), @(x) pause(0.3)};
         s_ = sweep(x);

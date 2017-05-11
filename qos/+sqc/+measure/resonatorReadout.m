@@ -115,7 +115,7 @@ classdef resonatorReadout < qes.measurement.prob
             ad = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',ad_i_names);
             da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',da_i_names);
             rs = ad.samplingRate/da.samplingRate;
-            ad.recordLength = ceil(rs*(qubits{1}.r_ln+ad.delayStep)); % maximum startidx increment is ad.delayStep
+            ad.recordLength = ceil(rs*qubits{1}.r_ln);
             iq_obj = sqc.measure.iq_ustc_ad(ad);
             iq_obj.n = qubits{1}.r_avg;
             iq_obj.upSampleNum = lcm(ad.samplingRate,da.samplingRate)/ad.samplingRate;
@@ -125,8 +125,8 @@ classdef resonatorReadout < qes.measurement.prob
                 demod_freq(ii) = qubits{ii}.r_freq- qubits{1}.r_fc;
             end
             iq_obj.freq = demod_freq;
-%             iq_obj.startidx = qubits{1}.r_truncatePts(1)+1;
-%             iq_obj.endidx = ad.recordLength-qubits{1}.r_truncatePts(2);
+            iq_obj.startidx = qubits{1}.r_truncatePts(1)+1;
+            iq_obj.endidx = ad.recordLength-qubits{1}.r_truncatePts(2);
             
             prob_obj = sqc.measure.prob_iq_ustc_ad_j(iq_obj,qubits);
             obj = obj@qes.measurement.prob(prob_obj);
@@ -248,11 +248,7 @@ classdef resonatorReadout < qes.measurement.prob
                 -obj.adDelayStep*vSamplingRate/obj.daSamplingRate+dd;
             
             if ~isempty(obj.qubits{1}.r_jpa)
-%                 jpaStartDelay = obj.delay-obj.qubits{1}.r_jpa_longer;
-%                 if jpaStartDelay < 0 % handled in GenWave
-%                     throw(MException('QOS_resonatorReadtou:negativeJPAStartDelay','negative jpa start delay, readout delay too short.'));
-%                 end
-                obj.jpa.startDelay = obj.delay-obj.qubits{1}.r_jpa_longer; % all qubits has the same r_jpa_longer value, asserted during object construction.
+                obj.jpa.startDelay = obj.delay-obj.qubits{1}.r_jpa_longer;
             end
         end
         function set.startWv(obj,wvObj)
@@ -273,10 +269,7 @@ classdef resonatorReadout < qes.measurement.prob
             obj.Prep();
             Run@qes.measurement.prob(obj); % important
             wvObj = obj.r_wv;
-
-            delay_ = obj.adDelayStep*floor((obj.delay)/obj.adDelayStep);
-            wvObj.awg.SetTrigOutDelay(obj.r_wv.awgchnl,delay_);
-            
+            wvObj.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
 % 			obj.r_wv.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
             obj.r_wv.SendWave();
             if ~isempty(obj.jpa)
@@ -317,7 +310,6 @@ classdef resonatorReadout < qes.measurement.prob
             if ~isempty(obj.startWv)
                 obj.r_wv.output_delay = obj.r_wv.output_delay-obj.startWv.length;
             end
-
 			if ~isempty(obj.qubits{1}.r_jpa)
 				obj.jpa_pump_wv = sqc.wv.rect_cos(obj.jpa.opDuration);
 				obj.jpa_pump_wv.amp = obj.jpa.pumpAmp;
