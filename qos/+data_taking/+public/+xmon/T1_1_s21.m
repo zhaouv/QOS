@@ -28,6 +28,9 @@ import sqc.op.physical.*
 args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'gui',false,'notes',''});
 q = data_taking.public.util.getQubits(args,{'qubit'});
 
+driveQubit=q;
+biasQubit=q;
+
 if ~isempty(args.r_avg) %add by GM, 20170416
     q.r_avg=args.r_avg;
 end
