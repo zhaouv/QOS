@@ -2,7 +2,7 @@
 % 	Author:GuoCheng
 % 	E-mail:fortune@mail.ustc.edu.cn
 % 	All right reserved @ GuoCheng.
-% 	Modified: 2017.2.26
+% 	Modified: 2017.4.26
 %   Description:The class of DAC
 
 classdef USTCDAC < handle
@@ -45,7 +45,8 @@ classdef USTCDAC < handle
                 driverfilename = [USTCDAC.driver,'.dll'];
                 loadlibrary(driverfilename,USTCDAC.driverh);
             end
-            [ret,version] = calllib(USTCDAC.driver,'GetSoftInformation','');
+            str = libpointer('cstring',blanks(50));
+            [ret,version] = calllib(USTCDAC.driver,'GetSoftInformation',str);
             if(ret == 0)
                 info = version;
             else

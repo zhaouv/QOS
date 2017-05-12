@@ -55,14 +55,14 @@ switch args.dataTyp %add by GM, 20170415
 			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
 			args.dataTyp));
 end
-Z = op.zBias4Spectrum(biasQubit);
 
-x = expParam(Z.zdc_src{1},'dcval');
+X.Run(); % from this point on X will assume that the dc source and mw source are set
+x = expParam(X.zdc_src{1},'dcval');
 x.name = [biasQubit.name,' zdc bias amplitude'];
-y = expParam(X,'mw_src{1}.frequency');
+y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.callbacks ={@(x_) x_.expobj.Run()};
+y.callbacks ={@(x_) X.Run()};
 s1 = sweep(x);
 s1.vals = args.biasAmp;
 s2 = sweep(y);

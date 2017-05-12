@@ -22,7 +22,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         daSamplingRate
 
         adRange
-        adDelayStep
+        adDelayStep % unit: DA sampling points
     end
     
     properties (SetAccess = private) % Yulin Wu
@@ -474,12 +474,12 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             
         end
 
-        function name = GetDACNameByChnl(obj,ch)
+        function name = GetDACNameByChnl(obj,ch) % Yulin Wu
             numChnls = numel(ch);
             ch_info = obj.da_channel_list(ch);
             name = cell(1,numChnls);
             for ii = 1:numChnls
-                da = obj.da_list(ch_info(ii).index).da;% GM, 070411
+                da = obj.da_list(ch_info(ii).index).da;
                 name{ii} = da.name;
             end
         end

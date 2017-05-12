@@ -109,7 +109,7 @@ classdef (Sealed = true)RegEditor < handle
                     if isempty(s)
                         continue;
                     else
-                        anno.qobject.(finfo(ii).name(1:end-4)) = s;
+                        anno.hardware.(finfo(ii).name(1:end-4)) = s;
                     end
                 catch ME
                     warning(getReport(ME));

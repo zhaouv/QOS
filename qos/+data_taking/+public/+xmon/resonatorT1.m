@@ -46,13 +46,14 @@ Z.ln = args.swpPiLn;
 function proc = procFactory(delay)
 	I2.ln = delay;
 	proc = Z*I2*Z*I1*X;
+    proc.Run();
+    R.delay = proc.length;
 end
 R = measure.rReadout4T1(q,X.mw_src{1},false);
 function rerunZ()
     piAmpBackup = X.amp;
     X.amp = 0;
-    proc_ = procFactory(y.val);
-    proc_.Run();
+    procFactory(y.val);
     X.amp = piAmpBackup;
 end
 if args.backgroundWithZBias
@@ -61,14 +62,8 @@ end
 
 y = expParam(@procFactory);
 y.name = [q.name,' decay time(da sampling interval)'];
-y.callbacks ={@(x_) x_.expobj.Run()};
-
-
-y_s = expParam(R,'delay');
-y_s.offset = X.length;
-
-s1 = sweep({y,y_s});
-s1.vals = {args.time,args.time};
+s1 = sweep(y);
+s1.vals = args.time;
 e = experiment();
 e.name = 'Resonator T1';
 e.sweeps = s1;

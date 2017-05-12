@@ -38,9 +38,10 @@ end
 
 X = gate.X(qs{args.driveQubit});
 Z = op.zBias4Spectrum(qs{args.biasQubit}); % todo: use iSwap gate
-function proc = procFactory(delay)
+function procFactory(delay)
 	Z.ln = delay;
 	proc = Z*I*X;
+    proc.Run();
 end
 
 error('todo...');
