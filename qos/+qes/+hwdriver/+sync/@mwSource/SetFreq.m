@@ -6,7 +6,8 @@ function SetFreq(obj,val,chnl)
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     if val < obj.freqlimits(chnl,1) || val > obj.freqlimits(chnl,2)
-        error('mwSource:OutOfLimit','Frequency value out of limits.');
+        throw(MException('QOS_mwSource:freqOutOfLimit',...
+            sprintf('Frequency value %0.3fGHz out of limits.',val/1e9)));
     end
 
     TYP = lower(obj.drivertype);

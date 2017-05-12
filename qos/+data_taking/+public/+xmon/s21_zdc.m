@@ -31,7 +31,7 @@ function varargout = s21_zdc(varargin)
     R = measure.resonatorReadout_ss(q);
     R.state = 1;
     R.swapdata = true;
-    R.name = 'iq';
+    R.name = '|IQ|';
     R.datafcn = @(x)mean(x);
     
     x = expParam(dcChnl,'dcval');
