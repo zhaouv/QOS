@@ -1,4 +1,4 @@
-// tst1.p, Yulin Wu, 2017-05-11
+// tst1.q, Yulin Wu, 2017-05-11
 
 qubit Q1
 qubit Q2

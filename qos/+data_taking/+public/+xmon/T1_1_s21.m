@@ -44,7 +44,7 @@ function procFactory(delay)
 end
 R = measure.resonatorReadout_ss(q);
 R.swapdata = true;
-R.name = 'iq';
+R.name = '|IQ|';
 R.datafcn = @(x)mean(abs(x));
 
 x = expParam(Z,'amp');

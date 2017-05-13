@@ -36,8 +36,13 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
 			obj.num_qs = num_qs_;
             qs = cell(1,num_qs_);
             for ii = 1:num_qs_
-                if ~ischar(val{ii}) && ~isa(val{ii},'sqc.qobj.qobject')
-                    error('input not a qubit.');
+                if ~ischar(val{ii})
+                    if ~isa(val{ii},'sqc.qobj.qobject')
+                        error('input not a qubit.');
+                    else
+                        qs{ii} = val{ii}; % accepts qubit objects, typically virtual qubits
+                        continue;
+                    end
                 end
                 if ~qes.util.ismember(val{ii},selected_qubits)
                     if ischar(val{ii})

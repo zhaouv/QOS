@@ -35,7 +35,6 @@ classdef resonatorReadout < qes.measurement.prob
         daSamplingRate
         adRecordLength
         
-        jpaRunner
     end
     methods
         function obj = resonatorReadout(qubits)
@@ -112,6 +111,7 @@ classdef resonatorReadout < qes.measurement.prob
             iq_obj = sqc.measure.iq_ustc_ad(ad);
             iq_obj.n = qubits{1}.r_avg;
             iq_obj.upSampleNum = lcm(ad.samplingRate,da.samplingRate)/ad.samplingRate;
+            num_qubits = numel(qubits);
             demod_freq = zeros(1,num_qubits);
             for ii = 1:num_qubits
                 demod_freq(ii) = qubits{ii}.r_freq- qubits{1}.r_fc;
@@ -119,8 +119,8 @@ classdef resonatorReadout < qes.measurement.prob
             iq_obj.freq = demod_freq;
 %             iq_obj.startidx = qubits{1}.r_truncatePts(1)+1;
 %             iq_obj.endidx = ad.recordLength-qubits{1}.r_truncatePts(2);
+            
             prob_obj = sqc.measure.prob_iq_ustc_ad_j(iq_obj,qubits);
-
             obj = obj@qes.measurement.prob(prob_obj);
             obj.n = prob_obj.n;
             obj.qubits = qubits;
@@ -247,7 +247,7 @@ classdef resonatorReadout < qes.measurement.prob
             
 % 			obj.r_wv.awg.SetTrigOutDelay(obj.r_wv.awgchnl,obj.delay);
             obj.r_wv.SendWave();
-            if ~isempty(obj.jpaRunner)
+            if ~isempty(obj.jpa)
                 obj.jpaRunner.Run();
             end
             obj.data = obj.instrumentObject();
