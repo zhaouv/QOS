@@ -14,6 +14,8 @@ import data_taking.public.xmon.*
 qubits = {'q1','q3','q4','q5'};
 dips = [6.6903e+09 6.8060e+09 6.6163e9 6.577e9 ]; % by qubit index
 %%
+data_taking.public.jpa.turnOnJPA('jpaName','impa1','pumpFreq',13.55e9,'pumpPower',5,'bias',0.00014,'on',true)
+%%
 ustcaddaObj.close()
 %%
 for ii=3:3
@@ -50,10 +52,15 @@ end
 
 for ii=2
     QS.saveSSettings({qubits{ii},'spc_driveAmp'},3000)
-    spectroscopy1_zpa_s21('qubit',qubits{ii},...
-       'biasAmp',0,'driveFreq',[6.45e9:2e6:6.55e9],...
-       'r_avg',3000,'notes','','gui',true,'save',true);
+    data0=spectroscopy1_zpa_s21('qubit',qubits{ii},...
+       'biasAmp',-3e4:1e3:3e4,'driveFreq',[6.e9:2e6:6.6e9],...
+       'r_avg',500,'notes','','gui',true,'save',true,'dataTyp','P');
 end
+%%
+data_taking.public.scripts.qubitStability('qubit','q3','Repeat',1,...
+       'biasAmp',0,'driveFreq',[6.45e9:2e6:6.55e9],...
+       'r_avg',1000,'notes','','gui',true,'save',true);
+  
 %%
 amp=5e3;
 QS.saveSSettings({qubits{2},'spc_driveAmp'},amp)
@@ -63,26 +70,27 @@ spectroscopy1_zpa_s21('qubit',qubits{2},...
 %%
 % setZDC('q2',-2000);
 rabi_amp1('qubit','q3','biasAmp',[0],'biasLonger',10,...
-      'xyDriveAmp',[0:500:3e4],'detuning',[0],'driveTyp','X','notes','RT 20dB',...
-      'dataTyp','S21','r_avg',3000,'gui',true,'save',true);
+      'xyDriveAmp',[0:500:3e4],'detuning',0,'driveTyp','X','notes','RT 26dB',...
+      'dataTyp','P','r_avg',1000,'gui',true,'save',true);
 % rabi_amp1('qubit','q2','xyDriveAmp',[0:500:3e4]);  % lazy mode
 %% To do
-rabi_long1('qubit','q3','biasAmp',[0],'biasLonger',0,...
-      'xyDriveAmp',[1e4],'xyDriveLength',[10:50:2000],'detuning',[0],'driveTyp','X',...
-      'dataTyp','S21','r_avg',5000,'gui',true,'save',true);
+rabi_long1('qubit','q3','biasAmp',[0],'biasLonger',10,...
+      'xyDriveAmp',[1.5e4],'xyDriveLength',[10:10:1000],'detuning',[0],'driveTyp','X',...
+      'dataTyp','P','r_avg',1000,'gui',true,'save',true);
 %%
 s21_01('qubit','q2','freq',[],'notes','','gui',true,'save',true);
 %%
-tuneup.xyGateAmpTuner('qubit','q2','gateTyp','X','gui',false,'save',true);
+tuneup.xyGateAmpTuner('qubit','q3','gateTyp','X','gui',false,'save',true);
 %%
 % QS.saveSSettings({'q2','r_amp'},0.77e4);
-% tuneup.optReadoutFreq('qubit','q3','gui',true,'save',true);
+tuneup.optReadoutFreq('qubit','q3','gui',true,'save',true);
+%%
 tuneup.iq2prob_01('qubit','q3','numSamples',1e4,...
       'gui',true,'save',true)
  %% automatic function, after previous steps pined down qubit parameters, 
 q = qubits{2};
 tuneup.correctf01bySpc('qubit',q,'gui',true,'save',true); % measure f01 by spectrum
-XYGate ={'X'};
+XYGate ={'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2','X/4', 'Y/4', '-X/4', '-Y/4'};
 for ii = 1:numel(XYGate)
     tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{ii},'gui',true,'save',true); % finds the XY gate amplitude and update to settings
 end
@@ -97,14 +105,14 @@ spectroscopy1_zdc('qubit','q2',...
 %       'time',[0:400:30000],'detuning',[1]*1e6,...
 %       'dataTyp','S21','notes','','gui',true,'save',true);
 ramsey_df01('qubit','q3',...
-      'time',[0:10:2000],'detuning',[-1]*1e6,...
+      'time',[0:10:2000],'detuning',[5]*1e6,...
       'dataTyp','P','notes','','gui',true,'save',true);
-  %%
-  T1_1('qubit','q3','biasAmp',0,'time',[0:400:20e3],'biasDelay',16,...
-      'gui',true,'save',true,'r_avg',1000)
-  %%
-  T1_1('qubit','q3','biasAmp',[2e4:0.5e3:3e4],'time',[0:400:20e3],'biasDelay',16,...
-      'gui',true,'save',true,'r_avg',5000)
+%%
+T1_1('qubit','q3','biasAmp',[0,1000],'time',[0:400:20e3],'biasDelay',16,...
+      'gui',true,'save',true,'r_avg',1000,'fit',true)
+%%
+T1_1('qubit','q3','biasAmp',[2e4:0.5e3:3e4],'time',[0:400:20e3],'biasDelay',16,...
+      'gui',true,'save',true,'r_avg',5000,'fit',true)
 %%
 T1_1_s21('qubit','q3','biasAmp',[0],'time',[0:200:10e3],'biasDelay',0,...
       'gui',true,'save',true,'r_avg',1000)
