@@ -114,16 +114,31 @@ classdef USTCDAC < handle
             
             while(try_count > 0 && ~isDACReady)
                 obj.isblock = 1;
+                arr = zeros(1,8);
+                idx = 1;
+                for addr = 1136:1139
+                    arr(idx) = ReadAD9136_1(addr);
+                    arr(idx+1) = ReadAD9136_2(addr);
+                    idx = idx + 2;
+                end
+                arr = mod(arr,256);
+                if(sum(arr == 255) == length(arr))
+                    islaneReady = 1;
+                else
+                    islaneReady = 0;
+                end
                 ret = obj.ReadReg(5,8);
                 obj.isblock = 0;
                 if(mod(floor(ret/(2^20)),4) == 3)
-                    isDACReady = 1;
+                    isDACReady = islaneReady;
                 else
+                    isDACReady = 0;
                     obj.InitBoard();
                     try_count =  try_count - 1;
                     pause(0.1);
                 end
             end
+            
             if(isDACReady == 0)
                 error('USTCDAC:InitError','Config DAC failed!');
             end
@@ -289,7 +304,7 @@ classdef USTCDAC < handle
         
         function SetDefaultVolt(obj,channel,volt)
             obj.AutoOpen();
-            volt = mod(volt,256)*256 + floor(volt/256);    %高低位切�?
+%             volt = mod(volt,256)*256 + floor(volt/256);    %高低位切�?
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00001B05')),uint32(channel),uint32(volt));
             if(ret == -1)
                  error('USTCDAC:WriteOffset','WriteOffset failed.');
