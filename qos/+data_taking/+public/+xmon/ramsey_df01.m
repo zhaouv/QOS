@@ -42,9 +42,11 @@ function varargout = ramsey_df01(varargin)
             throw(MException('QOS_ramsey_df01:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
-    function proc = procFactory(delay)
+    function procFactory(delay)
         I.ln = delay;
         proc = X2*I*X2;
+        proc.Run();
+        R.delay = proc.length;
     end
 
     x = expParam(X2,'f01');
@@ -52,16 +54,10 @@ function varargout = ramsey_df01(varargin)
     x.name = [q.name,' detunning'];
     y = expParam(@procFactory);
     y.name = [q.name,' time'];
-    y.callbacks ={@(x_) x_.expobj.Run()};
-
-    y_s = expParam(R,'delay');
-	y_s.offset = 2*X2.length+3*X2.gate_buffer;
-    y_s.offset = y_s.offset;
-    y_s.snap_val = R.adDelayStep;
     s1 = sweep(x);
     s1.vals = args.detuning;
-    s2 = sweep({y,y_s});
-    s2.vals = {args.time,args.time};
+    s2 = sweep(y);
+    s2.vals = args.time;
     e = experiment();
 	e.name = 'Ramsey(Detune by Sb. Freq.)';
     e.sweeps = [s1,s2];

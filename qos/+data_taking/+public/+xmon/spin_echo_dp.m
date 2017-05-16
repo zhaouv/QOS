@@ -24,36 +24,36 @@ function varargout = spin_echo_dp(varargin)
     import sqc.op.physical.*
 
     args = util.processArgs(varargin,{'gui',false,'notes','','detuning',0,'save',true});
+    if any(mod(args.time,2)~=0)
+        throw(MException('QOS_spinEcho:invalidInput','time not even integers.'));
+    end
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
     da =  qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.xy_i.instru);
     daSamplingRate = da.samplingRate;
 
-    X = op.XY(q,0);
+    X = gate.X(q);
     X2 = op.XY2p(q,0);
     I = gate.I(q);
     R = measure.resonatorReadout_ss(q);
 	detuning = util.hvar(0);
 	X2_ = copy(X2);
-    function proc = procFactory(delay)
+    function procFactory(delay)
         I.ln = delay/2;
 		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
-        X.phase = X2.phase/2;
         proc = X2*I*X*I*X2_;
+        proc.Run();
+        R.delay = proc.length;
     end
 
 	x = expParam(detuning,'val');
 	x.name = [q.name,' detuning(Hz)'];
-	
     y = expParam(@procFactory);
     y.name = [q.name,' time'];
-    y.callbacks ={@(x_) x_.expobj.Run()};
-    y_s = expParam(R,'delay');
-    y_s.offset = 2*X2.length+X.length+5*X2.gate_buffer;
 	s1 = sweep(x);
     s1.vals = args.detuning;
-    s2 = sweep({y,y_s});
-    s2.vals = {args.time,args.time};
+    s2 = sweep(y);
+    s2.vals = args.time;
     e = experiment();
     e.name = 'Spin Echo(Detune by Phase)';
     e.sweeps = [s1,s2];

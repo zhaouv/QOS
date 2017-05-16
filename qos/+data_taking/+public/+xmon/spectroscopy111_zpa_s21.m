@@ -26,33 +26,34 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'r_avg',0,'gui',false,'notes','','save',true});
+args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'r_avg',[],'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] = data_taking.public.util.getQubits(...
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
     args.driveFreq = driveQubit.f01-5*driveQubit.t_spcFWHM_est:...
         driveQubit.t_spcFWHM_est/5:driveQubit.f01+5*driveQubit.t_spcFWHM_est;
 end
-if args.r_avg~=0 %add by GM, 20170414
+if ~isempty(args.r_avg) %add by GM, 20170416
     readoutQubit.r_avg=args.r_avg;
 end
 X = op.mwDrive4Spectrum(driveQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 R.swapdata = true;
-R.name = 'iq';
+R.name = '|IQ|';
 R.datafcn = @(x)mean(abs(x));
 Z = op.zBias4Spectrum(biasQubit);
+function proc = procFactory(amp)
+    Z.amp = amp;
+    proc = X.*Z;
+end
 
-x = expParam(Z,'amp');
+x = expParam(@procFactory,true);
 x.name = [biasQubit.name,' z bias amplitude'];
-x.callbacks ={@(x_) x_.expobj.Run()};
-x.deferCallbacks = true;
 y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.auxpara = X;
-y.callbacks ={@(x_)expParam.RunCallbacks(x),@(x_)x_.auxpara.Run()};
+y.callbacks ={@(x_)x.fcnval.Run()};
 
 s1 = sweep(x);
 s1.vals = args.biasAmp;

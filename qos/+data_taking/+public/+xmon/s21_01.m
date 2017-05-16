@@ -32,13 +32,12 @@ function varargout = s21_01(varargin)
     X = gate.X(q);
     R = measure.rReadout4S21_01(q);
     R.delay = X.length;
-    R.name = 'iq';
+    R.name = '|IQ|';
     
     x = expParam(R,'mw_src_frequency');
     x.offset = q.r_fc - q.r_freq;
     x.name = [q.name,' readout frequency'];
-    x.auxpara = X;
-    x.callbacks ={@(x_) x_.auxpara.Run()};
+    x.callbacks ={@(x_) X.Run()};
     s1 = sweep(x);
     s1.vals = args.freq;
     e = experiment();

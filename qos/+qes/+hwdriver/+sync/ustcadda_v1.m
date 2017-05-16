@@ -22,7 +22,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         daSamplingRate
 
         adRange
-        adDelayStep
+        adDelayStep % unit: DA sampling points
     end
     
     properties (SetAccess = private) % Yulin Wu
@@ -171,34 +171,49 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 
             % é…?ç½®DAC
             for k = 1:obj.numDABoards
-                obj.da_list(k).da = qes.hwdriver.sync.ustcadda_backend.USTCDAC(s.da_boards{k}.ip,s.da_boards{k}.port);
-                obj.da_list(k).da.set('name',s.da_boards{k}.name);
-                obj.da_list(k).da.set('channel_amount',s.da_boards{k}.numChnls);
-                obj.da_list(k).da.set('gain',cell2mat(s.da_boards{k}.gain));
-                obj.da_list(k).da.set('sample_rate',s.da_boards{k}.samplingRate);
-                obj.da_list(k).da.set('sync_delay',s.da_boards{k}.syncDelay); 
-                obj.da_list(k).da.set('trig_delay',s.da_boards{k}.daTrigDelayOffset);
+                obj.da_list(k).da = qes.hwdriver.sync.ustcadda_backend.USTCDAC(...
+                    s.da_boards{k}.ip,s.da_boards{k}.port);
+                % set method removed, set properties directly, Yulin Wu, 170427
+%                 obj.da_list(k).da.set('name',s.da_boards{k}.name); 
+                obj.da_list(k).da.name=s.da_boards{k}.name;
+%                 obj.da_list(k).da.set('channel_amount',s.da_boards{k}.numChnls);
+                obj.da_list(k).da.channel_amount=s.da_boards{k}.numChnls;
+%                 obj.da_list(k).da.set('gain',cell2mat(s.da_boards{k}.gain));
+                obj.da_list(k).da.gain=cell2mat(s.da_boards{k}.gain);
+%                 obj.da_list(k).da.set('sample_rate',s.da_boards{k}.samplingRate);
+                obj.da_list(k).da.sample_rate=s.da_boards{k}.samplingRate;
+%                 obj.da_list(k).da.set('sync_delay',s.da_boards{k}.syncDelay);
+                obj.da_list(k).da.sync_delay=s.da_boards{k}.syncDelay; 
+%                 obj.da_list(k).da.set('trig_delay',s.da_boards{k}.daTrigDelayOffset);
+                obj.da_list(k).da.trig_delay=s.da_boards{k}.daTrigDelayOffset;
                 %è®¾ç½®trig_selé»˜è®¤å€?
-                obj.da_list(k).da.set('trig_sel',s.trigger_source);
+%                 obj.da_list(k).da.set('trig_sel',s.trigger_source);
+                obj.da_list(k).da.trig_sel=s.trigger_source;
                 %è®¾ç½®master?¿ï¼Œé»˜è®¤å€¼ä¸ºç¬¬ä¸€ä¸ªæ??
-                obj.da_list(k).da.set('ismaster', 0);
+%                 obj.da_list(k).da.set('ismaster', 0); % ismaster is false byt default, Yulin Wu, 170427
                 if(isfield(s,'da_master') && strcmpi(s.da_boards{k}.name,s.da_master))
+                    % Yulin Wu, 170427
+                    obj.da_list(k).da.ismaster=true;
                     obj.da_master_index = k;
                 end
                 % åˆ?å§‹åŒ–é€šé?“çš„maskå€?
                 obj.da_list(k).mask_plus = 0; %æ­£mask
                 obj.da_list(k).mask_min  = 0; %è´Ÿmask
-                obj.da_list(k).da.set('trig_interval',s.triggerInterval);
+%                 obj.da_list(k).da.set('trig_interval',s.triggerInterval);
+                obj.da_list(k).da.trig_interval=s.triggerInterval;
                 % da_trig_delayå±æ?
                 obj.da_list(k).da_trig_delay = 0;
                 % redefined offsetCorr settings, Yulin Wu
-                obj.da_list(k).offsetCorr = cell2mat(s.da_boards{k}.offsetCorr);
-                obj.da_list(k).da.set('offsetcorr',cell2mat(s.da_boards{k}.offsetCorr));
+%                 obj.da_list(k).da.set('offsetcorr',cell2mat(s.da_boards{k}.offsetCorr));
+                obj.da_list(k).da.offsetcorr=cell2mat(s.da_boards{k}.offsetCorr);
             end
 
             % è®¾ç½®ä¸»æ??
-            obj.da_list(obj.da_master_index).da.set('ismaster',true);
-            obj.da_list(obj.da_master_index).da.set('trig_interval',s.triggerInterval);
+            % removed by Yulin Wu, 170427
+%             obj.da_list(obj.da_master_index).da.set('ismaster',true);
+%             obj.da_list(obj.da_master_index).da.set('trig_interval',s.triggerInterval);
+%             obj.da_list(obj.da_master_index).da.ismaster=true;
+%             obj.da_list(obj.da_master_index).da.trig_interval=s.triggerInterval;
                         % æ˜ å°„é€šé??
             for k = 1:length(s.da_chnl_map)
                 channel = fieldnames(s.da_chnl_map{k});
@@ -232,9 +247,13 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % é…?ç½®ADC,ç›®å??ªæ”¯æŒ?ä¸?¸ªç½‘å??
             for k = 1:obj.numADBoards
                 obj.ad_list(k).ad = qes.hwdriver.sync.ustcadda_backend.USTCADC(s.ad_boards{k}.netcard);
-                obj.ad_list(k).ad.set('sample_rate',s.ad_boards{k}.samplingRate);
-                obj.ad_list(k).ad.set('channel_amount',s.ad_boards{k}.numChnls);
-                obj.ad_list(k).ad.set('mac',s.ad_boards{k}.mac);
+                % Yulin Wu, 170427
+%                 obj.ad_list(k).ad.set('sample_rate',s.ad_boards{k}.samplingRate);
+%                 obj.ad_list(k).ad.set('channel_amount',s.ad_boards{k}.numChnls);
+%                 obj.ad_list(k).ad.set('mac',s.ad_boards{k}.mac);
+                obj.ad_list(k).ad.sample_rate=s.ad_boards{k}.samplingRate;
+                obj.ad_list(k).ad.channel_amount=s.ad_boards{k}.numChnls;
+                obj.ad_list(k).ad.mac=s.ad_boards{k}.mac;
             end
             % æ˜ å°„ADCçš„é???
             for k = 1:length(s.ad_chnl_map)
@@ -371,7 +390,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % redefined offsetCorr to be a da board specific property other
             % than a ustcadda property, Yulin Wu
             data = uint16(data +...
-                obj.da_list(obj.da_channel_list(channel).index).offsetCorr(obj.da_channel_list(channel).ch)); 
+                obj.da_list(obj.da_channel_list(channel).index).da.offsetcorr(obj.da_channel_list(channel).ch)); 
             % ?‘é?æ³¢å½¢
             da_struct.da.WriteWave(ch,0,data);
             % ç›¸å½“äºæˆ–ä¸Šä¸€ä¸ªé???
@@ -411,7 +430,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % redefined offsetCorr to be a da board specific property other
             % than a ustcadda property, Yulin Wu
             voltage = uint16(voltage +...
-                obj.da_list(obj.da_channel_list(channel).index).offsetCorr(obj.da_channel_list(channel).ch)); 
+                obj.da_list(obj.da_channel_list(channel).index).da.offsetcorr(obj.da_channel_list(channel).ch)); 
             da_struct.da.WriteWave(ch,0,voltage);
             % æ›´æ–°çŠ¶æ?
             if(mod(floor(da_struct.mask_min/(2^(ch-1))),2) == 0)
@@ -455,12 +474,12 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             
         end
 
-        function name = GetDACNameByChnl(obj,ch)
+        function name = GetDACNameByChnl(obj,ch) % Yulin Wu
             numChnls = numel(ch);
             ch_info = obj.da_channel_list(ch);
             name = cell(1,numChnls);
             for ii = 1:numChnls
-                da = obj.da_list(ch_info(ii).index).da;% GM, 070411
+                da = obj.da_list(ch_info(ii).index).da;
                 name{ii} = da.name;
             end
         end

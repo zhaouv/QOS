@@ -26,7 +26,7 @@ function varargout = correctf01bySpc(varargin)
     args = qes.util.processArgs(varargin,{'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    f = q.f01-5*q.t_spcFWHM_est:q.t_spcFWHM_est/10:q.f01+5*q.t_spcFWHM_est;
+    f = q.f01-5*q.t_spcFWHM_est:q.t_spcFWHM_est/15:q.f01+5*q.t_spcFWHM_est;
     e = spectroscopy1_zpa('qubit',q,'driveFreq',f,'save',false,'gui',false);
     P = e.data{1};
     
@@ -35,7 +35,7 @@ function varargout = correctf01bySpc(varargin)
     P = P(2:end);
     
     rP = range(P);
-    if rP < 0.15
+    if rP < 0.1
         throw(MException('QOS_correctf01bySpc:visibilityTooLow',...
 				'visibility(%0.2f) too low, run correctf01bySpc at low visibility might produce wrong result, thus not supported.', rP));
     end
@@ -69,6 +69,7 @@ function varargout = correctf01bySpc(varargin)
 		ylabel(ax,'P|1>');
         legend(ax,{'data',sprintf('f01:%0.5fGHz',f01/1e9)});
         set(ax,'YLim',ylim);
+        drawnow;
     end
 	if args.save
         QS = qes.qSettings.GetInstance();

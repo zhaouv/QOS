@@ -18,13 +18,12 @@ classdef iq_ustc_ad < qes.measurement.iq
         eps_a = 0 % mixer amplitude correction
         eps_p = 0 % mixer phase correction
         upSampleNum = 1 % upsample to match DA sampling rate
-        downSampleNum = 1 % downsample before demodulation for speed
     end
     properties (SetAccess = private, GetAccess = private)
         % Cached variables
         Mc = [1, 0; 0, 1]          % mixer correction matrix
         IQ          % IQ = NaN*zeros(numFreq,obj.n); % numFreq = numel(obj.freq);
-       
+
         selectidx   % selectidx = obj.startidx:obj.eidx;
         kernel      % kernel = exp(-2j*pi*obj.freq(ii).*t);
     end
@@ -32,16 +31,17 @@ classdef iq_ustc_ad < qes.measurement.iq
         function obj = iq_ustc_ad(InstrumentObject)
             if isempty(strfind(class(InstrumentObject),'ustc_ad_')) ||...
                     ~isvalid(InstrumentObject)
-                error('iq_ustc_ad:InvalidInput','InstrumentObject is not a valid ustc_ad class object!');
+                throw(MException('iq_ustc_ad:InvalidInput',...
+                    'InstrumentObject is not a valid ustc_ad class object!'));
             end
             if isempty(InstrumentObject.recordLength)
-                error('iq_ustc_ad:InvalidInput','recordLength of InstrumentObject not set.');
+                throw(MException('iq_ustc_ad:InvalidInput','recordLength of InstrumentObject not set.'));
             end
             obj = obj@qes.measurement.iq(InstrumentObject);
         end
         function set.n(obj,val)
             if isempty(val) || ceil(val) ~=val || val <=0
-                error('iq_ustc_ad:InvalidInput','n should be a positive integer!');
+                throw(MException('iq_ustc_ad:InvalidInput','n should be a positive integer!'));
             end
             obj.n = val;
             if ~isempty(obj.freq)
@@ -55,19 +55,32 @@ classdef iq_ustc_ad < qes.measurement.iq
             end
             calcCachedVar(obj);
         end
-        function set.startidx(obj,val)
-            val = ceil(val);
-            if val < 1 || val > obj.instrumentObject.recordLength || (~isempty(obj.endidx) && val >= obj.endidx)
-                error('iq_ustc_ad:InvalidInput','startidx should be an interger greater than 0 and smaller than AD recordLength and endidx!');
+        function set.upSampleNum(obj,val)
+            if isempty(val)
+                throw(MException('QOS_iq_ustc_ad:emptyUnpSampleNum','upSampleNum can not be empty.'));
             end
+            if round(val) ~= val || val < 1
+                throw(MException('QOS_iq_ustc_ad:nonIntegerUnpSampleNum',...
+                    sprintf('upSampleNum must be a positive integer, %0.2f given.',val)));
+            end
+            obj.upSampleNum = val;
+            calcCachedVar(obj);
+        end
+        function set.startidx(obj,val)
+%             val = ceil(val);
+%             if val < 1 || val > obj.instrumentObject.recordLength || (~isempty(obj.endidx) && val >= obj.endidx)
+%                 throw(MException('iq_ustc_ad:InvalidInput',...
+%                     'startidx should be an interger greater than 0 and smaller than AD recordLength and endidx!'));
+%             end
             obj.startidx = val;
             calcCachedVar(obj);
         end
         function set.endidx(obj,val)
-            val = ceil(val);
-            if val <= obj.startidx || val > obj.instrumentObject.recordLength
-                error('iq_ustc_ad:InvalidInput','endidx should be an interger greater than startidx and not exceeding AD recordLength!');
-            end
+%             val = ceil(val);
+%             if val <= obj.startidx || val > obj.instrumentObject.recordLength
+%                 throw(MException('iq_ustc_ad:InvalidInput',...
+%                     'endidx should be an interger greater than startidx and not exceeding AD recordLength!'));
+%             end
             obj.endidx = val;
             calcCachedVar(obj);
         end
@@ -86,8 +99,8 @@ classdef iq_ustc_ad < qes.measurement.iq
             t_ = 1e9*(0:length(VI)-1)/obj.instrumentObject.samplingRate;
 %             plotyy(t,VI,t,VQ);
             if nargin < 2
-                figure();
-                ax = axes();
+                hf = qes.ui.qosFigure('AD Voltage Signal',true);
+                ax = axes('Parent',hf);
                 hold(ax,'on');
             end
             plot(ax,t_,VI,t_,VQ);
@@ -100,7 +113,7 @@ classdef iq_ustc_ad < qes.measurement.iq
         function Run(obj)
             % Run the measurement
             if isempty(obj.n)
-                error('iq_ustc_ad:RunError','some properties are not set yet!');
+                throw(MException('iq_ustc_ad:RunError','some properties are not set yet!'));
             end
             Run@qes.measurement.measurement(obj); % check object and its handle properties are isvalid or not
 %             disp('===========');
@@ -114,9 +127,10 @@ classdef iq_ustc_ad < qes.measurement.iq
 % %             toc 
 %             obj.data = mean(IQ);
 %             obj.extradata = IQ;
-            
+
+%              tic
             obj.Run_BothChnl(Vi,Vq);
-%             toc 
+%               toc 
             obj.data = mean(obj.IQ);
             obj.extradata = obj.IQ;
             
@@ -128,16 +142,16 @@ classdef iq_ustc_ad < qes.measurement.iq
             if ~isempty(obj.startidx) && ~isempty(obj.freq)
                 NperSeg = obj.instrumentObject.recordLength;
                 if isempty(obj.endidx)
-                    eidx = NperSeg;
+                    eidx = obj.upSampleNum*NperSeg;
                 else
                     eidx = obj.endidx;
                 end
-                % typically, one need ot remove a few data points at the
+                % typically, one needs to remove a few data points at the
                 % beginning or at the end of each segament due to trigger
                 % and signal may not be exactly syncronized.
-                obj.selectidx = obj.startidx:eidx;
-                idx = 1:eidx - obj.startidx+1;
-                t = (idx-1)/obj.instrumentObject.samplingRate;
+                obj.selectidx = obj.startidx:obj.upSampleNum:eidx;
+                t = (obj.selectidx-obj.startidx)/...
+                    (obj.instrumentObject.samplingRate*obj.upSampleNum);
                 obj.kernel = zeros(numel(obj.freq),numel(t));
                 for ii = 1:numel(obj.freq)
                     obj.kernel(ii,:) = exp(-2j*pi*obj.freq(ii).*t);
@@ -145,24 +159,22 @@ classdef iq_ustc_ad < qes.measurement.iq
             end
         end
 %         function IQ = Run_BothChnl(obj,Vi, Vq)
-          function Run_BothChnl(obj,Vi, Vq)
+          function Run_BothChnl(obj, Vi, Vq)
 %             NperSeg = obj.instrumentObject.recordLength;
 %             if isempty(obj.endidx)
 %                 eidx = NperSeg;
 %             else
 %                 eidx = obj.endidx;
 %             end
-            disp('====')
-            obj.selectidx(1)
-            obj.selectidx(end)
+%             disp('====')
+%             obj.selectidx(1)
+%             obj.selectidx(end)
             
-            if obj.upSampleNum ~= 1
-                Vi = upsample(Vi,obj.upSampleNum);
-                Vq = upsample(Vq,obj.upSampleNum);
-            end
+            Vi = qes.util.upsample_c(Vi,obj.upSampleNum);
+            Vq = qes.util.upsample_c(Vq,obj.upSampleNum);
             Vi = Vi(:,obj.selectidx);
             Vq = Vq(:,obj.selectidx);
-            
+
             for ii = 1:numel(obj.freq)
                 for jj = 1:obj.n
                     IQ_ = obj.kernel(ii,:).*(Vi(jj,:)+1j*Vq(jj,:));

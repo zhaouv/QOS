@@ -1,5 +1,5 @@
 function bol = identicalArray(a, b)
-% check two arrays are identical or not, elements should have eq method
+% check two arrays are identical or not, elements should have eq methods
 
 % Copyright 2016 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com

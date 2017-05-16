@@ -51,6 +51,11 @@ function varargout = optReadoutFreq(varargin)
     optFreq = frequency(idx);
     
     if args.gui
+        figure(51);
+        plot(frequency,abs(data(:,1)),'--.r',frequency,abs(data(:,2)),'--.b');legend('|1>','|0>');
+        hf = qes.ui.qosFigure(sprintf('Opt. Readout Freq. | %s', q.name),true);
+        ax_ = axes('parent',hf);
+        plot(ax_,frequency,abs(data(:,1)),'--.r',frequency,abs(data(:,2)),'--.b');legend('|1>','|0>');
         hf = qes.ui.qosFigure(sprintf('Opt. Readout Freq. | %s', q.name),true);
         ax = axes('parent',hf);
         plot(ax,data(:,1),'--.r');
@@ -77,6 +82,7 @@ function varargout = optReadoutFreq(varargin)
         title(ax,sprintf('Maximum IQ separation frequency: %0.5fGHHz',optFreq/1e9));
         set(ax,'PlotBoxAspectRatio',[1,1,1]);
         pbaspect(ax,[1,1,1]);
+        drawnow;
     end
     if args.save
         QS = qes.qSettings.GetInstance();

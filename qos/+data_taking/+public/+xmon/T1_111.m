@@ -4,8 +4,8 @@ function varargout = T1_111(varargin)
 % q1, q2, q3 can be the same qubit or diferent qubits,
 % q1, q2, q3 all has to be the selected qubits in the current session,
 % 
-% <_o_> = T1_111('biasQubit',_c&o_,'biasAmp',<[_f_]>,'biasDelay',biasDelay,...
-%       'backgroundWithZBias',b,...
+% <_o_> = T1_111('biasQubit',_c&o_,'biasAmp',<[_f_]>,'biasDelay',<_i_>,...
+%       'backgroundWithZBias',<_b_>,...
 %       'driveQubit',_c&o_,'readoutQubit',_c&o_,...
 %       'time',[_i_],...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
@@ -27,47 +27,44 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'r_avg',0,'biasAmp',0,'biasDelay',0,'backgroundWithZBias',true,...
+args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'biasDelay',0,'backgroundWithZBias',true,...
     'gui',false,'notes',''});
 [readoutQubit, biasQubit, driveQubit] =...
     data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
 
-if args.r_avg~=0 %add by GM, 20170416
+if ~isempty(args.r_avg)
     readoutQubit.r_avg=args.r_avg;
 end
 
 X = gate.X(driveQubit);
 I = gate.I(biasQubit);
-I.ln = X.length+args.biasDelay;
+I.ln = args.biasDelay;
 Z = op.zBias4Spectrum(biasQubit);
-function proc = procFactory(delay)
-	Z.ln = delay;
-	proc = Z*I;
+function procFactory(delay)
+    Z.ln = delay;
+    proc = Z*I*X;
+    proc.Run();
+    R.delay = proc.length;
 end
 R = measure.rReadout4T1(readoutQubit,X.mw_src{1});
-
-x = expParam(Z,'amp');
-x.name = [biasQubit.name,' z bias amplitude'];
-y = expParam(@procFactory);
-y.name = [driveQubit.name,' decay time(da sampling interval)'];
-y.auxpara = X;
-y.callbacks ={@(x_) x_.expobj.Run(); @(x_) x_.auxpara.Run()};
-
 function rerunZ()
-    proc_ = procFactory(y.val);
-    proc_.Run();
+    piAmpBackup = X.amp;
+    X.amp = 0;
+    procFactory(y.val);
+    X.amp = piAmpBackup;
 end
 if args.backgroundWithZBias
     R.postRunFcns = @rerunZ;
 end
 
-y_s = expParam(R,'delay');
-y_s.offset = X.length;
-
+x = expParam(Z,'amp');
+x.name = [biasQubit.name,' z bias amplitude'];
+y = expParam(@procFactory);
+y.name = [driveQubit.name,' decay time(da sampling interval)'];
 s1 = sweep(x);
 s1.vals = args.biasAmp;
-s2 = sweep({y,y_s});
-s2.vals = {args.time,args.time};
+s2 = sweep(y);
+s2.vals = args.time;
 e = experiment();
 e.name = 'T1';
 e.sweeps = [s1,s2];

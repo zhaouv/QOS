@@ -28,14 +28,14 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'driveFreq',[],'r_avg',0,'gui',false,'notes','','save',true});
+args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'driveFreq',[],'r_avg',[],'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] = data_taking.public.util.getQubits(...
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
     args.driveFreq = driveQubit.f01-5*driveQubit.t_spcFWHM_est:...
         driveQubit.t_spcFWHM_est/5:driveQubit.f01+5*driveQubit.t_spcFWHM_est;
 end
-if args.r_avg~=0 %add by GM, 20170414
+if ~isempty(args.r_avg)
     readoutQubit.r_avg=args.r_avg;
 end
 X = op.mwDrive4Spectrum(driveQubit);
@@ -55,14 +55,14 @@ switch args.dataTyp %add by GM, 20170415
 			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
 			args.dataTyp));
 end
-Z = op.zBias4Spectrum(biasQubit);
 
-x = expParam(Z.zdc_src{1},'dcval');
+X.Run(); % from this point on X will assume that the dc source and mw source are set
+x = expParam(X.zdc_src{1},'dcval');
 x.name = [biasQubit.name,' zdc bias amplitude'];
-y = expParam(X,'mw_src{1}.frequency');
+y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
 y.name = [driveQubit.name,' driving frequency (Hz)'];
-y.callbacks ={@(x_) x_.expobj.Run()};
+y.callbacks ={@(x_) X.Run()};
 s1 = sweep(x);
 s1.vals = args.biasAmp;
 s2 = sweep(y);
