@@ -26,7 +26,7 @@ function v = FFT(obj,f)
     % vi = fft(obj(t),NFFT);
     f = linspace(0,2.5,NFFT*10);
     if ~isempty(obj.df)
-%         v = exp(-1j*obj.phase)*interp1(UPSAMPLE*linspace(-0.5,0.5,NFFT),vi,f-obj.df,'spline');
+         v = exp(-1j*obj.phase)*interp1(UPSAMPLE*linspace(-0.5,0.5,NFFT),vi,f-obj.df,'spline');
     else
 %         v = interp1(UPSAMPLE*linspace(-0.5,0.5,NFFT),vi,f,'spline');
         v = interp1(f_,vi,f,'spline');

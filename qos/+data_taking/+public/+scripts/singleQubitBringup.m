@@ -10,7 +10,7 @@ scanRange = 5e6; % fine scan each qubit dips
 qubitIdx = 8;
 
 for ii = 1:numel(qubits)
-	setZDC(qubits{ii},1e4);
+	setZDC(qubits{ii},0);
 end
 setZDC(qubits{qubitIdx},0);
 %%

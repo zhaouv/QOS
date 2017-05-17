@@ -21,9 +21,9 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
             for ii = 0:2^obj.num_qs-1
                 obj.stateNames{ii+1} = sprintf('|%s>',dec2bin(ii,obj.num_qs));
             end
-			fMat = reshape(obj.qubits{1}.fMat,2,2).';
+			fMat = reshape(obj.qubits{1}.r_iq2prob_fMat,2,2).';
 			for ii = 2:numel(obj.qubits)
-				fMat_ = reshape(obj.qubits{ii}.fMat,2,2).';
+				fMat_ = reshape(obj.qubits{ii}.r_iq2prob_fMat,2,2).';
 				fMat = kron(fMat_,fMat);
 			end
 			obj.invFMat = inv(fMat);

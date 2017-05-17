@@ -85,8 +85,8 @@ T = nan*ones(1,N);
 for ii = 1:N
     tic
     ustcaddaObj.runReps = runReps(ii);
-    ustcaddaObj.SendWave(3,65535*ones(1,wvLn)); % 620
-    ustcaddaObj.SendWave(4,65535*ones(1,wvLn)); % 750
+    ustcaddaObj.SendWave(3,65535*ones(1,wvLn));
+    ustcaddaObj.SendWave(4,65535*ones(1,wvLn));
     data = ustcaddaObj.Run(true);
     T(ii) = toc;
 end
@@ -95,3 +95,20 @@ semilogx(runReps,T-runReps/5e3);
 xlabel('Number of samples');
 ylabel('Time taken(s)');
 title('Repetition 5kHz,waveform length 4000pts(da), 2000pts(ad).');
+%%
+wvLn = 4e3; % 2us
+N = 20;
+T = nan*ones(1,N);
+for ii = 1:N
+    tic
+    ustcaddaObj.runReps = 1000;
+    ustcaddaObj.SendWave(3,65535*ones(1,wvLn));
+    ustcaddaObj.SendWave(4,65535*ones(1,wvLn));
+    data = ustcaddaObj.Run(true);
+    T(ii) = toc;
+end
+figure();
+plot(1:N,T);
+xlabel('Number of runs');
+ylabel('Time taken(s)');
+%%
