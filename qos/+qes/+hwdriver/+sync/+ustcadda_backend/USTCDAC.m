@@ -118,26 +118,22 @@ classdef USTCDAC < handle
                 arr = zeros(1,8);
                 idx = 1;
                 for addr = 1136:1139
-                    arr(idx) = ReadAD9136_1(addr);
-                    arr(idx+1) = ReadAD9136_2(addr);
+                    arr(idx) = obj.ReadAD9136_1(addr);
+                    arr(idx+1) = obj.ReadAD9136_2(addr);
                     idx = idx + 2;
-                end
-                arr = mod(arr,256);
-                if(sum(arr == 255) == length(arr))
-                    islaneReady = 1;
-                else
-                    islaneReady = 0;
                 end
                 ret = obj.ReadReg(5,8);
                 obj.isblock = 0;
-                if(mod(floor(ret/(2^20)),4) == 3)
-                    isDACReady = islaneReady;
-                else
-                    isDACReady = 0;
+                
+                arr = mod(arr,256);
+                if(sum(arr == 255) == length(arr) && mod(floor(ret/(2^20)),4) == 3)
+                    isDACReady= 1;
+                else                 
                     obj.InitBoard();
                     try_count =  try_count - 1;
-                    pause(0.1);
+                    pause(1);
                 end
+                
             end
             
             if(isDACReady == 0)
