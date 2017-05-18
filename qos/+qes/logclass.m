@@ -17,18 +17,55 @@ classdef logclass < handle
             if isempty(refunc)
                 error('replace empty')
             end
-            func = @logclass;
+            func = @qes.logclass;
             if nargin
                 if strcmp(replacestr,'getreplacefunc')
                     func = refunc;
                 end
             end
         end
+        
+        function newobj=runlogs(logs)
+            [~,n]=size(logs);
+            timestr=logs{1,1};
+            tlate=timestr2second(timestr);
+            newobj=[];
+            for index = 1:n
+                timestr=logs{1,index};
+                tnow=timestr2second(timestr);
+                pause(tnow-tlate);
+                tlate=tnow;
+                if strcmp(logs{2,index},'create')
+                    if isempty(logs{4,index})
+                        newobj=qes.logclass();
+                    else
+                        newobj=qes.logclass(logs{4,index});
+                    end
+                else
+                    s=logs{4,index};
+                    if strcmp(logs{2,index},'get')
+                        sref=subsref(newobj,s);
+                    elseif strcmp(logs{2,index},'set')
+                        newobj=subsasgn(newobj,s,logs{3,index});
+                    end
+                end
+            end
+            
+            function fsecond=timestr2second(timestr)
+                s0=str2double(timestr(16:end));
+                m0=str2double(timestr(13:14));
+                h0=str2double(timestr(10:11));
+                d0=str2double(timestr(7:8));
+                % mm0=str2double(timestr(5:6));
+                % y0=str2double(timestr(1:4));
+                fsecond=((d0*24+h0)*60+m0)*60+s0;
+            end
+        end     
     end
     
     methods
         function obj=logclass(varargin)
-            func=logclass.replace('getreplacefunc');          
+            func=qes.logclass.replace('getreplacefunc');          
             if nargin
                 obj.logs={obj.time();'create';char(func);varargin};
                 obj.model=func(varargin{:});
@@ -51,7 +88,8 @@ classdef logclass < handle
             obj.logs(1,end+1)={obj.time()};
             obj.logs(2,end)={'set'};
             obj.logs(3,end)={val};
-            tempindex=4;
+            obj.logs(4,end)={s};
+            tempindex=5;
             for i=s
                 obj.logs(tempindex,end)={i.type};
                 tempindex=tempindex+1;
@@ -72,7 +110,8 @@ classdef logclass < handle
             end
             obj.logs(1,end+1)={obj.time()};
             obj.logs(2,end)={'get'};
-            tempindex=4;
+            obj.logs(4,end)={s};
+            tempindex=5;
             for i=s
                 obj.logs(tempindex,end)={i.type};
                 tempindex=tempindex+1;
