@@ -50,13 +50,15 @@ function varargout = iq2prob_01(varargin)
     end
     iq_raw_0 = iq_raw_0(:).';
 
-    [center0, center1, hf] =... 
+    [center0, center1,F00,F10,F01,F11, hf] =... 
 		data_taking.public.dataproc.iq2prob_centers(iq_raw_0,iq_raw_1,~args.gui);
 
     if args.save
         QS = qes.qSettings.GetInstance();
 		QS.saveSSettings({q.name,'r_iq2prob_center0'},center0);
         QS.saveSSettings({q.name,'r_iq2prob_center1'},center1);
+		QS.saveSSettings({q.name,'r_iq2prob_fMat'},...
+			sprintf('%0.3f,%0.3f,%0.3f,%0.3f',[F00,F10,F01,F11]));
         % QS.saveSSettings({q.name,'r_iq2prob_01rPoint'},rPoint);
         % QS.saveSSettings({q.name,'r_iq2prob_01angle'},ang);
         % QS.saveSSettings({q.name,'r_iq2prob_01threshold'},threshold);
@@ -68,6 +70,10 @@ function varargout = iq2prob_01(varargin)
             saveas(hf,dataSvName);
         end
     end
+	if ~isempty(hf) && ishghandle(hf)
+		ax = get(hf,'UserData');
+		title(ax,sprintf('P00:%0.2f,P01:%0.2f,P10:%0.2f,P11:%0.2f',P00,P01,P10,P11));
+	end
 
 	varargout{1} = center0;
 	varargout{1} = center1;

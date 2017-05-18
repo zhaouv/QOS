@@ -11,6 +11,9 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
     properties (SetAccess = private)
         stateNames
     end
+	properties (SetAccess = private, GetAccess = private)
+        invFMat % P = invFMat*Pm; 
+    end
     methods
         function obj = prob_iq_ustc_ad_j(iq_ustc_ad_obj,qs)
             obj = obj@sqc.measure.prob_iq_ustc_ad(iq_ustc_ad_obj,qs);
@@ -18,6 +21,12 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
             for ii = 0:2^obj.num_qs-1
                 obj.stateNames{ii+1} = sprintf('|%s>',dec2bin(ii,obj.num_qs));
             end
+			fMat = reshape(obj.qubits{1}.r_iq2prob_fMat,2,2).';
+			for ii = 2:numel(obj.qubits)
+				fMat_ = reshape(obj.qubits{ii}.r_iq2prob_fMat,2,2).';
+				fMat = kron(fMat_,fMat);
+			end
+			obj.invFMat = inv(fMat);
         end
         function Run(obj)
 			if obj.threeStates
@@ -31,6 +40,7 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
 			for ii = 0:numStates-1
 				obj.data(ii+1) = sum(d==ii)/obj.n;
 			end
+			obj.data = (obj.invFMat*obj.data.').';
         end
     end
 end

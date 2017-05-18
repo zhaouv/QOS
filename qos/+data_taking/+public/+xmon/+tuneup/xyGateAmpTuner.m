@@ -2,6 +2,7 @@ function varargout = xyGateAmpTuner(varargin)
 % tune xy gate amplitude: X, X/2, -X/2, X/4, -X/4, Y, Y/2, -Y/2, Y/4, -Y/4
 % 
 % <_f_> = xyGateAmpTuner('qubit',_c&o_,'gateTyp',_c_,...
+%		'AE',<_b_>,...  % insert multiple Idle gate(implemented by two pi rotations) to Amplify Error or not
 %       'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -18,8 +19,11 @@ function varargout = xyGateAmpTuner(varargin)
     import data_taking.public.xmon.rabi_amp1
 	
 	NUM_RABI_SAMPLING_PTS = 60;
+	NUM_RABI_SAMPLING_PTS_AE = 30;
+	MIN_VISIBILITY = 0.25;
+	AE_NUM_PI = 11; % must be an positive odd number
 	
-	args = qes.util.processArgs(varargin,{'gui',false,'save',true});
+	args = qes.util.processArgs(varargin,{'AE',false,'gui',false,'save',true});
     
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 	da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
@@ -41,9 +45,11 @@ function varargout = xyGateAmpTuner(varargin)
 		'detuning',0,'driveTyp',args.gateTyp,'gui',false,'save',false);
 	P = e.data{1};
 	rP = range(P);
-	if rP < 0.25
+	P0 = min(P);
+	P1 = max(P);
+	if rP < MIN_VISIBILITY
 		throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
-				'visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', rP));
+				sprintf('visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', rP)));
 	elseif rP < 5/sqrt(q.r_avg)
 		throw(MException('QOS_xyGateAmpTuner:rAvgTooLow',...
 				'readout average number %d too small.', q.r_avg));
@@ -93,6 +99,28 @@ function varargout = xyGateAmpTuner(varargin)
 	if gateAmp < amps(idx1) || gateAmp > amps(idx2)
 		throw(MException('QOS_xyGateAmpTuner:xyGateAmpTuner',...
 				'gate amplitude probably out of range.'));
+	end
+	
+	if args.AE  % use multiple pi gates to amplify error to fine tune gateAmp
+		amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+		e = rabi_amp1('qubit',q,'biasAmp',0,'biasLonger',0,'xyDriveAmp',amps,...
+			'detuning',0,'numPi',AE_NUM_PI,'driveTyp',args.gateTyp,'gui',false,'save',false);
+		P = e.data{1};
+		if max(P) < P0 + MIN_VISIBILITY
+			warning('QOS_xyGateAmpTuner:visibilityTooLow',...
+				'AE visibility too low, AE result not used.'));
+		else
+			P = smooth(P,3);
+			rP = range(P);
+		
+			[pks,locs,~,~] = findpeaks(P,,'MinPeakHeight',2*rP/3,...
+				'MinPeakProminence',rP/2,'MinPeakDistance',numel(P)/4,...
+				'WidthReference','halfprom');
+			if ~isempty(pks)
+				[~,idx] = min(locs-NUM_RABI_SAMPLING_PTS_AE/2);
+				gateAmp = amps_ae(locs(idx));
+			end
+		end
 	end
 
 	if args.gui

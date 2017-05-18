@@ -12,7 +12,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
         pulse_ln = 25000
 %         chnls
         
-        debug = false;
+        showResults = false
     end
 	properties (SetAccess = private, GetAccess = private)
 		awg
@@ -149,7 +149,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             x = round(xsol(1));
             y = round(xsol(2));
 			
-			if obj.debug
+			if obj.showResults
                 f([0,0]);
                 instr = qes.qHandle.FindByClass('qes.hwdriver.sync.spectrumAnalyzer');
                 spcAnalyzerObj = instr{1};
@@ -182,11 +182,12 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 
                 freq4plot=[obj.lo_freq-obj.sb_freq, obj.lo_freq, obj.lo_freq+obj.sb_freq];
 
-                figure(42);
-                plot(freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
-                xlabel('Frequency(GHz)');
-                ylabel('Amplitude');
-                legend({'before calibration','after calibration'});
+                hf = qes.ui.qosFigure('IQ Mixer Calibration | DC',true);
+				ax = axes('Parent',hf);
+                plot(ax, freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
+                xlabel(ax, 'Frequency(GHz)');
+                ylabel(ax, 'Amplitude');
+                legend(ax, {'before calibration','after calibration'});
 
                 spcAnalyzerObj.startfreq = startfreq_backup;
                 spcAnalyzerObj.stopfreq = stopfreq_backup;
@@ -339,7 +340,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 %             obj.iZero=i0;
 %             obj.qZero=q0;            
 %%			
-			if obj.debug
+			if obj.showResults
                 f([0,0]);
                 instr = qes.qHandle.FindByClass('qes.hwdriver.sync.spectrumAnalyzer');
                 spcAnalyzerObj = instr{1};
@@ -372,15 +373,16 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 
                 freq4plot=[obj.lo_freq-obj.sb_freq, obj.lo_freq, obj.lo_freq+obj.sb_freq];
 
-                figure(42);
-                plot(freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
-                xlabel('Frequency(GHz)');
-                ylabel('Amplitude');
-                legend({'after calibration zero','after calibration phase'});
+                hf = qes.ui.qosFigure('IQ Mixer Calibration | DC',true);
+				ax = axes('Parent',hf);
+                plot(ax,freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
+                xlabel(ax,'Frequency(GHz)');
+                ylabel(ax,'Amplitude');
+                legend(ax,{'after calibration zero','after calibration phase'});
                 if am-bm>0
-                    title('BAD!','color','r')
+                    title(ax,'BAD!','color','r')
                 else
-                    title('GOOD!','color','g')
+                    title(ax,'GOOD!','color','g')
                 end
                 
 %                 spcAnalyzerObj.startfreq = obj.lo_freq-abs(obj.sb_freq) - 1e6;

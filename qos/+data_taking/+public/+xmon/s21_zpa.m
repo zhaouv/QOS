@@ -29,18 +29,16 @@ function varargout = s21_zpa(varargin)
         q.r_avg=args.r_avg;
     end
 
+    Z = op.zBias4Spectrum(q);
     R = measure.resonatorReadout_ss(q);
     R.state = 1;
     R.swapdata = true;
-    R.name = 'iq';
+    R.name = '|IQ|';
     R.datafcn = @(x)mean(x);
-    
-    
-    Z = op.zBias4Spectrum(q);
-    
+
     x = expParam(Z,'amp');
     x.name = [q.name,' z pulse bias'];
-    x.callbacks = {@(x_)x_.expobj.Run()};
+    x.callbacks = {@(x_)Z.Run()};
     x.deferCallbacks = true;
     y = expParam(R,'mw_src_frequency');
     y.offset = q.r_fc - q.r_freq;

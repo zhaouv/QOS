@@ -40,18 +40,21 @@ end
 
 X = op.mwDrive4Spectrum(q);
 X.Run();
+Z = op.zBias4Spectrum(q);
 R = measure.resonatorReadout_ss(q);
 R.delay = X.length;
 R.state = 2;
-Z = op.zBias4Spectrum(q);
+function proc = procFactory(amp)
+	Z.amp = amp;
+	proc = Z.*X;
+end
 
-x = expParam(Z,'amp');
+x = expParam(@procFactory,true);
 x.name = [q.name,' z bias amplitude'];
 y = expParam(X.mw_src{1},'frequency');
 y.offset = -q.spc_sbFreq;
 y.name = [q.name,' driving frequency (Hz)'];
-y.auxpara = X;
-y.callbacks ={@(x_)x.RunCallbacks(x),@(x_)x_.auxpara.Run()};
+y.callbacks ={@(x_)x.fcnval.Run()};
 
 s1 = sweep(x);
 s1.vals = args.biasAmp;
@@ -61,9 +64,6 @@ s2.vals = args.driveFreq;
 swpRngObj = util.dynMwSweepRngBnd(s1,s2);
 swpRngObj.centerfunc = args.swpBandCenterFcn;
 swpRngObj.bandwidth = args.swpBandWdth;
-x.auxpara = swpRngObj;
-x.callbacks ={@(x_) x_.expobj.Run(),@(x) x.auxpara.UpdateRng()};
-x.deferCallbacks = true;
 
 e = experiment();
 e.name = 'Spectroscopy';

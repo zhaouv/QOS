@@ -50,16 +50,18 @@ classdef USTCADC < handle
         end
         
         function Open(obj)
-            if ~obj.isopen
-                ret = calllib(obj.driver,'OpenADC',int32(obj.netcard_no));
-                if(ret == 0)
-                    obj.status = 'open';
-                    obj.isopen = true;
-                else
-                   error('USTCADC:OpenError','Open ADC failed!');
-                end 
-                obj.Init()
+            if obj.isopen
+                return;
             end
+            ret = calllib(obj.driver,'OpenADC',int32(obj.netcard_no));
+            if(ret == 0)
+                obj.status = 'open';
+                obj.isopen = true;
+            else
+               throw(MException('USTCADC:OpenError',...
+                   sprintf('Open ADC %s failed!',obj.name))); % Yulin Wu
+            end 
+            obj.Init()
         end
         
         function Init(obj)
@@ -75,7 +77,8 @@ classdef USTCADC < handle
                     obj.status = 'close';
                     obj.isopen = false;
                 else
-                   error('USTCADC:CloseError','Close ADC failed!');
+                   throw(MException('USTCADC:CloseError',...
+                        sprintf('Close ADC %s failed!',obj.name))); % Yulin Wu
                 end 
             end
         end
@@ -86,7 +89,8 @@ classdef USTCADC < handle
                 pdata = libpointer('uint8Ptr', data);
                 [ret,~] = calllib(obj.driver,'SendData',int32(4),pdata);
                 if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetSampleDepth failed!');
+                   throw(MException('USTCADC:SetSampleDepthError',...
+                        sprintf('Set SampleDepth failed on ADC %s.',obj.name))); % Yulin Wu
                 end 
             end
         end
@@ -106,7 +110,8 @@ classdef USTCADC < handle
                 pdata = libpointer('uint8Ptr', data);
                 [ret,~] = calllib(obj.driver,'SendData',int32(4),pdata);
                 if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetTrigCount failed!');
+                   throw(MException('USTCADC:SetTrigCountError',...
+                        sprintf('Set TrigCount failed on ADC %s.',obj.name))); % Yulin Wu
                 end 
             end
         end

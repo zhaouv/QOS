@@ -32,7 +32,7 @@ function varargout = s21_01(varargin)
     X = gate.X(q);
     R = measure.rReadout4S21_01(q);
     R.delay = X.length;
-    R.name = 'iq';
+    R.name = '|IQ|';
     
     x = expParam(R,'mw_src_frequency');
     x.offset = q.r_fc - q.r_freq;
