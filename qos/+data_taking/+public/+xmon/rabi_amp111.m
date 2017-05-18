@@ -96,7 +96,7 @@ switch args.dataTyp
         % pass
     case 'S21'
         R.swapdata = true;
-        R.name = '|S21|';
+        R.name = '|IQ|';
         R.datafcn = @(x)mean(abs(x));
     otherwise
         throw(MException('QOS_rabi_amp111:unsupportedDataTyp',...

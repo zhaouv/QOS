@@ -33,7 +33,7 @@ function varargout = s21_zpa(varargin)
     R = measure.resonatorReadout_ss(q);
     R.state = 1;
     R.swapdata = true;
-    R.name = '|IQ|';
+    R.name = 'IQ';
     R.datafcn = @(x)mean(x);
 
     x = expParam(Z,'amp');

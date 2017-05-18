@@ -1,10 +1,10 @@
-%   FileName:USTCADDA.m
-%   Author:GuoCheng
-%   E-mail:fortune@mail.ustc.edu.cn
-%   All right reserved @ GuoCheng.
-%   Modified: 2017.2.26
+% 	FileName:USTCADDA.m
+% 	Author:GuoCheng
+% 	E-mail:fortune@mail.ustc.edu.cn
+% 	All right reserved @ GuoCheng.
+% 	Modified: 2017.2.26
 %   Description:The class of ADDA
-classdef ustcadda_v2 < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
+classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
     properties
         runReps = 1             %run repetition
         adRecordLength = 1           %éœ??åœ¨Runå‰?è®¾ç½® !!!!!     % daRecordLength
@@ -38,75 +38,65 @@ classdef ustcadda_v2 < qes.hwdriver.icinterface_compatible % extends icinterface
         
         da_master_index = 1
     end
-    
-    properties (SetAccess = private)
+	
+	properties (SetAccess = private)
         debug_mod='null';
     end
     
     methods % Yulin Wu
         function TakeDAChnls(obj,chnls)
             if any(chnls>length(obj.da_channel_list))
-                throw(MException('QOS_ustcadda:daChnlAlreadyTaken','some da channels are taken already'));
-            end
-            if any(ismember(chnls,obj.daTakenChnls))
-                throw(MException('QOS_ustcadda:daChnlAlreadyTaken','some da channels are taken already'));
-            end
-            obj.daTakenChnls = [obj.daTakenChnls, chnls];
-        end
-        function ReleaseDAChnls(obj,chnls)
-            obj.daTakenChnls = setdiff(obj.daTakenChnls,chnls);
-        end
-        
-        function TakeADChnls(obj,chnls)
-            if any(ismember(chnls,obj.adTakenChnls))
-                throw(MException('QOS_ustcadda:adChnlAlreadyTaken','some ad channels are taken already'));
-            end
-            obj.adTakenChnls = [obj.adTakenChnls, chnls];
-        end
-        function ReleaseADChnls(obj,chnls)
-            obj.adTakenChnls = setdiff(obj.adTakenChnls,chnls);
-        end
-        
-        function val = GetDAChnlSamplingRate(obj, chnls)
-            val = zeros(size(chnls));
-            for ii = 1:numel(val)
-                val(ii) = obj.da_list(obj.da_channel_list(chnls(ii)).index).da.sample_rate;
-            end
-        end
-        
-        function val = GetADChnlSamplingRate(obj,chnls)
-            val = zeros(size(chnls));
-            for ii = 1:numel(val)
-                val(ii) = obj.ad_list(obj.ad_channel_list(chnls(ii)).index).ad.sample_rate;
-            end
+				throw(MException('QOS_ustcadda:daChnlAlreadyTaken','some da channels are taken already'));
+			end
+			if any(ismember(chnls,obj.daTakenChnls))
+				throw(MException('QOS_ustcadda:daChnlAlreadyTaken','some da channels are taken already'));
+			end
+			obj.daTakenChnls = [obj.daTakenChnls, chnls];
+		end
+		function ReleaseDAChnls(obj,chnls)
+			obj.daTakenChnls = setdiff(obj.daTakenChnls,chnls);
+		end
+		
+		function TakeADChnls(obj,chnls)
+			if any(ismember(chnls,obj.adTakenChnls))
+				throw(MException('QOS_ustcadda:adChnlAlreadyTaken','some ad channels are taken already'));
+			end
+			obj.adTakenChnls = [obj.adTakenChnls, chnls];
+		end
+		function ReleaseADChnls(obj,chnls)
+			obj.adTakenChnls = setdiff(obj.adTakenChnls,chnls);
+		end
+		
+		function val = GetDAChnlSamplingRate(obj, chnls)
+			val = zeros(size(chnls));
+			for ii = 1:numel(val)
+				val(ii) = obj.da_list(obj.da_channel_list(chnls(ii)).index).da.sample_rate;
+			end
+		end
+		
+		function val = GetADChnlSamplingRate(obj,chnls)
+			val = zeros(size(chnls));
+			for ii = 1:numel(val)
+				val(ii) = obj.ad_list(obj.ad_channel_list(chnls(ii)).index).ad.sample_rate;
+			end
         end
         
         function val = GetTrigInterval(obj)
-            val = obj.da_list(obj.da_master_index).da.trig_interval;
-        end
+			val = obj.da_list(obj.da_master_index).da.trig_interval;
+		end
     end
     methods (Access = private) % Yulin Wu
-        function obj = ustcadda_v2()
+        function obj = ustcadda_v1()
             obj.Config();
             obj.Open();
         end
     end
     
     methods (Static = true)
-        function obj = GetInstance(args) % Yulin Wu
+        function obj = GetInstance() % Yulin Wu
             persistent objlst;
-            if ~nargin
-                args='null';
-            end
-            if strcmp(args,'debug')
-                if isempty(objlst) || ~isvalid(objlst)
-                    obj.debug_mod = 'debug';
-                else
-                    error('Object already exists')
-                end
-            end
             if isempty(objlst) || ~isvalid(objlst)
-                obj = qes.hwdriver.sync.ustcadda_v2();
+                obj = qes.hwdriver.sync.ustcadda_v1();
                 objlst = obj;
             else
                 obj = objlst;
@@ -182,17 +172,17 @@ classdef ustcadda_v2 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.daTrigDelayStep = s.daTrigDelayStep;
             obj.adDelayStep = s.adDelayStep;
             obj.adRange = s.adRange;
-            
-            
 
             % é…?ç½®DAC
             for k = 1:obj.numDABoards
-                if strcmp(obj.debug_mod,'debug')
+				if strcmp(obj.debug_mod,'debug')
                     qes.hwdriver.sync.ustcadda_backend.USTCDAC = qes.logclass.replace('qes.hwdriver.sync.ustcadda_backend.USTCDAC');
                 end
                 obj.da_list(k).da = qes.hwdriver.sync.ustcadda_backend.USTCDAC(...
                     s.da_boards{k}.ip,s.da_boards{k}.port);
-                clear qes;
+				if strcmp(obj.debug_mod,'debug')
+					clear qes;
+				end
                 % set method removed, set properties directly, Yulin Wu, 170427
 %                 obj.da_list(k).da.set('name',s.da_boards{k}.name); 
                 obj.da_list(k).da.name=s.da_boards{k}.name;
@@ -239,24 +229,24 @@ classdef ustcadda_v2 < qes.hwdriver.icinterface_compatible % extends icinterface
                 channel = fieldnames(s.da_chnl_map{k});
                 channel_info = s.da_chnl_map{k}.(channel{1});
 %                 channel_info = regexp(channel_info,' ', 'split');
-                channel_info = regexp(channel_info,'\s+', 'split'); % be lenient, Yulin Wu
+				channel_info = regexp(channel_info,'\s+', 'split'); % be lenient, Yulin Wu
                 da_name = channel_info{1};
                 channel_name = channel_info{2};
                 % da_index = 1;
-                da_index = [];
+				da_index = [];
                 for x = 1:length(obj.da_list)
                     if(strcmpi(da_name,obj.da_list(x).da.name))
                         da_index = x;
-                        break; % Yulin Wu
+						break; % Yulin Wu
                     end
                 end
-                % We need to check the settings. Yulin Wu
-                ch = str2double(channel_name(3:length(channel_name)));
-                if isempty(da_index) 
-                    throw(MException('QOS_ustcadda:badSettings',sprintf('DA %s in da_chnl_map not exist.',da_name)));
-                elseif ch > obj.da_list(da_index).da.channel_amount
-                    throw(MException('QOS_ustcadda:badSettings',sprintf('Channel %s dose not exist on DA %s',channel_info{2}, da_name)));
-                end
+				% We need to check the settings. Yulin Wu
+				ch = str2double(channel_name(3:length(channel_name)));
+				if isempty(da_index) 
+					throw(MException('QOS_ustcadda:badSettings',sprintf('DA %s in da_chnl_map not exist.',da_name)));
+				elseif ch > obj.da_list(da_index).da.channel_amount
+					throw(MException('QOS_ustcadda:badSettings',sprintf('Channel %s dose not exist on DA %s',channel_info{2}, da_name)));
+				end
                 obj.da_channel_list(k).index = da_index; % bug fix: obj.da_channel_list(ch) -> obj.da_channel_list(k), Yulin Wu
                 obj.da_channel_list(k).ch = ch;
                 % æ·»åŠ æ•°æ?®ç»“æž„ä½“
@@ -282,25 +272,25 @@ classdef ustcadda_v2 < qes.hwdriver.icinterface_compatible % extends icinterface
                 channel_info = s.ad_chnl_map{k}.(channel{1}); %20170411
 
                 % channel_info = regexp(channel_info,' ', 'split');
-                channel_info = regexp(channel_info,'\s+', 'split'); % Yulin Wu
+				channel_info = regexp(channel_info,'\s+', 'split'); % Yulin Wu
                 ad_name = channel_info{1};
                 channel_name = channel_info{2};
                 ad_index = 1;
                 for x = 1:length(obj.ad_list)
                     if(strcmpi(ad_name,obj.da_list(x).da.name))
                         ad_index = x;
-                        break; % Yulin Wu
+						break; % Yulin Wu
                     end
                 end
-                
-                % We need to check the settings. Yulin Wu
-                ch = str2double(channel_name(3:length(channel_name)));
-                if isempty(ad_index) 
-                    throw(MException('QOS_ustcadda:badSettings',sprintf('AD %s in ad_chnl_map not exist.',ad_name)));
-                elseif ch > obj.ad_list(ad_index).ad.channel_amount
-                    throw(MException('QOS_ustcadda:badSettings',sprintf('Channel %s dose not exist on AD %s',channel_info{2}, ad_name)));
-                end
-                
+				
+				% We need to check the settings. Yulin Wu
+				ch = str2double(channel_name(3:length(channel_name)));
+				if isempty(ad_index) 
+					throw(MException('QOS_ustcadda:badSettings',sprintf('AD %s in ad_chnl_map not exist.',ad_name)));
+				elseif ch > obj.ad_list(ad_index).ad.channel_amount
+					throw(MException('QOS_ustcadda:badSettings',sprintf('Channel %s dose not exist on AD %s',channel_info{2}, ad_name)));
+				end
+				
                 obj.ad_channel_list(k).index = ad_index; % bug fix: obj.ad_channel_list(ch) -> obj.ad_channel_list(k), Yulin Wu
                 obj.ad_channel_list(k).ch = ch;
                 % æ·»åŠ æ•°æ?®ç»“æž„ä½“
@@ -345,7 +335,7 @@ classdef ustcadda_v2 < qes.hwdriver.icinterface_compatible % extends icinterface
 
             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps); %20170411
 
-        
+		
             obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
             % ?œæ­¢é™¤è¿žç»­æ³¢å½¢å¤–çš„é??“ï¼Œ?¯åŠ¨è§¦å?‘é???
@@ -515,7 +505,7 @@ classdef ustcadda_v2 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.Close();
         end
         
-        function val = getlogs(obj)
+		function val = getlogs(obj)
             if ~strcmp(obj.debug_mod,'debug')
                 error('not in debug mod')
             end

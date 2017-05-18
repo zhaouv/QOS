@@ -86,6 +86,6 @@ function [center0, center1, F00,F10,F01,F11,hf] =...
 		F00 = sum(e0>=cc)/num_samples;
 		F11 = sum(e1<=cc)/num_samples;
 	end
-	F01 = 1-P00; % the probability of |0> erroneously measured as |1>
-	F10 = 1-P11; % the probability of |1> erroneously measured as |0>
+	F01 = 1-F00; % the probability of |0> erroneously measured as |1>
+	F10 = 1-F11; % the probability of |1> erroneously measured as |0>
 end

@@ -563,7 +563,7 @@ if isempty(clickcount)
     clickcount = zeros(2,2*temp(1)+1);
 end
 clickcount(:,1:2*temp(1)+1~=temp(2)) = 0;
-if clickcount(1,temp(2)) > 0 && now - clickcount(2,temp(2)) > 6.944444444444441e-06 % 0.6 second
+if clickcount(1,temp(2)) > 0 && now - clickcount(2,temp(2)) > 6.941e-06 % 0.6 second
     clickcount(1,temp(2)) = 0;
 end
 clickcount(1,temp(2)) = clickcount(1,temp(2)) + 1;
