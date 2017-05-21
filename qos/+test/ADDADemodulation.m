@@ -1,18 +1,13 @@
-% ustcadda tester
+% ustcadda demodulation tester
+%%
+demodeFreq = 100e6;
 %%
 import qes.*
 import qes.hwdriver.sync.*
-cd('Q:\qos');
-addpath('Q:\qos\dlls');
-QS = qSettings.GetInstance('Q:\settings');
-%% not needed unless you want to reconfigure the DACs and ADCs during the measurement
-% a DACs and ADCs reconfiguration is only needed when the hardware settings
-% has beens changed, a reconfiguration will update the changes to the
-% hardware.
-ustcaddaObj = ustcadda_v1.GetInstance();
+QS = qSettings.GetInstance('D:\settings');
 %%
-daInterface = ustc_da_v1([1,2,3,4]);
-awgObj = awg.GetInstance('myAWG',daInterface);
+daInterface = ustc_da_v1([3,4]);
+awgObj = awg.GetInstance('tempAWG',daInterface);
 %%
 mwSrcInterface = visa('agilent','TCPIP0::10.0.0.4::inst0::INSTR');
 mwSrc_ = mwSource.GetInstance('anritsu_02',mwSrcInterface);
@@ -26,28 +21,21 @@ ad = ustc_ad_v1.GetInstance('ustc_ad_v1',[1,2]);
 ad.recordLength = 2000;
 iq_obj = sqc.measure.iq_ustc_ad(ad);
 iq_obj.n = 500;
-iq_obj.freq = 100e6;
+iq_obj.freq = demodeFreq;
 iq_obj.startidx = 15;
 iq_obj.endidx = ad.recordLength-0;
 %%
-import sqc.wv.*
-T = @qes.waveform.fcns.Show;
-F = @(x)qes.waveform.fcns.Show(x,[],true);
-%%
-g = sqc.wv.rect_cos(4e3);
-g.amp = 3e4;
-g.df = 0.1;
+g = qes.waveform.dc(4e3);
+g.dcval = 3e4;
+g.df = demodeFreq/2e9;
 % g.phase = pi/2;
-%%
-T(g);
-F(g);
 %%
 t = 0:0.2:50;
 figure();
 plot(t,real(g(t)),t,imag(g(t)));
 %%
 g.awg = awgObj;
-g.awgchnl = [3,4];
+g.awgchnl = [1,2];
 %%
 % g.awg.SetTrigOutDelay(1,0);
 % g.output_delay = [0,0];
@@ -58,8 +46,8 @@ mwSrc.power = 20;
 mwSrc.on = true;
 
 g.df = 0.05;
-g.amp = 1e4;
-iq_obj.freq = 100.0e6;
+g.dcval = 1e4;
+iq_obj.freq = demodeFreq;
 
 num = 100;
 phi = linspace(0,2*pi,num);

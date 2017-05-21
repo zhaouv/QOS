@@ -26,6 +26,7 @@ function [rPoint, ang, threshold, polarity, hf] =...
         ax1 = subplot(2,2,[1,3],'Parent',hf);
         ax2 = subplot(2,2,2,'Parent',hf);
         ax3 = subplot(2,2,4,'Parent',hf);
+        hf.UserData = ax1;
     else
         hf = [];
     end
@@ -64,10 +65,10 @@ function [rPoint, ang, threshold, polarity, hf] =...
         inv_v = 1/v;
         if polarity > 0
             P11 = mean((iq_raw_1 - c_ref)*exp(-1j*a)> threshold);
-            P10 = mean((iq_raw_0 - c_ref)*exp(-1j*a)> threshold);
+            P01 = mean((iq_raw_0 - c_ref)*exp(-1j*a)> threshold);
         else
             P11 = mean((iq_raw_1 - c_ref)*exp(-1j*a)< threshold);
-            P10 = mean((iq_raw_0 - c_ref)*exp(-1j*a)< threshold);
+            P01 = mean((iq_raw_0 - c_ref)*exp(-1j*a)< threshold);
         end
         nEval = nEval +1;
         if ~auto
@@ -86,7 +87,8 @@ function [rPoint, ang, threshold, polarity, hf] =...
                     'DataAspectRatio',[1,1,1],'PlotBoxAspectRatio',[1,1,1]);
                 xlabel(ax1,'I');
                 ylabel(ax1,'Q');
-                title(ax1,['P11: ',num2str(P11,'%0.2f'),', P10: ',num2str(P10,'%0.2f')]);
+                title(ax1,['P_{1->1}: ',num2str(P11,'%0.2f'),', P_{0->1}: ',num2str(P01,'%0.2f')],...
+                    'FontWeight','normal','FontSize',11);
                 hold(ax1,'off');
 
                 plot(ax2,x,p0,'b-',x,p1,'r-');
@@ -101,7 +103,7 @@ function [rPoint, ang, threshold, polarity, hf] =...
                 plot(ax3,nEval4plot,v4plot,'-');
     %             set(ax3,'YLim',[0,1]);
                 xlabel(ax3,'nth evaluation');
-                ylabel(ax3,'visibilty(P|1>-P|0>)');
+                ylabel(ax3,'visibilty(P_{1->1}-P_{0->1})');
                 drawnow;
     %             % temp, save for demo;
     %             saveas(hf,['F:\data\matlab\20161221\zdc2f01\',datestr(now,'mmddHHMMSS'),'.png']);

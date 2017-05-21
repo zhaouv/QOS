@@ -17,22 +17,18 @@ classdef USTCDAC < handle
     
     properties % (SetAccess = private) % changed to public, Yulin Wu, 170427
         name = '';              
-
         channel_amount = 4;     
-
-        sample_rate = 2e9;     
+        sample_rate = 2e9;      
         sync_delay = 0;         
         trig_delay = 0;         
+
         da_range = 0.8;         
-
         gain = zeros(1,4);      
-
         offset = zeros(1,4);    
-        offsetcorr  = zeros(1,4);       
-        trig_sel = 0;          
+        offsetcorr  = zeros(1,4);      
+        trig_sel = 0;           
         trig_interval = 200e-6; 
-
-
+%         ismaster = 0;          
         ismaster = false;           %Yulin Wu
         daTrigDelayOffset = 0;  
     end
@@ -84,16 +80,18 @@ classdef USTCDAC < handle
         end
              
         function Open(obj)              %open the device
-            if ~obj.isopen
-                [ret,obj.id,~] = calllib(obj.driver,'Open',0,obj.ip,obj.port);
-                if(ret == 0)
-                    obj.status = 'open';
-                    obj.isopen = true;
-                else
-                   error('USTCDA:OpenError','Open DAC failed!');
-                end
-                 obj.Init();
+            if obj.isopen
+                return;
             end
+            [ret,obj.id,~] = calllib(obj.driver,'Open',0,obj.ip,obj.port);
+            if(ret == 0)
+                obj.status = 'open';
+                obj.isopen = true;
+            else
+               throw(MException('USTCDAC:OpenError',...
+                   sprintf('Open DAC %s failed!',obj.name))); % Yulin Wu
+            end
+             obj.Init();
         end
          
         function Init(obj)
@@ -122,8 +120,8 @@ classdef USTCDAC < handle
                 arr = zeros(1,8);
                 idx = 1;
                 for addr = 1136:1139
-                    arr(idx) = ReadAD9136_1(addr);
-                    arr(idx+1) = ReadAD9136_2(addr);
+                    arr(idx) = obj.ReadAD9136_1(addr);
+                    arr(idx+1) = obj.ReadAD9136_2(addr);
                     idx = idx + 2;
                 end
                 arr = mod(arr,256);
@@ -161,7 +159,8 @@ classdef USTCDAC < handle
             if obj.isopen
                 ret = calllib(obj.driver,'Close',uint32(obj.id));
                 if(ret == -1)
-                    error('USTCDA:CloseError','Close DA failed.');              
+                    throw(MException('USTCDAC:CloseError',...
+                        sprintf('Close DAC %s failed!',obj.name))); % Yulin Wu         
                 end
                 obj.id = [];
                 obj.status = 'closed';
@@ -183,7 +182,8 @@ classdef USTCDAC < handle
             obj.AutoOpen();
             ret = calllib(obj.driver,'WriteInstruction', obj.id,uint32(hex2dec('00000405')),uint32(index),0);
             if(ret == -1)
-                error('USTCDAC:StartStopError','Start/Stop failed.');
+                throw(MException('USTCDAC:StartStopError',...
+                        sprintf('Start/Stop DAC %s failed!',obj.name))); % Yulin Wu   
             end
         end
         function FlipRAM(obj,index)
@@ -372,7 +372,7 @@ classdef USTCDAC < handle
                 error('USTCDAC:WriteSeqError','WriteSeq failed.');
             end
         end
-	function wave = ReadWave(obj,ch,offset,len)
+        function wave = ReadWave(obj,ch,offset,len)
               obj.AutoOpen();
               wave = [];
               startaddr = (ch*2)*2^18 + 2*offset;
@@ -385,7 +385,7 @@ classdef USTCDAC < handle
                   error('USTCDAC:ReadWaveError','ReadWave failed.');
               end
         end
-	function seq = ReadSeq(obj,ch,offset,len)
+        function seq = ReadSeq(obj,ch,offset,len)
               obj.AutoOpen();
               startaddr = (ch*2+1)*2^18 + offset*8;
               ret = calllib(obj.driver,'ReadMemory',obj.id,uint32(hex2dec('00000003')),uint32(startaddr),uint32(len*8));

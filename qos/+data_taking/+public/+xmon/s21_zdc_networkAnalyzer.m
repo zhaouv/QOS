@@ -59,7 +59,7 @@ function varargout = s21_zdc_networkAnalyzer(varargin)
     na.power = args.NApower;
     
     R = qes.measurement.sParam(na);
-    R.name = '|IQ|';
+    R.name = 'IQ';
     
     x = expParam(dcChnl,'dcval');
     x.name = [q.name,' dc bias'];

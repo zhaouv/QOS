@@ -110,7 +110,7 @@ function table_data = Struct2TableData(data,anno,prefix)
                     startIndex = startIndex + 1;
                     endIndex = endIndex - 1;
                     key__ = regexprep(key_,'{\d+}','');
-					% the following is handle a bad settings design in ustcadda, may be removed in future versions 
+					% the following is to handle a bad settings design in ustcadda, may be removed in future versions 
                     if qes.util.startsWith(key__,'da_chnl_map__')
                         key__  = 'da_chnl_map__';
                     elseif qes.util.startsWith(key__,'ad_chnl_map__')

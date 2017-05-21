@@ -12,16 +12,19 @@ ustcaddaObj = ustcadda_v1.GetInstance();
 %%
 ustcaddaObj.close()
 %% run all channels
+numChnls = 44;
+numRuns = 10;
 wavedata=[zeros(1,4000),65535*ones(1,4000)];
-nn=0;
-while true
-    nn=nn+1
 ustcaddaObj.runReps = 1e3;
-for ii = 1:16
-    ustcaddaObj.SendWave(ii,wavedata);
-    ustcaddaObj.SendWave(ii,wavedata);
-end
-[datai,dataq] = ustcaddaObj.Run(true);
+tic
+for jj = 1:numRuns
+    for ii = 1:numChnls
+        ustcaddaObj.SendWave(ii,wavedata);
+        ustcaddaObj.SendWave(ii,wavedata);
+    end
+    [datai,dataq] = ustcaddaObj.Run(true);
+    t = toc;
+    disp(sprintf('%0.0f, elapsed time: %0.1fs',jj,t));
 end
 %% sync test, and use the mimimum oscillascope vertical range to check zero offset
 ustcaddaObj.runReps = 1e4;
@@ -85,8 +88,8 @@ T = nan*ones(1,N);
 for ii = 1:N
     tic
     ustcaddaObj.runReps = runReps(ii);
-    ustcaddaObj.SendWave(3,65535*ones(1,wvLn)); % 620
-    ustcaddaObj.SendWave(4,65535*ones(1,wvLn)); % 750
+    ustcaddaObj.SendWave(3,65535*ones(1,wvLn));
+    ustcaddaObj.SendWave(4,65535*ones(1,wvLn));
     data = ustcaddaObj.Run(true);
     T(ii) = toc;
 end
@@ -95,3 +98,20 @@ semilogx(runReps,T-runReps/5e3);
 xlabel('Number of samples');
 ylabel('Time taken(s)');
 title('Repetition 5kHz,waveform length 4000pts(da), 2000pts(ad).');
+%%
+wvLn = 4e3; % 2us
+N = 20;
+T = nan*ones(1,N);
+for ii = 1:N
+    tic
+    ustcaddaObj.runReps = 1000;
+    ustcaddaObj.SendWave(3,65535*ones(1,wvLn));
+    ustcaddaObj.SendWave(4,65535*ones(1,wvLn));
+    data = ustcaddaObj.Run(true);
+    T(ii) = toc;
+end
+figure();
+plot(1:N,T);
+xlabel('Number of runs');
+ylabel('Time taken(s)');
+%%

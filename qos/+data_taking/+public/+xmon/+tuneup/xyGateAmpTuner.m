@@ -2,6 +2,7 @@ function varargout = xyGateAmpTuner(varargin)
 % tune xy gate amplitude: X, X/2, -X/2, X/4, -X/4, Y, Y/2, -Y/2, Y/4, -Y/4
 % 
 % <_f_> = xyGateAmpTuner('qubit',_c&o_,'gateTyp',_c_,...
+%		'AE',<_b_>,...  % insert multiple Idle gate(implemented by two pi rotations) to Amplify Error or not
 %       'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -17,11 +18,20 @@ function varargout = xyGateAmpTuner(varargin)
     % Yulin Wu, 2017/1/8
     import data_taking.public.xmon.rabi_amp1
 	
-	NUM_RABI_SAMPLING_PTS = 60;
+	NUM_RABI_SAMPLING_PTS = 70;
+	NUM_RABI_SAMPLING_PTS_AE = 35;
+	MIN_VISIBILITY = 0.3;
+	AE_NUM_PI = 11; % must be an positive odd number
 	
-	args = qes.util.processArgs(varargin,{'gui',false,'save',true});
-    
+	args = qes.util.processArgs(varargin,{'AE',false,'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
+    fMat = q.r_iq2prob_fMat;
+    vis = (fMat(1)-fMat(2)+fMat(4)-fMat(3))/2;
+    if vis < 0.2
+        throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
+				sprintf('visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', vis)));
+    end
+    q.r_iq2prob_normalize = true;
 	da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name', q.channels.xy_i.instru);
 	switch args.gateTyp
@@ -41,58 +51,92 @@ function varargout = xyGateAmpTuner(varargin)
 		'detuning',0,'driveTyp',args.gateTyp,'gui',false,'save',false);
 	P = e.data{1};
 	rP = range(P);
-	if rP < 0.25
+	P0 = min(P);
+	P1 = max(P);
+	if rP < MIN_VISIBILITY
 		throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
-				'visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', rP));
+				sprintf('visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', rP)));
 	elseif rP < 5/sqrt(q.r_avg)
 		throw(MException('QOS_xyGateAmpTuner:rAvgTooLow',...
 				'readout average number %d too small.', q.r_avg));
     end
     
-    [pks,locs,~,~] = findpeaks(P,'MinPeakHeight',2*rP/3,...
-        'MinPeakProminence',rP/2,'MinPeakDistance',numel(P)/4,...
-        'WidthReference','halfprom');
-    if isempty(pks)
-        throw(MException('QOS_xyGateAmpTuner:SNRLow',...
-				'no peaks detected, data SNR probabality too low.'));
-    end
-    [locs,idx] = sort(locs,'ascend');
-    pks = pks(idx);
+    gateAmp = findsPkLoc(amps,P);
     
-	maxIdx = locs(1);
-	if numel(pks) > 3
-		throw(MException('QOS_xyGateAmpTuner:tooManyOscCycles',...
-				'too many oscillation cycles or data SNR too low.'));
-	end
-	dP = pks(1)-P;
-	idx1 = find(dP(maxIdx:-1:1)>rP/4,1,'first');
-	if isempty(idx1)
-		idx1 = 1;
-	else
-		idx1 = maxIdx-idx1+1;
-	end
+%     [pks,locs,~,~] = findpeaks(P,'MinPeakHeight',2*rP/3,...
+%         'MinPeakProminence',rP/2,'MinPeakDistance',numel(P)/4,...
+%         'WidthReference','halfprom');
+%     if ~isempty(pks)
+%         [locs,idx] = sort(locs,'ascend');
+%         pks = pks(idx);
+% 
+%         maxIdx = locs(1);
+%         if numel(pks) > 3
+%             throw(MException('QOS_xyGateAmpTuner:tooManyOscCycles',...
+%                     'too many oscillation cycles or data SNR too low.'));
+%         end
+%         dP = pks(1)-P;
+%     else
+%         [mP,maxIdx] = max(P);
+%         dP = mP-P;
+%     end
+%     
+% 	
+% 	idx1 = find(dP(maxIdx:-1:1)>rP/4,1,'first');
+% 	if isempty(idx1)
+% 		idx1 = 1;
+% 	else
+% 		idx1 = maxIdx-idx1+1;
+% 	end
+% 	
+% 	idx2 = find(dP(maxIdx:end)>rP/4,1,'first');
+% 	if isempty(idx2)
+% 		idx2 = NUM_RABI_SAMPLING_PTS;
+% 	else
+% 		idx2 = maxIdx+idx2-1;
+%     end
+% %	 [~, gateAmp, ~, ~] = toolbox.data_tool.fitting.gaussianFit.gaussianFit(...
+% %		 amps(idx1:idx2),P(idx1:idx2),maxP,amps(maxIdx),amps(idx2)-amp(idx1));
+% 
+% 	% gateAmp = roots(polyder(polyfit(amps(idx1:idx2),P(idx1:idx2),2)));
+%     warning('off');
+% 	p = polyfit(amps(idx1:idx2),P(idx1:idx2),2);
+%     warning('on');
+% 	if mean(abs(polyval(p,amps(idx1:idx2))-P(idx1:idx2))) > range(P(idx1:idx2))/4
+% 		throw(MException('QOS_xyGateAmpTuner:fittingFailed','fitting error too large.'));
+% 	end
+% 	gateAmp = roots(polyder(p));
+% 	
+% 	if gateAmp < amps(idx1) || gateAmp > amps(idx2)
+% 		throw(MException('QOS_xyGateAmpTuner:xyGateAmpTuner',...
+% 				'gate amplitude probably out of range.'));
+%     end
 	
-	idx2 = find(dP(maxIdx:end)>rP/4,1,'first');
-	if isempty(idx2)
-		idx2 = NUM_RABI_SAMPLING_PTS;
-	else
-		idx2 = maxIdx+idx2-1;
-    end
-%	 [~, gateAmp, ~, ~] = toolbox.data_tool.fitting.gaussianFit.gaussianFit(...
-%		 amps(idx1:idx2),P(idx1:idx2),maxP,amps(maxIdx),amps(idx2)-amp(idx1));
-
-	% gateAmp = roots(polyder(polyfit(amps(idx1:idx2),P(idx1:idx2),2)));
-    warning('off');
-	p = polyfit(amps(idx1:idx2),P(idx1:idx2),2);
-    warning('on');
-	if mean(abs(polyval(p,amps(idx1:idx2))-P(idx1:idx2))) > range(P(idx1:idx2))/4
-		throw(MException('QOS_xyGateAmpTuner:fittingFailed','fitting error too large.'));
-	end
-	gateAmp = roots(polyder(p));
-	
-	if gateAmp < amps(idx1) || gateAmp > amps(idx2)
-		throw(MException('QOS_xyGateAmpTuner:xyGateAmpTuner',...
-				'gate amplitude probably out of range.'));
+	if args.AE  % use multiple pi gates to amplify error to fine tune gateAmp
+		amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+		e = rabi_amp1('qubit',q,'biasAmp',0,'biasLonger',0,'xyDriveAmp',amps_ae,...
+			'detuning',0,'numPi',AE_NUM_PI,'driveTyp',args.gateTyp,'gui',false,'save',false);
+		P_ae = e.data{1};
+		if max(P_ae) < P0 + MIN_VISIBILITY
+			warning('QOS_xyGateAmpTuner:visibilityTooLow',...
+				'AE visibility too low, AE result not used.');
+		else
+% 			P_aeS = smooth(P_ae,5);
+% 			rP = range(P_aeS);
+% 			[pks,locs,~,~] = findpeaks(P_aeS,'MinPeakHeight',2*rP/3,...
+% 				'MinPeakProminence',rP/2,'MinPeakDistance',numel(P_aeS)/4,...
+% 				'WidthReference','halfprom');
+            try
+                gateAmp_f = findsPkLoc(amps_ae,P_ae);
+            catch
+                gateAmp_f = [];
+            end
+			if ~isempty(gateAmp_f)
+				gateAmp = gateAmp_f;
+            else
+                args.AE = false;
+            end
+		end
 	end
 
 	if args.gui
@@ -100,11 +144,20 @@ function varargout = xyGateAmpTuner(varargin)
 		ax = axes('parent',h);
 		plot(ax,amps,P,'-b');
 		hold(ax,'on');
+        if args.AE
+           plot(ax,amps_ae,P_ae);
+        end
         ylim = get(ax,'YLim');
-		plot(ax,[gateAmp,gateAmp],ylim,'--r');
+        plot(ax,[gateAmp,gateAmp],ylim,'--r');
 		xlabel(ax,'xy drive amplitude');
 		ylabel(ax,'P|1>');
-        legend(ax,{'data',sprintf('%s gate amplitude',args.gateTyp)});
+        if args.AE
+            legend(ax,{'data(1\pi)',...
+                sprintf('data(AE:%0.0f\pi)',AE_NUM_PI),...
+                sprintf('%s gate amplitude',args.gateTyp)});
+        else
+            legend(ax,{'data(1\pi)',sprintf('%s gate amplitude',args.gateTyp)});
+        end
         set(ax,'YLim',ylim);
         drawnow;
 	end
@@ -135,4 +188,56 @@ function varargout = xyGateAmpTuner(varargin)
 		end
     end
 	varargout{1} = gateAmp;
+end
+
+function xp = findsPkLoc(x,y)
+    rng = range(y);
+    [pks,locs,~,~] = findpeaks(y,'MinPeakHeight',2*rng/3,...
+        'MinPeakProminence',rng/2,'MinPeakDistance',numel(x)/4,...
+        'WidthReference','halfprom');
+    
+    if ~isempty(pks)
+        [locs,idx] = sort(locs,'ascend');
+        pks = pks(idx);
+
+        maxIdx = locs(1);
+        if numel(pks) > 3
+            throw(MException('QOS_xyGateAmpTuner:tooManyOscCycles',...
+                    'too many oscillation cycles or data SNR too low.'));
+        end
+        dy = pks(1)-y;
+    else
+        [mP,maxIdx] = max(y);
+        dy = mP-y;
+    end
+
+	idx1 = find(dy(maxIdx:-1:1)>rng/3,1,'first');
+	if isempty(idx1)
+		idx1 = 1;
+	else
+		idx1 = maxIdx-idx1+1;
+	end
+	
+	idx2 = find(dy(maxIdx:end)>rng/4,1,'first');
+	if isempty(idx2)
+		idx2 = numel(x);
+	else
+		idx2 = maxIdx+idx2-1;
+    end
+%	 [~, gateAmp, ~, ~] = toolbox.data_tool.fitting.gaussianFit.gaussianFit(...
+%		 amps(idx1:idx2),P(idx1:idx2),maxP,amps(maxIdx),amps(idx2)-amp(idx1));
+
+	% gateAmp = roots(polyder(polyfit(amps(idx1:idx2),P(idx1:idx2),2)));
+    warning('off');
+	p = polyfit(x(idx1:idx2),y(idx1:idx2),2);
+    warning('on');
+	if mean(abs(polyval(p,x(idx1:idx2))-y(idx1:idx2))) > range(y(idx1:idx2))/4
+		throw(MException('QOS_xyGateAmpTuner:fittingFailed','fitting error too large.'));
+	end
+	xp = roots(polyder(p));
+
+    if xp < x(idx1) || xp > x(idx2)
+		throw(MException('QOS_xyGateAmpTuner:xyGateAmpTuner',...
+				'gate amplitude probably out of range.'));
+    end
 end
