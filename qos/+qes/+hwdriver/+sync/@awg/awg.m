@@ -5,7 +5,9 @@ classdef awg < qes.hwdriver.sync.instrument
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     properties
-        dynamicReserve
+        % dynamic range reserved for pulse shape correction(0 =< dynamicReserve < 1)
+        % waveform vpp should within range of [0, (1-dynamicReserve)*vpp].
+        dynamicReserve = 0 
 		irf % impulse response functions(numeric) of each channel
         iqCalDataSet
     end

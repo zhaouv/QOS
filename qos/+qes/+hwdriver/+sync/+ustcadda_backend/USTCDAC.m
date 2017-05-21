@@ -7,35 +7,39 @@
 
 classdef USTCDAC < handle
     properties (SetAccess = private)
-        id = [];            %è®¾å¤‡æ ‡è¯†
-        ip = '';            %è®¾å¤‡ip
-        port = 80;          %ç«¯å?£å??
-        status = 'close';   %æ‰“å¼€çŠ¶æ?
-        isopen = 0;         %æ‰“å¼€çŠ¶æ?
-        isblock = 0;        %æ˜¯å?¦ä»¥é˜»å¡žæ¨¡å?è¿?è¡?
+        id = [];            
+        ip = '';            
+        port = 80;          
+        status = 'close';   
+        isopen = 0;         
+        isblock = 0;        
     end
     
     properties % (SetAccess = private) % changed to public, Yulin Wu, 170427
-        name = '';              %DAC??å­?
-        channel_amount = 4;     %DACé€šé?“æ•°ç›?
-        sample_rate = 2e9;      %é‡‡æ ·çŽ?
-        sync_delay = 0;         %DAC?¿å?çš„å?Œæ­¥å»¶æ?
-        trig_delay = 0;         %DACè§¦å?‘è¾“å‡ºå»¶æ—?
-        da_range = 0.8;         %æœ?¤§ç”µåŽ‹ï¼Œæœªä½¿ç”¨
-        gain = zeros(1,4);      %é€šé?“å¢žç›?
-        offset = zeros(1,4);    %é€šé?“å??ç½?
-        offsetcorr  = zeros(1,4); % å…³é—­DACç”µåŽ‹
-        
-        trig_sel = 0;           %è§¦å?‘æ??æ‹?
-        trig_interval = 200e-6; %ä¸»æ?¿è¿žç»­è§¦?‘è¾“å‡ºæ—¶é—´é—´éš?
-%         ismaster = 0;           %ä¸»æ?¿æ ‡è¯?
+        name = '';              
+
+        channel_amount = 4;     
+
+        sample_rate = 2e9;     
+        sync_delay = 0;         
+        trig_delay = 0;         
+        da_range = 0.8;         
+
+        gain = zeros(1,4);      
+
+        offset = zeros(1,4);    
+        offsetcorr  = zeros(1,4);       
+        trig_sel = 0;          
+        trig_interval = 200e-6; 
+
+
         ismaster = false;           %Yulin Wu
-        daTrigDelayOffset = 0;  %æœªä½¿ç”?
+        daTrigDelayOffset = 0;  
     end
     
     properties (GetAccess = private,Constant = true)
-        driver  = 'USTCDACDriver';   %é©±åŠ¨??
-        driverh = 'USTCDACDriver.h'; %å¤´æ–‡ä»¶å??
+        driver  = 'USTCDACDriver';   
+        driverh = 'USTCDACDriver.h'; 
     end
     
     methods (Static = true)
@@ -115,16 +119,31 @@ classdef USTCDAC < handle
             
             while(try_count > 0 && ~isDACReady)
                 obj.isblock = 1;
+                arr = zeros(1,8);
+                idx = 1;
+                for addr = 1136:1139
+                    arr(idx) = ReadAD9136_1(addr);
+                    arr(idx+1) = ReadAD9136_2(addr);
+                    idx = idx + 2;
+                end
+                arr = mod(arr,256);
+                if(sum(arr == 255) == length(arr))
+                    islaneReady = 1;
+                else
+                    islaneReady = 0;
+                end
                 ret = obj.ReadReg(5,8);
                 obj.isblock = 0;
                 if(mod(floor(ret/(2^20)),4) == 3)
-                    isDACReady = 1;
+                    isDACReady = islaneReady;
                 else
+                    isDACReady = 0;
                     obj.InitBoard();
                     try_count =  try_count - 1;
                     pause(0.1);
                 end
             end
+            
             if(isDACReady == 0)
                 error('USTCDAC:InitError','Config DAC failed!');
             end
@@ -167,7 +186,6 @@ classdef USTCDAC < handle
                 error('USTCDAC:StartStopError','Start/Stop failed.');
             end
         end
-       % è¯¥å‡½æ•°æœªä½¿ç”¨
         function FlipRAM(obj,index)
             obj.AutoOpen();
             ret = calllib(obj.driver,'WriteInstruction', obj.id,uint32(hex2dec('00000305')),uint32(index),0);
@@ -270,7 +288,7 @@ classdef USTCDAC < handle
         
         function SetGain(obj,channel,data)
              obj.AutoOpen();
-             map = [2,3,0,1];       %æœ‰bugï¼Œéœ€è¦??šä?¬¡æ˜ å°„
+             map = [2,3,0,1];       
              channel = map(channel+1);
              ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00000702')),uint32(channel),uint32(data));
              if(ret == -1)
@@ -280,7 +298,9 @@ classdef USTCDAC < handle
         
         function SetOffset(obj,channel,data)
             obj.AutoOpen();
-            map = [6,7,4,5];       %æœ‰bugï¼Œéœ€è¦??šä?¬¡æ˜ å°„
+            map = [6,7,4,5];       
+
+
             channel = map(channel+1);
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00000702')),uint32(channel),uint32(data));
             if(ret == -1)
@@ -290,8 +310,6 @@ classdef USTCDAC < handle
         
         function SetDefaultVolt(obj,channel,volt)
             obj.AutoOpen();
-%             volt = mod(volt,256)*256 + floor(volt/256);    %Only for DAC
-%             version before 170510
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00001B05')),uint32(channel),uint32(volt));
             if(ret == -1)
                  error('USTCDAC:WriteOffset','WriteOffset failed.');
@@ -300,7 +318,7 @@ classdef USTCDAC < handle
         
         function WriteReg(obj,bank,addr,data)
              obj.AutoOpen();
-             cmd = bank*256 + 2; %1è¡¨ç¤ºReadRegï¼ŒæŒ‡ä»¤å’Œbankå­˜å‚¨åœ¨ä¸€ä¸ªDWORDæ•°æ?®ä?
+             cmd = bank*256 + 2; 
              ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(cmd),uint32(addr),uint32(data));
              if(ret == -1)
                  error('USTCDAC:WriteRegError','WriteReg failed.');
@@ -309,10 +327,8 @@ classdef USTCDAC < handle
         
         function WriteWave(obj,ch,offset,wave)
             obj.AutoOpen();
-            % èŒƒå›´é™?åˆ?
             wave(wave > 65535) = 65535;
             wave(wave < 0) = 0;
-            % è¡¥å¤Ÿ512bitçš„ä?å®½æ•´æ•°å?
             data = wave;
             len = length(wave);
             if(mod(len,32) ~= 0)
@@ -320,15 +336,12 @@ classdef USTCDAC < handle
                 data = zeros(1,len);
                 data(1:length(wave)) = wave;
             end            
-            % é¢ å?å‰??Žæ•°?®ï¼Œè¿™æ˜¯ç”±äºŽFPGAæŽ¥æ”¶å­—èŠ‚åº?é—®é?
             for k = 1:length(data)/2
                 temp = data(2*k);
                 data(2*k) = data(2*k-1);
                 data(2*k-1) = temp;
             end
-            % æ•°æ?®å??ç›¸ï¼Œä¸´æ—¶éœ??
             data = 65535 - data;
-            % ä»?é€šé?“å?§‹ç¼–å??
             ch = ch - 1;
             ch(ch < 0) = 0;
             startaddr = ch*2*2^18+2*offset;
@@ -342,7 +355,6 @@ classdef USTCDAC < handle
         
         function WriteSeq(obj,ch,offset,seq)
             obj.AutoOpen();
-            % è¡¥å¤Ÿ512bitä½?å®?
             len = length(seq);
             data = seq;
             if(mod(len,32) ~= 0)
@@ -350,19 +362,17 @@ classdef USTCDAC < handle
                 data = zeros(1,len);
                 data(1:length(seq)) = seq;
             end
-            % ä»?é€šé?“å?§‹ç¼–å??
             ch = ch - 1;
             ch(ch < 0) = 0;
-            startaddr = (ch*2+1)*2^18+offset*8; %åº?åˆ—çš„å†…å­˜èµ·å§‹åœ°å??¼Œ?•ä?æ˜¯å­—èŠ‚ã?
-            len = length(data)*2;               %å­—èŠ‚ä¸ªæ•°ã€?
+            startaddr = (ch*2+1)*2^18+offset*8; 
+            len = length(data)*2;             
             pval = libpointer('uint16Ptr', data);
             [ret,~] = calllib(obj.driver,'WriteMemory',obj.id,uint32(hex2dec('00000004')),uint32(startaddr),uint32(len),pval);
             if(ret == -1)
                 error('USTCDAC:WriteSeqError','WriteSeq failed.');
             end
         end
-       % è¯¥å‡½æ•°æœªä½¿ç”¨
-        function wave = ReadWave(obj,ch,offset,len)
+	function wave = ReadWave(obj,ch,offset,len)
               obj.AutoOpen();
               wave = [];
               startaddr = (ch*2)*2^18 + 2*offset;
@@ -375,8 +385,7 @@ classdef USTCDAC < handle
                   error('USTCDAC:ReadWaveError','ReadWave failed.');
               end
         end
-       % è¯¥å‡½æ•°æœªä½¿ç”¨
-        function seq = ReadSeq(obj,ch,offset,len)
+	function seq = ReadSeq(obj,ch,offset,len)
               obj.AutoOpen();
               startaddr = (ch*2+1)*2^18 + offset*8;
               ret = calllib(obj.driver,'ReadMemory',obj.id,uint32(hex2dec('00000003')),uint32(startaddr),uint32(len*8));
@@ -391,7 +400,7 @@ classdef USTCDAC < handle
         
         function reg = ReadReg(obj,bank,addr)
              obj.AutoOpen();
-             cmd = bank*256 + 1; %1è¡¨ç¤ºReadRegï¼ŒæŒ‡ä»¤å’Œbankå­˜å‚¨åœ¨ä¸€ä¸ªDWORDæ•°æ?®ä?
+             cmd = bank*256 + 1; 
              reg = 0;
              ret = calllib(obj.driver,'ReadInstruction',obj.id,uint32(cmd),uint32(addr));
              if(ret == 0)
