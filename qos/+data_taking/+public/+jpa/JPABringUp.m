@@ -112,7 +112,7 @@ function varargout = jpaBringup(varargin)
     function generateReadout()
         R = sqc.measure.resonatorReadout_ss(virtualQubit);
         R.swapdata = true;
-        R.name = '|IQ|';
+        R.name = 'IQ';
         R.datafcn = @(x)mean(x);
         e.measurements = R;
     end

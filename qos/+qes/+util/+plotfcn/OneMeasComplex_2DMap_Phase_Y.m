@@ -1,7 +1,7 @@
 function [varargout] = OneMeasComplex_2DMap_Phase_Y(Data, SweepVals,ParamNames,MainParam,MeasurementName,AX,IsPreview)
    % plot function for data:
    % OneMeasComplex_2DMap_Phase plots 3D spectrum data to a 2D map with color scale
-   % for the third dimension, subtract background(linear) along the y axes(the second sweep).
+   % for the third dimension, subtract background(linear, global background, not individual slice) along the y axes(the second sweep).
    % application: spectrum
    % varargout: data parsed from QES format to simple x, y and z,
    % varargout{1} is x, varargout{2} is y, varargout{3} is z, if
@@ -53,14 +53,14 @@ function [varargout] = OneMeasComplex_2DMap_Phase_Y(Data, SweepVals,ParamNames,M
     sz = size(z);
     z_ = angle(z);
     for uu = 1:2
-        for ii = 1:swpsize
+        for ii = 1:sz(1)
             z_(ii,:) = unwrap(z_(ii,:));
             z_(ii,:) = z_(ii,:) - z_(ii,1);
         end
-        P = polyfit(0:(sz(2)-1),mean(z_,1),1);
-        for ii = 1:swpsize
-            hold on;
-            z_(ii,:) = z_(ii,:) - polyval(P,0:(sz(2)-1));
+        xf = 0:(sz(2)-1);
+        P = polyfit(xf,mean(z_,1),1);
+        for ii = 1:sz(1)
+            z_(ii,:) = z_(ii,:) - polyval(P,xf);
         end
     end
     warning('on','MATLAB:polyfit:RepeatedPointsOrRescale');
