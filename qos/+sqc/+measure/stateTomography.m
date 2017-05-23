@@ -34,8 +34,8 @@ classdef stateTomography < qes.measurement.measurement
 			obj.readoutGates = cell(numTomoQs);
 			for ii = 1:numTomoQs
 				obj.readoutGates{ii} = {I(obj.qubits{ii}),...
-										Y2p(obj.qubits{ii}),...
-										X2m(obj.qubits{ii})};
+										X2p(obj.qubits{ii}),...
+										Y2p(obj.qubits{ii})};
             end
             obj.numericscalardata = false;
         end
@@ -62,7 +62,7 @@ classdef stateTomography < qes.measurement.measurement
 					P = P.*rGates{ii};
 				end
 				if ~isempty(obj.process)
-					P = P*obj.process;
+					P = obj.process*P;
 				end
 				R = sqc.measure.resonatorReadout(obj.qubits);
 				R.delay = P.length;

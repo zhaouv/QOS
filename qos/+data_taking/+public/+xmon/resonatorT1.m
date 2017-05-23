@@ -45,7 +45,7 @@ Z.amp = args.swpPiAmp;
 Z.ln = args.swpPiLn;
 function proc = procFactory(delay)
 	I2.ln = delay;
-	proc = Z*I2*Z*I1*X;
+	proc = X*I1*Z*I2*Z;
     proc.Run();
     R.delay = proc.length;
 end

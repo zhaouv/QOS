@@ -34,7 +34,10 @@ classdef processTomography < qes.measurement.measurement
 			numTomoQs = numel(obj.tomoQubits);
 			obj.statePrepGates = cell(numTomoQs);
 			for ii = 1:numTomoQs
+				% gates that prepares the qubit onto states: {|0>,|0>-i|1>,|0>+|1>,|1>}
 				obj.statePrepGates{ii} = {I(obj.tomoQubits{ii}),...
+										X2p(obj.tomoQubits{ii}),...
+										Y2p(obj.tomoQubits{ii}),...
 										X(obj.tomoQubits{ii})};
             end
 			obj.stateTomoObj = sqc.measure.stateTomography(qubits);

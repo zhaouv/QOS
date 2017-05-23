@@ -41,7 +41,7 @@ function varargout = spin_echo_dp(varargin)
     function procFactory(delay)
         I.ln = delay/2;
 		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
-        proc = X2*I*X*I*X2_;
+        proc = X2_*I*X*I*X2;
         proc.Run();
         R.delay = proc.length;
     end
