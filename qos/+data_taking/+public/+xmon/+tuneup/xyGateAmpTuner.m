@@ -25,8 +25,8 @@ function varargout = xyGateAmpTuner(varargin)
 	
 	args = qes.util.processArgs(varargin,{'AE',false,'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
-    fMat = q.r_iq2prob_fMat;
-    vis = (fMat(1)-fMat(2)+fMat(4)-fMat(3))/2;
+    F = q.r_iq2prob_fidelity;
+    vis = F(1)+F(2)-1;
     if vis < 0.2
         throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
 				sprintf('visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', vis)));
@@ -153,7 +153,7 @@ function varargout = xyGateAmpTuner(varargin)
 		ylabel(ax,'P|1>');
         if args.AE
             legend(ax,{'data(1\pi)',...
-                sprintf('data(AE:%0.0f\pi)',AE_NUM_PI),...
+                [sprintf('data(AE:%0.0f',AE_NUM_PI),'\pi)'],...
                 sprintf('%s gate amplitude',args.gateTyp)});
         else
             legend(ax,{'data(1\pi)',sprintf('%s gate amplitude',args.gateTyp)});
