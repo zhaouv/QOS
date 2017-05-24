@@ -1,9 +1,6 @@
 function s21_CompJPAOnOff_networkAnalyzer(varargin)
 
-
-    import qes.*
-    
-    args = util.processArgs(varargin,{'gui',false,'notes','','save',true});
+    args = qes.util.processArgs(varargin,{'gui',false,'notes','','save',true});
     
 data0=data_taking.public.jpa.s21_BiasPwrpPwrs_networkAnalyzer('jpaName',args.jpaName,...
     'startFreq',args.startFreq,'stopFreq',args.stopFreq,...

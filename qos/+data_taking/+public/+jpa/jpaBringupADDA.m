@@ -1,4 +1,4 @@
-function varargout = jpaBringup(varargin)
+function varargout = jpaBringupADDA(varargin)
 % [iqAmp] vs [signalFreq], [signalAmp], [biasAmp], [pumpFreq], [pumpAmp], [pumpPower]
 % with DAC, run in EXACTLY the same way as when the jpa is used for a working qubit.
 %
@@ -21,7 +21,7 @@ function varargout = jpaBringup(varargin)
 
 % Yulin Wu, 2017/2/14
 
-    fcn_name = 'data_taking.public.jpa.jpaBringup'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.jpa.jpaBringupADDA'; % this and args will be saved with data
     import qes.*
     
     args = util.processArgs(varargin,{'signalPower',0,'signalSbFreq',0,...
@@ -130,7 +130,7 @@ function varargout = jpaBringup(varargin)
     s(end).poststepcallbacks = @(x_)generateReadout;
 
     e = experiment();
-    e.name = 'JPA bringup';
+    e.name = 'JPA Bringup(ADDA)';
     e.sweeps = s;
 %     e.plotfcn = @util.plotfcn.sparam.Amplitude;
     

@@ -1,3 +1,4 @@
+% J. Koch. Phys. Rev. A 76, 042319(2007)
 import sqc.simulation.ctx.CPBEL
 
 % (a) Ej/Ec = 1,
