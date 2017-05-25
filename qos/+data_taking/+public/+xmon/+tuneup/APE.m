@@ -32,7 +32,7 @@ function varargout = APE(varargin)
 	I = (X2m*X2p)^args.numI;
     function proc = procFactory(phase)
 		XY2.phase = phase;
-        proc = XY2*I*X2p;
+        proc = X2p*I*XY2;
     end
 	R = measure.resonatorReadout_ss(q);
     R.state = 2;

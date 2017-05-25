@@ -1,12 +1,12 @@
-function varargout = jpaBringup(varargin)
-% [iqAmp] vs [signalFreq], [signalAmp], [biasAmp], [pumpFreq], [pumpAmp]
+function varargout = jpaBringupADDA(varargin)
+% [iqAmp] vs [signalFreq], [signalAmp], [biasAmp], [pumpFreq], [pumpAmp], [pumpPower]
 % with DAC, run in EXACTLY the same way as when the jpa is used for a working qubit.
 %
 % <_o_> = jpaBringup('jpa',_c&o_,...
 %       'signalAmp',[_f_],signalFreq',[_f_],'signalPower',<_f_>,'signalSbFreq',<_f_>,...
 %       'signalLn',_i_,'rAvg',<_i_>,...
 %       'biasAmp',<[_f_]>,'pumpAmp',<[_f_]>,...
-%       'pumpFreq',<[_f_]>,'pumpPower',<_f_>,...
+%       'pumpFreq',<[_f_]>,'pumpPower',<[_f_]>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -21,7 +21,7 @@ function varargout = jpaBringup(varargin)
 
 % Yulin Wu, 2017/2/14
 
-    fcn_name = 'data_taking.public.jpa.jpaBringup'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.jpa.jpaBringupADDA'; % this and args will be saved with data
     import qes.*
     
     args = util.processArgs(varargin,{'signalPower',0,'signalSbFreq',0,...
@@ -42,8 +42,7 @@ function varargout = jpaBringup(varargin)
     virtualQubit.channels.r_mw.chnl = jpa.channels.signal_mw.chnl;    
     virtualQubit.r_jpa = jpa.name;
     virtualQubit.r_avg = args.rAvg;
-    virtualQubit.r_jpa_pumpPower = args.pumpPower; % this is pump lo mw source power,...
-    virtualQubit.r_ln = args.signalLn;                                              % jpa pump power is scanned by mixer iq amplitude: pumpAmp
+    virtualQubit.r_ln = args.signalLn;
     virtualQubit.r_iq2prob_center0 = 0;
     virtualQubit.r_iq2prob_center1 = 1;
     virtualQubit.r_iq2prob_center2 = 2;
@@ -77,6 +76,17 @@ function varargout = jpaBringup(varargin)
         s_.vals = args.pumpAmp;
         s = [s,s_];
     end
+    if isempty(args.pumpPower)
+        virtualQubit.r_jpa_pumpPower = jpa.pumpPower;
+    elseif numel(args.pumpPower) == 1
+        virtualQubit.r_jpa_pumpPower = args.pumpPower;
+    else
+        x = expParam(virtualQubit,'r_jpa_pumpPower');
+        x.name = 'pump power(dBm)';
+        s_ = sweep(x);
+        s_.vals = args.pumpPower;
+        s = [s,s_];
+    end
     if numel(args.signalAmp) == 1
         virtualQubit.r_amp = args.signalAmp;
     elseif numel(args.signalAmp)> 1
@@ -91,18 +101,19 @@ function varargout = jpaBringup(varargin)
         virtualQubit.r_freq = args.signalFreq;
     elseif numel(args.signalFreq)> 1
         x = expParam(virtualQubit,'r_freq');
-        x.name = 'signal frequency';
+        x.name = 'signal frequency(Hz)';
         x_s = expParam(virtualQubit,'r_fc');
         x_s.offset = -args.signalSbFreq;
         s_ = sweep([x,x_s]);
         s_.vals = {args.signalFreq,args.signalFreq};
         s = [s,s_];
     end
+    
     virtualQubit.r_uSrcPower = args.signalPower;
     
     if isempty(s) % we need at least one sweep
         x = expParam(virtualQubit,'r_freq');
-        x.name = 'signal frequency';
+        x.name = 'signal frequency(Hz)';
         x_s = expParam(virtualQubit,'r_fc');
         x_s.offset = -args.signalSbFreq;
         s_ = sweep([x,x_s]);
@@ -112,13 +123,14 @@ function varargout = jpaBringup(varargin)
     function generateReadout()
         R = sqc.measure.resonatorReadout_ss(virtualQubit);
         R.swapdata = true;
-        R.name = '|IQ|';
+        R.name = 'IQ';
         R.datafcn = @(x)mean(x);
         e.measurements = R;
     end
     s(end).poststepcallbacks = @(x_)generateReadout;
 
     e = experiment();
+    e.name = 'JPA Bringup(ADDA)';
     e.sweeps = s;
 %     e.plotfcn = @util.plotfcn.sparam.Amplitude;
     

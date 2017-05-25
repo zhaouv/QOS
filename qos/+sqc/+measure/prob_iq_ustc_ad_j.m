@@ -10,10 +10,13 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
     
     properties (SetAccess = private)
         stateNames
+        % convert to intrinsic state probability by using measurement
+        % fidelity or not, this property can only be set by registry
+        % setting: r_iq2prob_intrinsic
+        intrinsic = false 
     end
 	properties (SetAccess = private, GetAccess = private)
-        normalize = false
-        invFMat % P = invFMat*Pm; 
+        invFMat % to convert the measured probability to intrinsic state probability: P = invFMat*Pm; 
     end
     methods
         function obj = prob_iq_ustc_ad_j(iq_ustc_ad_obj,qs)
@@ -22,16 +25,20 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
             for ii = 0:2^obj.num_qs-1
                 obj.stateNames{ii+1} = sprintf('|%s>',dec2bin(ii,obj.num_qs));
             end
-            normalize_ = sqc.util.samePropVal(qs,{'r_iq2prob_normalize'});
-            if numel(qs) > 1 && normalize_
+            intrinsic_ = sqc.util.samePropVal(qs,{'r_iq2prob_intrinsic'});
+            if numel(qs) > 1 && intrinsic_
                 throw(MException('QOS_prob_iq_ustc_ad_j:settingsMismatch',...
-                    'the qubits to readout has different r_iq2prob_normalize setting.'));
+                    'the qubits to readout has different r_iq2prob_intrinsic setting.'));
             end
-            obj.normalize = normalize_;
-            if obj.normalize
-                fMat = reshape(obj.qubits{1}.r_iq2prob_fMat,2,2).';
+            obj.intrinsic = intrinsic_;
+            if obj.intrinsic
+				F00 = obj.qubits{1}.r_iq2prob_fidelity(1);
+				F11 = obj.qubits{1}.r_iq2prob_fidelity(2);
+                fMat = [F00,1-F11;1-F00,F11];
                 for ii = 2:numel(obj.qubits)
-                    fMat_ = reshape(obj.qubits{ii}.r_iq2prob_fMat,2,2).';
+                    F00 = obj.qubits{ii}.r_iq2prob_fidelity(1);
+                    F11 = obj.qubits{ii}.r_iq2prob_fidelity(2);
+                    fMat_ = [F00,1-F11;1-F00,F11];
                     fMat = kron(fMat_,fMat);
                 end
                 obj.invFMat = inv(fMat);
@@ -49,7 +56,7 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
 			for ii = 0:numStates-1
 				obj.data(ii+1) = sum(d==ii)/obj.n;
             end
-            if obj.normalize
+            if obj.intrinsic
                 obj.data = (obj.invFMat*obj.data.').';
             end
         end

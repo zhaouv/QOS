@@ -41,7 +41,7 @@ I.ln = args.biasDelay;
 Z = op.zBias4Spectrum(biasQubit);
 function procFactory(delay)
 	Z.ln = delay;
-	proc = Z*I*X;
+	proc = X*I*Z;
     proc.Run();
     R.delay = proc.length;
 end

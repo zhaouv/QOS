@@ -64,11 +64,11 @@ function [rPoint, ang, threshold, polarity, hf] =...
         end
         inv_v = 1/v;
         if polarity > 0
-            P11 = mean((iq_raw_1 - c_ref)*exp(-1j*a)> threshold);
-            P01 = mean((iq_raw_0 - c_ref)*exp(-1j*a)> threshold);
+			F00 = mean((iq_raw_0 - c_ref)*exp(-1j*a)< threshold);
+            F11 = mean((iq_raw_1 - c_ref)*exp(-1j*a)> threshold);
         else
-            P11 = mean((iq_raw_1 - c_ref)*exp(-1j*a)< threshold);
-            P01 = mean((iq_raw_0 - c_ref)*exp(-1j*a)< threshold);
+			F01 = mean((iq_raw_0 - c_ref)*exp(-1j*a)> threshold);
+            F11 = mean((iq_raw_1 - c_ref)*exp(-1j*a)< threshold);
         end
         nEval = nEval +1;
         if ~auto
@@ -87,7 +87,7 @@ function [rPoint, ang, threshold, polarity, hf] =...
                     'DataAspectRatio',[1,1,1],'PlotBoxAspectRatio',[1,1,1]);
                 xlabel(ax1,'I');
                 ylabel(ax1,'Q');
-                title(ax1,['P_{1->1}: ',num2str(P11,'%0.2f'),', P_{0->1}: ',num2str(P01,'%0.2f')],...
+                title(ax1,['F_{0->0}: ',num2str(F00,'%0.2f'),', F_{1->1}: ',num2str(F11,'%0.2f')],...
                     'FontWeight','normal','FontSize',11);
                 hold(ax1,'off');
 

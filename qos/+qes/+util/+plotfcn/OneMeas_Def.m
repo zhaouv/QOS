@@ -11,6 +11,14 @@ function [varargout] = OneMeas_Def(Data, SweepVals,ParamNames,MainParam,Measurem
     
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
+
+
+    nSwps = numel(SweepVals);
+    a = numel(MainParam);
+    if a < nSwps
+        MainParam = [MainParam, ones(1,nSwps-a)];
+    end
+    
     if nargin < 7
         IsPreview = false;
     end

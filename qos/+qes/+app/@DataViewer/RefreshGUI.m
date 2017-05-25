@@ -50,7 +50,8 @@ function RefreshGUI(obj)
         return;
     end
     previewidx = find(obj.previewfiles == obj.currentfile,1);
-    set(handles.fileidxdisp,'String',[num2str(obj.currentfile,'%0.0f'),' of ',num2str(length(obj.files2show),'%0.0f')]);
+    set(handles.fileidxdisp,'String',[num2str(obj.currentfile,'%0.0f'),...
+        ' of ',num2str(length(obj.files2show),'%0.0f')]);
     if isempty(previewidx)
         error('Unexpected error.'); % if this happens, there are bugs
     end
@@ -60,7 +61,8 @@ function RefreshGUI(obj)
         set(handles.InfoTable,'Data',table_data);
     end
     if ~obj.filedeleted(obj.files2show(obj.currentfile)) && ~isempty(data) &&...
-            ((isfield(data,'Info') && ~ischar(data.Info)) || (isfield(data,'Config') && ~ischar(data.Config)))% disp info
+            ((isfield(data,'Info') && ~ischar(data.Info)) ||...
+            (isfield(data,'Config') && ~ischar(data.Config)))% disp info
         try
             datafile = obj.datafiles{obj.files2show(obj.currentfile)};
             Timestamp = obj.datatime(obj.files2show(obj.currentfile));
@@ -92,7 +94,7 @@ function RefreshGUI(obj)
             sz = size(Notes);
             if sz(1) > 1
                 Notes_ = '';
-                for ww = 1:sz(1);
+                for ww = 1:sz(1)
                     tempstr = strtrim(Notes(ww,:));
                     tempstr((tempstr == 10) | (tempstr == 13)) = [];
                     if ~isempty(tempstr)
@@ -118,7 +120,8 @@ function RefreshGUI(obj)
         set(handles.NotesBox,'string','');
     end
     if obj.plotfunc == 1
-        if isfield(data,'Info') && ~ischar(data.Info) && isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn)
+        if isfield(data,'Info') && ~ischar(data.Info) &&...
+                isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn)
             if ischar(data.Info.plotfcn)
                 PlotFcn = str2func(data.Info.plotfcn);
             elseif isa(data.Info.plotfcn,'function_handle')
@@ -126,7 +129,8 @@ function RefreshGUI(obj)
             else
                 PlotFcn = @qes.util.plotfcn.OneMeas_Def; % default
             end
-        elseif isfield(data,'Config') && ~ischar(data.Config) && isfield(data.Config,'plotfcn') && ~isempty(data.Config.plotfcn)
+        elseif isfield(data,'Config') && ~ischar(data.Config) &&...
+                isfield(data.Config,'plotfcn') && ~isempty(data.Config.plotfcn)
             if ischar(data.Config.plotfcn)
                 PlotFcn = str2func(data.Config.plotfcn);
             elseif isa(data.Config.plotfcn,'function_handle')
@@ -144,7 +148,8 @@ function RefreshGUI(obj)
     hold(handles.mainax,'off');
     try
         if ~obj.filedeleted(obj.files2show(obj.currentfile)) && ~isempty(data) &&...
-                ((isfield(data,'Info') && ~ischar(data.Info)) || (isfield(data,'Config') && ~ischar(data.Config)))
+                ((isfield(data,'Info') && ~ischar(data.Info)) ||...
+                (isfield(data,'Config') && ~ischar(data.Config)))
             if isfield(data,'Info')
                 if isfield(data.Info,'measurementnames') % to be compatible with a old bug.
                     measurementnames = data.Info.measurementnames; 
@@ -154,13 +159,14 @@ function RefreshGUI(obj)
                     measurementnames = '';
                 end
             else
-                if isfield(data.Config,'measurementnames') % to be compatible with a old bug.
+                if isfield(data.Config,'measurement_names') % to be compatible with a old bug.
                     measurementnames = data.Config.measurement_names; 
                 else
                     measurementnames = {''};
                 end
             end
-            feval(PlotFcn,data.Data, data.SweepVals,data.ParamNames,data.SwpMainParam,measurementnames,handles.mainax);
+            feval(PlotFcn,data.Data, data.SweepVals,data.ParamNames,...
+                data.SwpMainParam,measurementnames,handles.mainax);
             colorbar('off','peer',handles.mainax);
             obj.uihandles.ColorBar = colorbar('peer',handles.mainax);
 			if obj.resizable
@@ -239,7 +245,7 @@ function RefreshGUI(obj)
                                 measurementnames = '';
                             end
                         else
-                            if isfield(data.Config,'measurementnames') % to be compatible with a foremer bug.
+                            if isfield(data.Config,'measurement_names') % to be compatible with a foremer bug.
                                 measurementnames = data.Config.measurement_names; 
                             else
                                 measurementnames = '';
@@ -251,7 +257,8 @@ function RefreshGUI(obj)
                         plot(handles.PreviewAX(centerax-ii),NaN,NaN);
                         XLIM = get(handles.PreviewAX(centerax-ii),'XLim');
                         YLIM = get(handles.PreviewAX(centerax-ii),'YLim');
-                        text('Parent',handles.PreviewAX(centerax-ii),'Position',[mean(XLIM),mean(YLIM)],'String','Plot fail.',...
+                        text('Parent',handles.PreviewAX(centerax-ii),'Position',...
+                            [mean(XLIM),mean(YLIM)],'String','Plot fail.',...
                             'HorizontalAlignment','center','VerticalAlignment','middle',...
                             'Color',[1,0,0],'FontSize',10,'FontWeight','bold');
                     end
@@ -336,7 +343,7 @@ function RefreshGUI(obj)
                                 measurementnames = '';
                             end
                         else
-                            if isfield(data.Config,'measurementnames') % to be compatible with a foremer bug.
+                            if isfield(data.Config,'measurement_names') % to be compatible with a foremer bug.
                                 measurementnames = data.Config.measurement_names; 
                             else
                                 measurementnames = '';

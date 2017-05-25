@@ -85,7 +85,7 @@ function CreateGUI_resizable(obj)
     %footlayout
     handles.PreviousPageBtn = uicontrol('Parent',footleftlayout,'Style','pushbutton','string','<<',...
         'FontSize',18,'FontUnits','points','Units','characters','Callback',{@PNPageBtnCallback,-1},...
-        'Tooltip','Go previous page.');
+        'Tooltip','Single click: backward one page; Double click: backward multiple pages.');
     handles.PreviewAX = zeros(1,2*obj.numpreview+1);
     for ii = 1:2*obj.numpreview+1
         handles.PreviewAX(ii) = axes('Parent',uix.Grid('parent',footmidlayout,'UserData',obj),'Visible','on','HandleVisibility','callback',...
@@ -96,7 +96,7 @@ function CreateGUI_resizable(obj)
     %         'LineWidth',3,'ButtonDownFcn',{});
     handles.NextPageBtn = uicontrol('Parent',footrightlayout,'Style','pushbutton','string','>>',...
         'FontSize',18,'FontUnits','points','Units','characters','Callback',{@PNPageBtnCallback,+1},...
-        'Tooltip','Go next page.');
+        'Tooltip','Single click: forward one page; Double click: forward multiple pages.');
    
     %leftlayout
 %     axeslayout=uix.Panel(...
@@ -388,8 +388,22 @@ function CreateGUI_resizable(obj)
             idx = find(obj.previewfiles == obj.currentfile,1);
             data = obj.loadeddata{idx};
             if obj.plotfunc == 1
-                if isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn) && ischar(data.Info.plotfcn)
-                    PlotFcn = str2func(data.Info.plotfcn);
+                if isfield(data,'Info')  && isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn) &&...
+                        (ischar(data.Info.plotfcn) ||...
+                        isa(data.Info.plotfcn,'function_handle'))
+                    if ischar(data.Info.plotfcn)
+                        PlotFcn = str2func(data.Info.plotfcn);
+                    else
+                        PlotFcn = data.Info.plotfcn;
+                    end
+                elseif isfield(data,'Config')  && isfield(data.Config,'plotfcn') &&...
+                        ~isempty(data.Config.plotfcn) && (ischar(data.Config.plotfcn) ||...
+                        isa(data.Config.plotfcn,'function_handle'))
+                    if ischar(data.Config.plotfcn)
+                        PlotFcn = str2func(data.Config.plotfcn);
+                    else
+                        PlotFcn = data.Config.plotfcn;
+                    end
                 else
                     PlotFcn = @qes.util.plotfcn.OneMeas_Def; % default
                 end
@@ -518,11 +532,25 @@ end
 
 
 function PNPageBtnCallback(src,entdata,NorP)
+persistent lastFwdClick
+persistent lastBkwdClick
 obj = get(get(src,'Parent'),'UserData');
 if NorP > 0
-    obj.NextPage();
+    if ~isempty(lastFwdClick) && now - lastFwdClick < 6.941e-06 % 0.6 second
+        obj.NextN(100);
+    else
+        obj.NextPage();
+    end
+    lastFwdClick = now; 
+    lastBkwdClick = [];
 elseif NorP < 0
-    obj.PreviousPage();
+    if ~isempty(lastBkwdClick) && now - lastBkwdClick < 6.941e-06 % 0.6 second
+        obj.NextN(-100);
+    else
+        obj.PreviousPage();
+    end
+    lastFwdClick = []; 
+    lastBkwdClick = now;
 end
 end
 

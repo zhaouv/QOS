@@ -98,7 +98,7 @@ photonNumberCal('qubit','q2',...
       'time',[0:500:30e3],'detuning',[0],...
       'r_amp',[],'r_ln',[],...
       'ring_amp',[],'ring_w',[],...
-      'gui',true,'save',true)
+      'gui',true,'save',true);
 %%
 zDelay('qubit','q2','zAmp',5000,'zLn',[],'zDelay',[-200:20:200],...
        'gui',true,'save',true)
@@ -111,13 +111,14 @@ tuneup.zpls2f01('qubit','q7','maxBias',35e3 ,'gui',true,'save',false);
 %% automatic function, after previous steps pined down qubit parameters, 
 q = qubits{2};
 tuneup.correctf01bySpc('qubit',q,'gui',true,'save',true); % measure f01 by spectrum
+tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',true,'gui',true,'save',true);
+tuneup.optReadoutFreq('qubit',q,'gui',true,'save',true);
+tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
+%%
 XYGate ={'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2','X/4', 'Y/4', '-X/4', '-Y/4'};
 for ii = 1:numel(XYGate)
     tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{ii},'AE',false,'gui',true,'save',true); % finds the XY gate amplitude and update to settings
 end
-tuneup.optReadoutFreq('qubit',q,'gui',true,'save',true);
-tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
-
 %%
 zdc2f01('qubit','q7_c','gui',true,'save',true);
 
