@@ -39,8 +39,11 @@ function varargout = correctf01bySpc(varargin)
         throw(MException('QOS_correctf01bySpc:visibilityTooLow',...
 				'visibility(%0.2f) too low, run correctf01bySpc at low visibility might produce wrong result, thus not supported.', rP));
     end
-
-    [pks,locs,~,p] = findpeaks(smooth(P,3),'SortStr','descend','MinPeakHeight',rP/2,...
+    
+    Ps = smooth(P,3);
+    Ps = Ps - min(Ps); % P might have negative value in case of iq2prob parameters have drifted away
+    rP = range(Ps);
+    [pks,locs,~,p] = findpeaks(Ps,'SortStr','descend','MinPeakHeight',rP/2,...
         'MinPeakProminence',rP/2,'MinPeakDistance',numel(P)/5,...
         'WidthReference','halfprom');
     if numel(pks)

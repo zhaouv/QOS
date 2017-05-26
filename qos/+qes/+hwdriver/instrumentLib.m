@@ -28,6 +28,7 @@ classdef instrumentLib
                         {'ustc'}, {'ustc_dadc_v1'};... % ustc da used as dc source
 						{'signalcore'},{'sc5511a'};...
                         {'simulatedhw'},{'simulatedmwsrc'};... % simulated mw source
+                        {'agilent technologies','agilent', 'keysight technologies', 'keysight'}, {'keysight_multimeter','34465a'};... % multi meter
                        }
     end
     methods

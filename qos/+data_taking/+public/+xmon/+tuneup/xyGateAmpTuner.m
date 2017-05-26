@@ -31,7 +31,7 @@ function varargout = xyGateAmpTuner(varargin)
         throw(MException('QOS_xyGateAmpTuner:visibilityTooLow',...
 				sprintf('visibility(%0.2f) too low, run xyGateAmpTuner at low visibility might produce wrong result, thus not supported.', vis)));
     end
-    q.r_iq2prob_normalize = true;
+    q.r_iq2prob_intrinsic = true;
 	da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                         'name', q.channels.xy_i.instru);
 	switch args.gateTyp
@@ -147,7 +147,8 @@ function varargout = xyGateAmpTuner(varargin)
         if args.AE
            plot(ax,amps_ae,P_ae);
         end
-        ylim = get(ax,'YLim');
+%         ylim = get(ax,'YLim');
+        ylim = [0,1];
         plot(ax,[gateAmp,gateAmp],ylim,'--r');
 		xlabel(ax,'xy drive amplitude');
 		ylabel(ax,'P|1>');
