@@ -202,7 +202,7 @@ classdef (Sealed = true)RegEditor < handle
             if obj.bigScreen
                 Pos = [5,5,255,600];
             else
-                Pos = [5,5,228,445];
+                Pos = [5,5,230,400];
             end
             obj.guiHandles.mtree = uitree('v0', 'Root', rootNode,...
                 'Parent',obj.guiHandles.reWin,'Position',Pos);

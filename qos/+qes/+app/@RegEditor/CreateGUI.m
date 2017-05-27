@@ -51,7 +51,7 @@ function CreateGUI(obj)
     if obj.bigScreen
         pos(3) = 30;
     else
-        pos(3) = 21;
+        pos(3) = 23;
     end
     pos(1) = pos(1)-pos(3)-0.5;
     obj.guiHandles.SelectUser = uicontrol('Parent',obj.guiHandles.reWin,'Style','popupmenu','String',obj.userList,...
