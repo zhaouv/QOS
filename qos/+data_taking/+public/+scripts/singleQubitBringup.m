@@ -66,7 +66,7 @@ spectroscopy1_zdc('qubit','q7_c',...
 %%
 rabi_amp1('qubit','q2','biasAmp',0,'biasLonger',20,...
       'xyDriveAmp',[0:500:3e4],'detuning',[0],'driveTyp','X',...
-      'dataTyp','S21','gui',true,'save',false);
+      'dataTyp','P','gui',true,'save',false);
 % rabi_amp1('qubit','q2','xyDriveAmp',[0:500:3e4]);  % lazy mode
 %%
 rabi_long1('qubit','q2','biasAmp',0,'biasLonger',0,...
@@ -95,15 +95,28 @@ tuneup.APE('qubit','q2',...
       'gui',true,'save',true);
 %%
 photonNumberCal('qubit','q2',...
-      'time',[0:500:30e3],'detuning',[0],...
-      'r_amp',[],'r_ln',[],...
-      'ring_amp',[],'ring_w',[],...
-      'gui',true,'save',true);
+'time',[-500:50:4e3],'detuning',[-300e6:5e6:300e6],...
+'r_amp',[],'r_ln',[],...
+'ring_amp',[],'ring_w',[],...
+'gui',true,'save',true);
 %%
 zDelay('qubit','q2','zAmp',5000,'zLn',[],'zDelay',[-200:20:200],...
        'gui',true,'save',true)
 %%
-data = singleQStateTomo('qubit','q2','reps',2,'state','|1>');
+state = '|0>-i|1>';
+data = singleQStateTomo('qubit','q2','reps',2,'state',state);
+rho = sqc.qfcns.stateTomoData2Rho(data);
+h = figure();bar3(real(rho));h = figure();bar3(imag(rho));
+%%
+gate = 'Y/2';
+data = singleQProcessTomo('qubit','q2','reps',2,'process',gate);
+chi = sqc.qfcns.processTomoData2Rho(data);
+h = figure();bar3(real(chi));h = figure();bar3(imag(chi));
+%%
+numGates = 1:1:20;
+[Pref,Pi] = randBenchMarking('qubit','q2',...
+       'process','X','numGates',numGates,'numReps',20,...
+       'gui',true,'save',true);
 %%
 tuneup.zpls2f01('qubit','q7','maxBias',35e3 ,'gui',true,'save',false);
 %%
@@ -117,7 +130,7 @@ tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
 %%
 XYGate ={'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2','X/4', 'Y/4', '-X/4', '-Y/4'};
 for ii = 1:numel(XYGate)
-    tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{ii},'AE',false,'gui',true,'save',true); % finds the XY gate amplitude and update to settings
+    tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{ii},'AE',true,'gui',true,'save',true); % finds the XY gate amplitude and update to settings
 end
 %%
 zdc2f01('qubit','q7_c','gui',true,'save',true);

@@ -33,7 +33,7 @@ function varargout = ramsey_dp(varargin)
  
     switch args.dataTyp
         case 'P'
-            % pass
+            R.state = 2;
         case 'S21'
             R.swapdata = true;
             R.name = 'iq';

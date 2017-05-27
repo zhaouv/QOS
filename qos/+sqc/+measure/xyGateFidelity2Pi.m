@@ -27,12 +27,8 @@ classdef xyGateFidelity2Pi < qes.measurement
 					sprintf('the input gate %s is not one of the supported gates.',gClass)));
 			end
 			obj.gate = g;
-			
-			error('todo...');
-			
-			
             if nargin == 1
-				
+				obj.num2Pi = 1;
 			end
 			obj.gate = g;
             obj.numericscalardata = true;

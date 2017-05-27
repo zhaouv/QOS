@@ -36,6 +36,7 @@ function varargout = spin_echo_dz(varargin)
     X2 = gate.X2p(q);
     I = op.detune(q);
     R = measure.resonatorReadout_ss(q);
+	R.state = 2;
     function procFactory(delay)
         I.ln = delay/2;
         X.phase = pi/2+2*pi*args.detuning*delay/2/daSamplingRate;

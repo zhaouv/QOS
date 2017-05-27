@@ -26,11 +26,11 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
                 obj.stateNames{ii+1} = sprintf('|%s>',dec2bin(ii,obj.num_qs));
             end
             intrinsic_ = sqc.util.samePropVal(qs,{'r_iq2prob_intrinsic'});
-            if numel(qs) > 1 && intrinsic_
+            if numel(qs) > 1 && ~intrinsic_
                 throw(MException('QOS_prob_iq_ustc_ad_j:settingsMismatch',...
                     'the qubits to readout has different r_iq2prob_intrinsic setting.'));
             end
-            obj.intrinsic = intrinsic_;
+            obj.intrinsic = obj.qubits{1}.r_iq2prob_intrinsic;
             if obj.intrinsic
 				F00 = obj.qubits{1}.r_iq2prob_fidelity(1);
 				F11 = obj.qubits{1}.r_iq2prob_fidelity(2);

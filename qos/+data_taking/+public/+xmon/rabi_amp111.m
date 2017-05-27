@@ -93,7 +93,6 @@ R = measure.resonatorReadout_ss(readoutQubit);
 switch args.dataTyp
     case 'P'
         R.state = 2;
-        % pass
     case 'S21'
         R.swapdata = true;
         R.name = '|IQ|';

@@ -36,11 +36,11 @@ function varargout = xyGateAmpTuner(varargin)
                         'name', q.channels.xy_i.instru);
 	switch args.gateTyp
 		case {'X','Y'}
-			maxAmp = da.vpp/2;
+% 			maxAmp = da.vpp/2;
 		case {'X/2','-X/2','X2m','X2p','Y/2','-Y/2','Y2m','Y2p'}
-			maxAmp = da.vpp/4;
+% 			maxAmp = da.vpp/4;
         case {'X/4','-X/4','X4m','X4p','Y/4','-Y/4','Y4m','Y4p'}
-			maxAmp = da.vpp/8;
+% 			maxAmp = da.vpp/8;
 		otherwise
 			throw(MException('QOS_xyGateAmpTuner:unsupportedGataType',...
 				sprintf('gate %s is not supported, supported types are %s',args.gateTyp,...
@@ -113,7 +113,15 @@ function varargout = xyGateAmpTuner(varargin)
 %     end
 	
 	if args.AE  % use multiple pi gates to amplify error to fine tune gateAmp
-		amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+
+        switch args.gateTyp
+            case {'X','Y'}
+                amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+            case {'X/2','-X/2','X2m','X2p','Y/2','-Y/2','Y2m','Y2p'}
+                amps_ae = linspace(0.85*gateAmp,min(da.vpp,1.15*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+            case {'X/4','-X/4','X4m','X4p','Y/4','-Y/4','Y4m','Y4p'}
+                amps_ae = linspace(0.8*gateAmp,min(da.vpp,1.2*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+        end
 		e = rabi_amp1('qubit',q,'biasAmp',0,'biasLonger',0,'xyDriveAmp',amps_ae,...
 			'detuning',0,'numPi',AE_NUM_PI,'driveTyp',args.gateTyp,'gui',false,'save',false);
 		P_ae = e.data{1};
