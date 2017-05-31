@@ -1,13 +1,12 @@
-function varargout = singleQStateTomo(varargin)
-% demonstration of state tomography on single qubit.
-% state tomography is a measurement, it is not used alone in real
+function varargout = singleQProcessTomo(varargin)
+% demonstration of process tomography on single qubit.
+% process tomography is a measurement, it is not used alone in real
 % applications, this simple function is just a demonstration/test to show
-% that state tomography is working properly.
-% prepares a a state(options are: '|0>', '|1>','|0>+|1>','|0>-|1>','|0>+i|1>','|0>-i|1>')
-% and do state tomography.
+% that process tomography is working properly.
+% process options are: 'X','Z','Y','X/2','-X/2','Y/2','-Y/2'
 %
 % <_o_> = singleQStateTomo('qubit',_c&o_,...
-%       'state',<_c_>,'reps',<_i_>,...
+%       'process',<_c_>,'reps',<_i_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -29,27 +28,33 @@ function varargout = singleQStateTomo(varargin)
     args = util.processArgs(varargin,{'state','|0>','reps',1,'gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    R = measure.stateTomography(q);
-    
-    switch args.state
-        case '|0>'
+    switch args.process
+        case 'I'
             p = gate.I(q);
-        case '|1>'
+        case 'X'
             p = gate.X(q);
-        case '|0>+|1>'
-            p = gate.Y2p(q);
-        case '|0>-|1>'
-            p = gate.Y2m(q);
-        case '|0>-i|1>'
+        case 'Y'
+            p = gate.Y(q);
+        case {'X/2','X2p'}
             p = gate.X2p(q);
-        case '|0>+i|1>'
+        case {'Y/2','Y2p'}
+            p = gate.Y2p(q);
+		case {'-X/2','X2m'}
             p = gate.X2m(q);
+        case {'-Y/2','Y2m'}
+            p = gate.Y2m(q);
+		case {'Z'}
+            X = gate.X(q);
+			Y = gate.Y(q);
+			p = Y*X;
         otherwise
-            throw(MException('QOS_singleQStateTomo',...
-                sprintf('available state options for singleQStateTomo is %s, %s given.',...
-                '|0> |1> |0>+|1> |0>-|1> |0>+i|1> |0>-i|1>',args.state)));
+            throw(MException('QOS_singleQProcessTomo:unsupportedGate',...
+                sprintf('available process options for singleQProcessTomo is %s, %s given.',...
+                '''X'',''Z'',''Y'',''X/2'',''-X/2'',''Y/2'',''-Y/2''',args.process)));
     end
-    R.setProcess(p);
+	
+    R = measure.processTomography(q,p);
+
     for ii = 1:args.reps
         if ii == 1
             data = R();

@@ -1,8 +1,8 @@
-function varargout = spin_echo_dz(varargin)
-% spin echo: detune by z detune pulse
+function varargout = zPulseRipple(varargin)
+% zPulseRipple: ramsey oscillation,..
+% detune by changing the second pi/2 pulse tracking frame
 % 
-% <_o_> = spin_echo_dz('qubit',_c&o_,...
-%       'time',[_i_],'detuning',<[_f_]>,...
+% <_o_> = zPulseRipple('qubit',_c&o_,'time',[_i_],...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -15,49 +15,44 @@ function varargout = spin_echo_dz(varargin)
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as they form correct pairs.
 
-
 % Yulin Wu, 2016/12/27
 
-    fcn_name = 'data_taking.public.xmon.spin_echo_dz'; % this and args will be saved with data
+    fcn_name = 'data_taking.public.xmon.zPulseRipple'; % this and args will be saved with data
     import qes.*
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'gui',false,'notes','','detuning',0,'save',true});
-    if any(mod(args.time,2)~=0)
-        throw(MException('QOS_spinEcho:invalidInput','time not even integers.'));
-    end
+    args = util.processArgs(varargin,{'dataTyp','P','gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
-    
-    da =  qHandle.FindByClassProp('qes.hwdriver.hardware','name',q.channels.xy_i.instru);
-    daSamplingRate = da.samplingRate;
 
-    X = op.XY(q,0);
     X2 = gate.X2p(q);
-    I = op.detune(q);
+    I1 = gate.I(q);
+    I2 = gate.I(q);
+    Z = op.zRect(q);
+    Z.ln = 6000;
+    Z.amp = args.zAmp;
     R = measure.resonatorReadout_ss(q);
-	R.state = 2;
+    R.state = 2;
+    
+	X2_ = copy(X2);
+    maxDelayTime = max(args.delayTime);
     function procFactory(delay)
-        I.ln = delay/2;
-        X.phase = pi/2+2*pi*args.detuning*delay/2/daSamplingRate;
-        proc = X2*I*X*I*X2;
+        I1.ln = delay;
+        I2.ln = maxDelayTime - delay;
+        proc = Z*I1*X2_*I2*X2;
         proc.Run();
         R.delay = proc.length;
     end
 
-	x = expParam(I,'df');
-    x.name = [q.name,' detunning'];
     y = expParam(@procFactory);
-    y.name = [q.name,' time'];
-	s1 = sweep(x);
-    s1.vals = args.detuning;
+    y.name = [q.name,' delay time(DA samplig interval)'];
     s2 = sweep(y);
-    s2.vals = args.time;
+    s2.vals = args.delayTime;
     e = experiment();
-    e.name = 'Spin Echo(Detune by Z)';
-    e.sweeps = [s1,s2];
+    e.name = 'zPulseRipple';
+    e.sweeps = [s2];
     e.measurements = R;
-    e.datafileprefix = sprintf('%s',q.name);
+    e.datafileprefix = sprintf('%s', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

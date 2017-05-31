@@ -116,15 +116,17 @@ function saveSettings(spath, field,value)
                                 	'value type of the current settings field is numeric, %s given.', class(value));
                             else
                                 value = regexprep(value,'\s+','');
-                                value = regexprep(value,',\.',',0\.');
-                                value = regexprep(value,'\[\.','[0\.');
-                                if isnan(str2double(value)) &&...
-                                	isempty(regexp(regexprep(value,'[eE][-\+]\d+',''),...
-                                        '[(\d+(\.\d+){0,1},)*(\d+(\.\d+){0,1}])', 'once'))
-                                    error('saveSettings:invalidInput',...
-                                         'value type of the current settings field is numeric, %s given.', value);
+                                if ~ismember(value,{'true','True','false','False'})
+                                    value = regexprep(value,',\.',',0\.');
+                                    value = regexprep(value,'\[\.','[0\.');
+                                    if isnan(str2double(value)) &&...
+                                        isempty(regexp(regexprep(value,'[eE][-\+]\d+',''),...
+                                            '[(\d+(\.\d+){0,1},)*(\d+(\.\d+){0,1}])', 'once'))
+                                        error('saveSettings:invalidInput',...
+                                             'value type of the current settings field is numeric, %s given.', value);
+                                    end
+                                    value = regexprep(value,'[\[\]]','');
                                 end
-                                value = regexprep(value,'[\[\]]','');
                             end
                         end
                         if ~ischar(value) % if not converted to char string already by caller.

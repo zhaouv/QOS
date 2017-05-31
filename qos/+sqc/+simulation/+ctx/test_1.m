@@ -5,9 +5,9 @@ ee = 1.602176e-19;
 % 0.280 uA -> junction resistance 1kOhm
 KRI = 0.290e-6;
 
-R = 6.0e3:0.025e3:7.0e3;
+R = 6.0e3:0.025e3:7.5e3;
 Ic = KRI./(R/1e3);
-C = 65e-15:0.5e-15:85e-15;
+C = 70e-15:0.5e-15:90e-15;
 
 f01 = NaN*ones(numel(R),numel(C));
 ah = NaN*ones(numel(R),numel(C));
