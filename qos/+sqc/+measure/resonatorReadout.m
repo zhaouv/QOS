@@ -276,6 +276,8 @@ classdef resonatorReadout < qes.measurement.prob
                 obj.r_wv = obj.r_wv + wv_{ii};
             end
             if ~isempty(obj.startWv)
+				df = (obj.qubits{ii}.r_freq - obj.qubits{ii}.r_fc)/obj.da.samplingRate;
+				obj.r_wv.phase = 2*pi*df*obj.startWv.length;
                 obj.r_wv = [obj.startWv, obj.r_wv];
             end
             obj.r_wv.awg = obj.da;
