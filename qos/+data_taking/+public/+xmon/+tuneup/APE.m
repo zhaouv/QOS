@@ -52,6 +52,15 @@ function varargout = APE(varargin)
         e.showctrlpanel = false;
         e.plotdata = false;
     end
+    
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
     if ~args.save
         e.savedata = false;
     end

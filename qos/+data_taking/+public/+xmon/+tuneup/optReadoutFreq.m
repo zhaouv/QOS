@@ -82,6 +82,14 @@ function varargout = optReadoutFreq(varargin)
         pbaspect(ax,[1,1,1]);
         drawnow;
     end
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
     if args.save
         QS = qes.qSettings.GetInstance();
         QS.saveSSettings({q.name,'r_freq'},optFreq);

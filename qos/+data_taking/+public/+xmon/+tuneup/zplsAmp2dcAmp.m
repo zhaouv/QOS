@@ -223,7 +223,13 @@ function zplsAmp2dcAmp(qName,auto)
 		throw(MException('QOS_zdc2f01:fittingFailed','fitting failed.'));
 	end
 
-    if args.save
+    if ischar(args.save)
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            QS.saveSSettings({q.name,'zdc_amp2f01'},param);
+        end
+    elseif args.save
         QS.saveSSettings({q.name,'zdc_amp2f01'},param);
     end
 	

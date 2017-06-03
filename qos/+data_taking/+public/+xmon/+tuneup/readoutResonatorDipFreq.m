@@ -1,12 +1,12 @@
-function varargout = correctf01bySpc(varargin)
-% correct f01 at the current working point(defined by zdc_amp in registry)
-% by spectroscopy: f01 already set previously, correctf01bySpc is just to
-% remeasure f01 in case f01 has drifted away slightly.
-% note: estimation of the FWHM of the spectrum peak(t_spcFWHM_est) must be
-% set with a resonable value, otherwise measuref01 might produce an
+function varargout = readoutResonatorDipFreq(varargin)
+% set a coarse value for r_fr(readout resonator frequency) in registry, 
+% readoutResonatorDipFreq will measure the fine readout resonator frequency
+% value and update r_fr.
+% note: estimation of the FWHM of the readout resonator dip(t_rrDipFWHM_est) must be
+% set with a resonable value, otherwise readoutResonatorDipFreq might produce an
 % incorrect result.
 %
-% <_f_> = correctf01bySpc('qubit',_c&o_,...
+% <_f_> = readoutResonatorDipFreq('qubit',_c&o_,...
 %       'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -19,9 +19,9 @@ function varargout = correctf01bySpc(varargin)
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as they form correct pairs.
     
-    % Yulin Wu, 2017/4/14
+    % Yulin Wu, 2017/6/2
     
-    import data_taking.public.xmon.spectroscopy1_zpa
+    import data_taking.public.xmon.s21_rAmp
     
     args = qes.util.processArgs(varargin,{'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});

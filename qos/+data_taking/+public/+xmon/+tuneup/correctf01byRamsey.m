@@ -63,6 +63,14 @@ function varargout = correctf01byRamsey(varargin)
     
     f01 = q.f01+(fn-fp)/2;
     
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
 	if args.save
         QS = qes.qSettings.GetInstance();
         QS.saveSSettings({q.name,'f01'},f01);
