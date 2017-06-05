@@ -18,8 +18,8 @@ data_taking.public.jpa.turnOnJPA('jpaName','impa1','pumpFreq',13.55e9,'pumpPower
 %%
 ustcaddaObj.close()
 %%
-for ii=3:3
-s21_zdc_networkAnalyzer('qubit',qubits{ii},'NAName',[],'startFreq',dips(ii)-10e6,'stopFreq',dips(ii)+2e6,'numFreqPts',500,'avgcounts',30,'NApower',-15,'amp',[-3e4:1e3:3e4],'bandwidth',10000,'notes','','gui',true,'save',true)
+for ii=1
+s21_zdc_networkAnalyzer('qubit',qubits{ii},'NAName',[],'startFreq',dips(ii)-1e6,'stopFreq',dips(ii)+2e6,'numFreqPts',500,'avgcounts',5,'NApower',-15,'biasAmp',[-3e4:1e3:3e4],'bandwidth',2000,'notes','','gui',true,'save',true)
 end
 %% S21
 s21_zdc('qubit', qubits{1},...
