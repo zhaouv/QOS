@@ -191,7 +191,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.trig_sel=s.trigger_source;
                 %è®¾ç½®master?¿ï¼Œé»˜è®¤å€¼ä¸ºç¬¬ä¸€ä¸ªæ??
 %                 obj.da_list(k).da.set('ismaster', 0); % ismaster is false byt default, Yulin Wu, 170427
-                if(isfield(s,'da_master') && strcmpi(s.da_boards{k}.name,s.da_master))
+                if isfield(s,'da_master') && s.da_master == k
                     % Yulin Wu, 170427
                     obj.da_list(k).da.ismaster=true;
                     obj.da_master_index = k;
@@ -252,6 +252,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.ad_list(k).ad.sample_rate=s.ad_boards{k}.samplingRate;
                 obj.ad_list(k).ad.channel_amount=s.ad_boards{k}.numChnls;
                 obj.ad_list(k).ad.mac=s.ad_boards{k}.mac;
+				obj.ad_list(k).ad.demod = s.ad_boards{k}.demod;
             end
             % æ˜ å°„ADCçš„é???
             for k = 1:length(s.ad_chnl_map)
@@ -313,13 +314,21 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 len = len - 1;
             end
         end
+		
+		function [I,Q] = Run(obj,freqOrIssample)
+			 if obj.ad_list(1).ad.demod
+				[I,Q] = RunDemo_(obj,freqOrIssample);
+			 else
+				[I,Q] = Run_(obj,freqOrIssample);
+			 end
+		end
         
-        function [I,Q] = Run(obj,isSample)
+        function [I,Q] = Run_(obj,isSample)
             I=0;Q=0;ret = -1;
 
             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps); %20170411
 
-		
+            obj.ad_list(1).ad.SetMode(0);
             obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
             % ?œæ­¢é™¤è¿ç»­æ³¢å½¢å¤–çš„é??“ï¼Œ?¯åŠ¨è§¦å?‘é???
@@ -353,6 +362,50 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 I = (reshape(I,[obj.adRecordLength,obj.runReps]))';
                 Q = (reshape(Q,[obj.adRecordLength,obj.runReps]))';
             end
+            % å¹¶æ¸…ç©ºé??“è®°å½?
+            for k = 1:obj.numDABoards
+                obj.da_list(k).mask_plus = 0;
+                obj.da_list(k).da_trig_delay = 0;
+            end
+        end
+        
+        function [I,Q] = RunDemo_(obj,frequency) %Unit:Hz
+            I=0;Q=0;ret = -1;
+
+            obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps); %20170411
+
+            obj.ad_list(1).ad.SetTrigCount(obj.runReps);
+            obj.ad_list(1).ad.SetMode(1);
+            obj.ad_list(1).ad.SetDemoFre(frequency);
+            obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength + 10);            
+            obj.ad_list(1).ad.SetWindowStart(10);
+            obj.ad_list(1).SetWindowLength(obj.adRecordLength);
+            
+            % ?œæ­¢é™¤è¿ç»­æ³¢å½¢å¤–çš„é??“ï¼Œ?¯åŠ¨è§¦å?‘é???
+            for k = 1:obj.numDABoards
+                obj.da_list(k).da.StartStop((15 - obj.da_list(k).mask_min)*16);
+                obj.da_list(k).da.StartStop(obj.da_list(k).mask_plus);
+                obj.da_list(k).da.SetTrigDelay(obj.da_list(k).da_trig_delay);
+            end
+            % æ£?Ÿ¥æ˜¯å?¦æ?åŠŸå†™å…¥å®Œæ¯?
+            
+            for k=1:obj.numDABoards
+%                 tic
+                isSuccessed = obj.da_list(k).da.CheckStatus();
+%                 toc
+                if(isSuccessed ~= 1)
+                    error('ustcadda_v1:Run','There were some task failed!');
+                end
+            end
+            % é‡‡é›†æ•°æ??
+            while(ret ~= 0)
+                obj.ad_list(1).ad.EnableADC();  
+                obj.da_list(obj.da_master_index).da.SendIntTrig();
+                [ret,I,Q] = obj.ad_list(1).ad.RecvData(obj.runReps,obj.adRecordLength);
+            end
+            % å°†æ•°?®æ•´?†æ?å›ºå®šæ ¼å?
+            I = double(I)/256/obj.adRecordLength*2;
+            Q = double(Q)/256/obj.adRecordLength*2;
             % å¹¶æ¸…ç©ºé??“è®°å½?
             for k = 1:obj.numDABoards
                 obj.da_list(k).mask_plus = 0;
@@ -477,6 +530,10 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 name{ii} = da.name;
             end
         end
+		
+		function d = GetADDemod(obj)
+			d = obj.ad_list(1).ad.demod;
+		end
         
         function delete(obj) % Yulin Wu
             try % the object should be deletable under any circunstance

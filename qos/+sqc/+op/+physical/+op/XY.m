@@ -18,7 +18,7 @@ classdef XY < sqc.op.physical.gate.X
     methods (Hidden = true)
         function GenWave(obj)
             GenWave@sqc.op.physical.gate.X(obj)
-            obj.xy_wv{1}.phase = obj.phase;
+            obj.xy_wv{1}.phase = obj.qubits{1}.g_XY_phaseOffset+obj.phase;
         end
     end
 end

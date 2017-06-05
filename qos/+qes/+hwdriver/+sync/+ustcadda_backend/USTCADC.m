@@ -10,6 +10,7 @@ classdef USTCADC < handle
         name = ''
         channel_amount = 2     %ADC通道，未使用，实际使用I、Q两个通道。
         sample_rate = 1e9      %ADC采样率，未使用
+		demod = false
     end
     
     properties(SetAccess = private)
@@ -32,6 +33,28 @@ classdef USTCADC < handle
         driverh = 'USTCADCDriver.h';
     end
     
+	methods(Static = true) % GuoCheng 170605
+        function list = ListAdpter()
+            driverfilename = [USTCADC.driver,'.dll'];
+            if(~libisloaded(USTCADC.driver))
+                loadlibrary(driverfilename,USTCADC.driverh);
+            end
+            list = blanks(2048);
+            pos = 1;
+            str = libpointer('cstring',blanks(2048));
+            [ret,info] = calllib(USTCADC.driver,'GetAdapterList',str);
+            if(ret == 0)
+                info = regexp(info,'\n', 'split');
+                for index = 1:length(info)
+                   info{index} = [num2str(index),' : ',info{index}];
+                   list(pos:pos + length(info{index})) = [info{index},10];
+                   pos = pos + length(info{index}) + 1;
+                end
+            else
+                error('USTCDAC: Get adpter list failed!');
+            end
+        end
+    end
     methods
         function obj = USTCADC(num)
             obj.netcard_no = num;
@@ -150,6 +173,71 @@ classdef USTCADC < handle
            end
         end
         
+		function SetMode(obj,isdemo) % GuoCheng 170605
+            if obj.isopen
+                if(isdemo == 0)
+                    data = [1,1,17,17,17,17,17,17];
+                else
+                    data = [1,1,34,34,34,34,34,34];
+                end
+                pdata = libpointer('uint8Ptr', data);
+                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+                if(ret ~= 0)
+                   error('USTCADC:SendPacket','SetMode failed!');
+                end
+            end       
+        end
+        
+        function SetWindowLength(obj,length) % GuoCheng 170605
+            if obj.isopen
+                data = [0,20,floor(length/256),mod(length,256),0,0,0,0];
+                pdata = libpointer('uint8Ptr', data);
+                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+                if(ret ~= 0)
+                   error('USTCADC:SendPacket','SetWindowLength failed!');
+                end
+            end       
+        end
+        
+        function SetWindowStart(obj,pos) % GuoCheng 170605
+            if obj.isopen
+                data = [0,21,floor(pos/256),mod(pos,256),0,0,0,0];
+                pdata = libpointer('uint8Ptr', data);
+                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+                if(ret ~= 0)
+                   error('USTCADC:SendPacket','SetWindowStart failed!');
+                end
+            end 
+        end
+        
+        function SetDemoFre(obj,fre) % GuoCheng 170605
+            if obj.isopen
+                step = fre/1e9*65536;
+                data = [0,22,floor(step/256),mod(step,256),0,0,0,0];
+                pdata = libpointer('uint8Ptr', data);
+                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+                if(ret ~= 0)
+                   error('USTCADC:SendPacket','SetDemoFre failed!');
+                end
+            end 
+        end
+        
+        function SetGain(obj,mode) % GuoCheng 170605
+            if obj.isopen
+                switch mode
+                    case 1,code = [80,80];
+                    case 2,code = [0,0];
+                    case 3,code = [255,255];
+                end
+                data = [0,23,code(1),code(2),0,0,0,0];
+                pdata = libpointer('uint8Ptr', data);
+                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+                if(ret ~= 0)
+                   error('USTCADC:SendPacket','SetGain failed!');
+                end
+            end 
+        end
+        
         function [ret,I,Q] = RecvData(obj,row,column)
             if obj.isopen
                 I = zeros(row*column,1);
@@ -161,6 +249,19 @@ classdef USTCADC < handle
         end
         
         % removed by Yulin Wu, 170427
+		function [ret,I,Q] = RecvDemo(obj,row) % GuoCheng 170605
+            if obj.isopen
+                IQ = zeros(2*row,1);
+                pIQ = libpointer('int32Ptr', IQ);
+                [ret,IQ] = calllib(obj.driver,'RecvDemo',int32(row),pIQ);
+                if(ret == 0)
+                    I = IQ(1:2:length(IQ));
+                    Q = IQ(2:2:length(IQ));
+                else
+                    error('USTCADC:RecvDemo','Recive demode data error!')
+                end
+            end
+        end
 %         function set(obj,properties,value)
 %             switch properties
 %                 case 'mac'
