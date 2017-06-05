@@ -4,15 +4,15 @@ import qes.*
 import qes.hwdriver.sync.*
 QS = qSettings.GetInstance('D:\Dropbox\MATLAB GUI\USTC Measurement System\settings');
 QS.SU('Ming');
-QS.SS('s170509');
+QS.SS('s170602');
 QS.CreateHw();
 ustcaddaObj = ustcadda_v1.GetInstance();
 import data_taking.public.util.*
 import data_taking.public.xmon.*
 %%
 % qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-qubits = {'q1','q3','q4','q5'};
-dips = [6.6903e+09 6.8060e+09 6.6163e9 6.577e9 ]; % by qubit index
+qubits = {'q10','q9','q8','q7','q6','q5','q4','q3','q2','q1'};
+dips = [6.64320 6.68880 6.73840 6.77460 6.81090 6.85010 6.89200 6.93300 6.94520 6.99620]*1e9; % by qubit index
 %%
 data_taking.public.jpa.turnOnJPA('jpaName','impa1','pumpFreq',13.55e9,'pumpPower',5,'bias',0.00014,'on',true)
 %%
