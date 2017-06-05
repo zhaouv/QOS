@@ -6,7 +6,7 @@ classdef dcVoltage < qes.measurement.measurement
 
     methods
         function obj = dcVoltage(InstrumentObject)
-            if ~isa(InstrumentObject,'qes.hwdriver.sync.voltMeter') ||...
+            if ~isa(InstrumentObject,'qes.hwdriver.sync.voltMeter') &&...
 				~isa(InstrumentObject,'qes.hwdriver.async.voltMeter')
                 throw(MException('QOS_dcVoltage:InvalidInput','Invalud input arguments.'));
             end
@@ -17,7 +17,7 @@ classdef dcVoltage < qes.measurement.measurement
         function Run(obj)
             Run@qes.measurement.measurement(obj); % check object and its handle properties are isvalid or not
             obj.dataready = false;
-            obj.data = obj.InstrumentObject.voltage;
+            obj.data = obj.instrumentObject.voltage;
             obj.dataready = true;
         end
     end

@@ -170,7 +170,14 @@ function varargout = xyGateAmpTuner(varargin)
         set(ax,'YLim',ylim);
         drawnow;
 	end
-	
+	if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
     if args.save
         QS = qes.qSettings.GetInstance();
 		switch args.gateTyp

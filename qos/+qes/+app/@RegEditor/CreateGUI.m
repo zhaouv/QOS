@@ -160,7 +160,8 @@ function CreateGUI(obj)
             set(obj.guiHandles.SelectSession,'String',obj.sessionList);
             idx = qes.util.find(obj.qs.session,obj.sessionList);
             if isempty(idx) || numel(idx) > 1
-                error('BUG! this should not happen!');
+                throw(MException('QOS_RegEditor:CorruptedDatabase',...
+                    sprintf('database corrupted, selected session: %s points is an non existent session.',obj.qs.session)));
             end
             set(obj.guiHandles.SelectSession,'Value',idx,'Enable','on');
         end
@@ -173,7 +174,8 @@ function CreateGUI(obj)
             set(obj.guiHandles.SelectHw,'String',obj.hwList);
             idx = qes.util.find(obj.qs.hardware,obj.hwList);
             if isempty(idx) || numel(idx) > 1
-                error('BUG! this should not happen!');
+                throw(MException('QOS_RegEditor:CorruptedDatabase',...
+                    sprintf('database corrupted, selected hardware group: %s points is an non existent hardware group.', obj.qs.hardware)));
             end
             set(obj.guiHandles.SelectHw,'Value',idx);
             set(obj.guiHandles.iniBtn,'Enable','on');

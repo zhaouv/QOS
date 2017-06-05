@@ -19,16 +19,26 @@ function varargout = ustcDAZeroOffser(varargin)
     awgObj = qes.qHandle.FindByClassProp('qes.hwdriver.sync.awg','name',args.awgName);
     voltMeter = qes.qHandle.FindByClassProp('qes.hwdriver.sync.voltMeter','name',args.voltMeterName);
     vM = qes.measurement.dcVoltage(voltMeter);
-    Calibrator = qes.measurement.awgZeroCalibrator(awgObj,args.chnl,vM);
-    zero = Calibrator();
     
     if args.save
         awgChnlMap = cell2mat(QS.loadHwSettings({args.awgName,'interface','chnlMap'}));
         backendChnlMap = QS.loadHwSettings({'ustcadda','da_chnl_map'});
-        tempVar = strsplit(regexprep(backendChnlMap{awgChnlMap(args.chnl)},'\s+',''),',');
-        QS.saveSSettings({'ustcadda',...
-            sprintf('da_boards{%s}',tempVar{1}),...
-            sprintf('offsetCorr{%s}',tempVar{2})},num2str(zero,'%0.0f'));
+        boardIndChnlInd = strsplit(regexprep(backendChnlMap{awgChnlMap(args.chnl)},'\s+',''),',');
+        fieldNameList = {'ustcadda',...
+            sprintf('da_boards{%s}',boardIndChnlInd{1}),...
+            sprintf('offsetCorr{%s}',boardIndChnlInd{2})};
+    end
+    
+    Calibrator = qes.measurement.awgZeroCalibrator(awgObj,args.chnl,vM);
+    if args.gui
+        Calibrator.showProcess = true;
+    end
+    offsetCorr = Calibrator();
+    
+    if args.save
+        da_boards = QS.loadHwSettings({'ustcadda','da_boards'});
+        offsetCorr_old = da_boards{str2double(boardIndChnlInd{1})}.offsetCorr{str2double(boardIndChnlInd{2})};
+        QS.saveHwSettings(fieldNameList,num2str(offsetCorr_old+offsetCorr,'%0.0f'));
     end 
-    varargout{1} = zero;
+    varargout{1} = offsetCorr;
 end

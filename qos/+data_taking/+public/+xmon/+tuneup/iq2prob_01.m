@@ -53,6 +53,14 @@ function varargout = iq2prob_01(varargin)
     [center0, center1,F00,F11, hf] =... 
 		data_taking.public.dataproc.iq2prob_centers(iq_raw_0,iq_raw_1,~args.gui);
 
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
     if args.save
         QS = qes.qSettings.GetInstance();
 		QS.saveSSettings({q.name,'r_iq2prob_center0'},center0);
