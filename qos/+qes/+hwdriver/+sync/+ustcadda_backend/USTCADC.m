@@ -10,6 +10,7 @@ classdef USTCADC < handle
         name = ''
         channel_amount = 2     %ADC通道，未使用，实际使用I、Q两个通道。
         sample_rate = 1e9      %ADC采样率，未使用
+		demod = false
     end
     
     properties(SetAccess = private)

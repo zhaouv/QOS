@@ -18,7 +18,7 @@ classdef XY2p < sqc.op.physical.gate.X2p
     methods (Hidden = true)
         function GenWave(obj)
             GenWave@sqc.op.physical.gate.X2p(obj)
-            obj.xy_wv{1}.phase = obj.phase;
+            obj.xy_wv{1}.phase = obj.qubits{1}.g_XY_phaseOffset+obj.phase;
         end
     end
 end
