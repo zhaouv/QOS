@@ -371,15 +371,16 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         
         function [I,Q] = RunDemo_(obj,frequency) %Unit:Hz
             I=0;Q=0;ret = -1;
-
+            
             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps); %20170411
-
-            obj.ad_list(1).ad.SetTrigCount(obj.runReps);
-            obj.ad_list(1).ad.SetMode(1);
+            
+%             obj.ad_list(1).ad.SetGain(1); % Temp
+            obj.ad_list(1).ad.SetMode(1);          
+            obj.ad_list(1).ad.SetWindowStart(9);
+            obj.ad_list(1).ad.SetWindowLength(obj.adRecordLength);
+            obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength +24);  
             obj.ad_list(1).ad.SetDemoFre(frequency);
-            obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength + 10);            
-            obj.ad_list(1).ad.SetWindowStart(10);
-            obj.ad_list(1).SetWindowLength(obj.adRecordLength);
+            obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             
             % ?œæ­¢é™¤è¿ç»­æ³¢å½¢å¤–çš„é??“ï¼Œ?¯åŠ¨è§¦å?‘é???
             for k = 1:obj.numDABoards
@@ -402,10 +403,13 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.ad_list(1).ad.EnableADC();  
                 obj.da_list(obj.da_master_index).da.SendIntTrig();
                 [ret,I,Q] = obj.ad_list(1).ad.RecvData(obj.runReps,obj.adRecordLength);
+                if ret ~= 0
+                    pause(1)
+                end
             end
             % å°†æ•°?®æ•´?†æ?å›ºå®šæ ¼å?
-            I = double(I)/256/obj.adRecordLength*2;
-            Q = double(Q)/256/obj.adRecordLength*2;
+            I = double(I)/256/obj.adRecordLength*2/2^12;
+            Q = double(Q)/256/obj.adRecordLength*2/2^12;
             % å¹¶æ¸…ç©ºé??“è®°å½?
             for k = 1:obj.numDABoards
                 obj.da_list(k).mask_plus = 0;
