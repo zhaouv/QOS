@@ -239,6 +239,14 @@ classdef USTCADC < handle
         end
         
         function [ret,I,Q] = RecvData(obj,row,column)
+            if obj.demod
+                [ret,I,Q] = RecvDemo(obj,row);
+            else
+                [ret,I,Q] = RecvRawData(obj,row,column);
+            end
+        end
+        
+        function [ret,I,Q] = RecvRawData(obj,row,column)
             if obj.isopen
                 I = zeros(row*column,1);
                 Q = zeros(row*column,1);
@@ -254,12 +262,11 @@ classdef USTCADC < handle
                 IQ = zeros(2*row,1);
                 pIQ = libpointer('int32Ptr', IQ);
                 [ret,IQ] = calllib(obj.driver,'RecvDemo',int32(row),pIQ);
-                if(ret == 0)
-                    I = IQ(1:2:length(IQ));
-                    Q = IQ(2:2:length(IQ));
-                else
-                    error('USTCADC:RecvDemo','Recive demode data error!')
-                end
+                I = IQ(1:2:length(IQ));
+                Q = IQ(2:2:length(IQ));
+%                 if(ret ~= 0)
+%                     error('USTCADC:RecvDemo','Recive demode data error!')
+%                 end
             end
         end
 %         function set(obj,properties,value)
