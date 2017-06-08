@@ -6,7 +6,8 @@ function qqRamsey(varargin)
 % on the phase angle theta. The oscillation amplitudes of P01 and P10 are maximized (minimized)
 % whenever the relative phase between the |01> and |10> states is 90(0) degrees. 
 % When the oscillation amplitude is maximized and P10 peaks first, theta corresponds to a y-rotation
-% for the second qubit and serves as the calibration. Ref.: M. Steffen, Science Vol. 313, 1423
+% for the second qubit and serves as the calibration.
+% Ref.: M. Steffen, Science Vol. 313, 1423; Bialczak, Phd. thesis P97
 % 
 % bias qubit q1 or q2, drive qubit q1 or q2 and readout qubit q1 and q2,
 % q1, q2 all has to be the selected qubits in the current session,
