@@ -43,9 +43,6 @@ function varargout = optReadoutFreq(varargin)
         throw(MException('QOS_XmonOptReadoutFreq:inproperSettings',...
             'inproper r_freq or t_rrDipFWHM_est value, dip(s) out of range.'));
     end
-
-    data(:,1) = smooth(data(:,1),3);
-    data(:,2) = smooth(data(:,2),3);
     
     [~, idx] = max(abs(data(:,1) - data(:,2)));
     optFreq = frequency(idx);
