@@ -63,7 +63,8 @@ if args.gui
         semilogx(ax, args.rAmp,abs(e.data{1,1}(1:2:end)));
         hold(ax,'on');
         semilogx(ax, args.rAmp, abs(e.data{1,1}(2:2:end)));
-        semilogx(ax, args.rAmp, abs(e.data{1,1}(2:2:end))-abs(e.data{1,1}(2:2:end)));
+        yyaxis right
+        semilogx(ax, args.rAmp, (abs(e.data{1,1}(2:2:end))-abs(e.data{1,1}(1:2:end)))./abs(e.data{1,1}(2:2:end)));
         legend(ax,{'|0>', '|1>','|1>-|0>'});
     elseif numel(args.freq) > 1 && numel(args.rAmp) > 1 
         ax = axes('Parent',figure('NumberTitle','off','Name','QOS | s21 of |0>, |1> '));

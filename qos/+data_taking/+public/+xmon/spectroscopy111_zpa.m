@@ -28,7 +28,7 @@ import qes.*
 import sqc.*
 import sqc.op.physical.*
 
-args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
+args = util.processArgs(varargin,{'dataTyp','P','r_avg',[],'biasAmp',0,'driveFreq',[],'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] = data_taking.public.util.getQubits(...
     args,{'readoutQubit','biasQubit','driveQubit'});
 if isempty(args.driveFreq)
@@ -43,7 +43,18 @@ end
 X = op.mwDrive4Spectrum(driveQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
-R.state = 2;
+switch args.dataTyp
+    case 'P'
+        R.state = 2;
+    case 'S21'
+        R.swapdata = true;
+        R.name = '|IQ|';
+        R.datafcn = @(x)mean(abs(x));
+    otherwise
+        throw(MException('QOS_rabi_amp111:unsupportedDataTyp',...
+			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
+			args.dataTyp));
+end
 Z = op.zBias4Spectrum(biasQubit);
 function proc = procFactory(amp)
     Z.amp = amp;
