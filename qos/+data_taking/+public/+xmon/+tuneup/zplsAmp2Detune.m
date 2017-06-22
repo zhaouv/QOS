@@ -265,9 +265,15 @@ function zplsAmp2Detune(qName,auto)
     warning('on');
 	if mean(abs(residual)) > RESTOL
 		throw(MException('QOS_zdc2f01:fittingFailed','fitting failed.'));
-	end
-
-    if args.save
+    end
+    
+    if ischar(args.save)
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            QS.saveSSettings({q.name,'zdc_amp2f01'},param);
+        end
+    elseif args.save
         QS.saveSSettings({q.name,'zdc_amp2f01'},param);
     end
 	

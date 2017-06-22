@@ -32,7 +32,7 @@ function varargout = APE(varargin)
 	I = (X2m*X2p)^args.numI;
     function proc = procFactory(phase)
 		XY2.phase = phase;
-        proc = XY2*I*X2p;
+        proc = X2p*I*XY2;
     end
 	R = measure.resonatorReadout_ss(q);
     R.state = 2;
@@ -51,6 +51,15 @@ function varargout = APE(varargin)
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;
+    end
+    
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
     end
     if ~args.save
         e.savedata = false;

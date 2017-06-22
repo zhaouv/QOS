@@ -3,8 +3,8 @@ function varargout = s21_zdc_networkAnalyzer(varargin)
 % 
 %  <_o_> = s21_zdc_networkAnalyzer('qubit',_c&o_,'NAName',<[_c_]>,...
 %       'startFreq',_f_,'stopFreq',_f_,...
-%       'numFreqPts',_i_,'avgcounts',_i_,'NApower',_f_,...
-%       'amp',[_f_],'bandwidth',_f_,...
+%       'numFreqPts',_i_,'avgcounts',_i_,'NApower',[_f_],...
+%       'biasAmp',[_f_],'bandwidth',_f_,...
 %       'notes',<[_c_]>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -17,7 +17,7 @@ function varargout = s21_zdc_networkAnalyzer(varargin)
 % <>: optional, for input arguments, assume the default value if not specified
 % arguments order not important as long as the form correct pairs.
 % example: 
-% s21_zdc_networkAnalyzer('qubit','q1','NAName',[],'startFreq',6.5e9,'stopFreq',6.9e9,'numFreqPts',1000,'avgcounts',10,'NApower',-10,'amp',[-1e4:1e3:1e4],'bandwidth',20000,'notes','','gui',true,'save',false)
+% s21_zdc_networkAnalyzer('qubit','q1','NAName',[],'startFreq',6.5e9,'stopFreq',6.9e9,'numFreqPts',1000,'avgcounts',10,'NApower',-10,'biasAmp',[-1e4:1e3:1e4],'bandwidth',20000,'notes','','gui',true,'save',false)
 
 % Yulin Wu, 2017/2/14
 % GM, 2017/04/12
@@ -59,12 +59,12 @@ function varargout = s21_zdc_networkAnalyzer(varargin)
     na.power = args.NApower;
     
     R = qes.measurement.sParam(na);
-    R.name = '|IQ|';
+    R.name = 'S21';
     
     x = expParam(dcChnl,'dcval');
     x.name = [q.name,' dc bias'];
     s1 = sweep(x);
-    s1.vals = args.amp;
+    s1.vals = args.biasAmp;
     e = experiment();
     e.name = 'S21 with NA';
     e.sweeps = s1;

@@ -16,6 +16,9 @@ classdef (Sealed = true)RegEditor < handle
         tblRefreshTmr
         
         keyAnnotation
+        bigScreen = false
+        winSize
+        leftPanelWidth
     end
     properties (Constant = true, GetAccess = private)
         tblRefreshPeriond = 30
@@ -36,6 +39,18 @@ classdef (Sealed = true)RegEditor < handle
                         getReport(ME,'extended','hyperlinks','off')],'Error!');
                     return;
                 end
+            end
+            try
+                obj.bigScreen = qes.util.loadSettings(obj.qs.root,{'misc','registryEditor','bigScreen'});
+            catch
+                obj.bigScreen = false;
+            end
+            if obj.bigScreen
+                obj.winSize = [0,0,150,65];
+                obj.leftPanelWidth = 50.5;
+            else
+                obj.winSize = [0,0,100,40];
+                obj.leftPanelWidth = 45.5;
             end
             userList_ = {'_Not set_'};
             fInfo = dir(fullfile(obj.qs.root));
@@ -184,8 +199,13 @@ classdef (Sealed = true)RegEditor < handle
             rootNode.add(hws);
             rootNode.add(ss);
         
+            if obj.bigScreen
+                Pos = [5,5,255,600];
+            else
+                Pos = [5,5,230,400];
+            end
             obj.guiHandles.mtree = uitree('v0', 'Root', rootNode,...
-                'Parent',obj.guiHandles.reWin,'Position',[5,5,200,600]);
+                'Parent',obj.guiHandles.reWin,'Position',Pos);
             set(obj.guiHandles.mtree,'NodeSelectedCallback', @SelectFcn);
             obj.guiHandles.mtree.expand(rootNode);
             obj.guiHandles.mtree.expand(ss);

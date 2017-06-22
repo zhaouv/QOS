@@ -28,6 +28,6 @@ function q = virtualXmon()
     q.syncDelay_r = [0,0];
     addprop(q,'r_jpa_longer');
     q.r_jpa_longer = 0;
-    addprop(q,'r_iq2prob_fMat');
-    q.r_iq2prob_fMat = [1,0,0,1];
+    addprop(q,'r_iq2prob_fidelity');
+    q.r_iq2prob_fidelity = [1,1];
 end

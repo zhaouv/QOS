@@ -23,7 +23,14 @@ function varargout = f01DcTuningBySpc(varargin)
 	q = copy(getQubits(args,{'qubit'})); % we may need to modify the qubit properties, better make a copy to avoid unwanted modifications to the original.
 	
 	
-	
+	if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
 	if args.save
         QS = qes.qSettings.GetInstance();
         QS.saveSSettings({q.name,'f01'},f01(end));

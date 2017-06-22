@@ -93,10 +93,9 @@ R = measure.resonatorReadout_ss(readoutQubit);
 switch args.dataTyp
     case 'P'
         R.state = 2;
-        % pass
     case 'S21'
         R.swapdata = true;
-        R.name = '|S21|';
+        R.name = '|IQ|';
         R.datafcn = @(x)mean(abs(x));
     otherwise
         throw(MException('QOS_rabi_amp111:unsupportedDataTyp',...

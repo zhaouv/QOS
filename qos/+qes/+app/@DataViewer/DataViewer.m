@@ -1,5 +1,5 @@
 classdef (Sealed = true)DataViewer < handle
-    % QES data viewer
+    % QOS data viewer
     
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com

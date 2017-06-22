@@ -47,6 +47,7 @@ classdef jpaRunner < qes.qHandle
             if obj.setupMwSrc || refresh
                 obj.pumpMwSrc.frequency = obj.jpa.pumpFreq;
                 obj.pumpMwSrc.power = obj.jpa.pumpPower;
+                obj.pumpMwSrc.on = true;
                 obj.setupMwSrc = false;
             end
             if isempty(obj.pumpWv) || refresh

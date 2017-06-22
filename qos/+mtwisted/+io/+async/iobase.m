@@ -223,9 +223,9 @@ classdef (Abstract = true) iobase < handle
             obj.read_busy = true;
             d = mtwisted.defer.Deferred();
             function cb1(~,~)
-                disp('@@@@ fread_ executed'); % debug
-                disp('    BytesAvailable:');  % debug
-                disp(obj.backend.BytesAvailable);  % debug
+%                 disp('@@@@ fread_ executed'); % debug
+%                 disp('    BytesAvailable:');  % debug
+%                 disp(obj.backend.BytesAvailable);  % debug
                 obj.backend.BytesAvailableFcn = '';
                 if isempty(numbytes)
                     try 

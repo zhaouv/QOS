@@ -50,10 +50,14 @@ classdef iq_ustc_ad < qes.measurement.iq
         end
         function set.freq(obj,val)
             obj.freq = val;
-            if ~isempty(obj.n)
-                obj.IQ = NaN*zeros(numel(obj.freq),obj.n);
-            end
-            calcCachedVar(obj);
+			if obj.instrumentObject.demodMode
+				obj.instrumentObject.demodFreq = obj.freq;
+			else
+				if ~isempty(obj.n)
+					obj.IQ = NaN*zeros(numel(obj.freq),obj.n);
+				end
+				calcCachedVar(obj);
+			end
         end
         function set.upSampleNum(obj,val)
             if isempty(val)
@@ -118,10 +122,15 @@ classdef iq_ustc_ad < qes.measurement.iq
             Run@qes.measurement.measurement(obj); % check object and its handle properties are isvalid or not
 %             disp('===========');
 %             tic
-            [Vi,Vq] = obj.instrumentObject.Run(obj.n);
+
+			if obj.instrumentObject.demodMode
+				[I, Q]= obj.instrumentObject.Run(obj.n);
+				obj.IQ = (I+1j*Q).';
+			else
+				[Vi,Vq] = obj.instrumentObject.Run(obj.n);
 %             toc
-            Vi = double(Vi) -127;
-            Vq = double(Vq) -127;
+				Vi = double(Vi) -127;
+				Vq = double(Vq) -127;
 %             tic
 %             IQ = obj.Run_BothChnl(Vi,Vq);
 % %             toc 
@@ -129,7 +138,8 @@ classdef iq_ustc_ad < qes.measurement.iq
 %             obj.extradata = IQ;
 
 %              tic
-            obj.Run_BothChnl(Vi,Vq);
+				obj.Run_BothChnl(Vi,Vq);
+			end           
 %               toc 
             obj.data = mean(obj.IQ);
             obj.extradata = obj.IQ;

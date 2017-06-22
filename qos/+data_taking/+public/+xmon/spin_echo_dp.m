@@ -36,12 +36,13 @@ function varargout = spin_echo_dp(varargin)
     X2 = op.XY2p(q,0);
     I = gate.I(q);
     R = measure.resonatorReadout_ss(q);
+	R.state = 2;
 	detuning = util.hvar(0);
 	X2_ = copy(X2);
     function procFactory(delay)
         I.ln = delay/2;
 		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
-        proc = X2*I*X*I*X2_;
+        proc = X2_*I*X*I*X2;
         proc.Run();
         R.delay = proc.length;
     end

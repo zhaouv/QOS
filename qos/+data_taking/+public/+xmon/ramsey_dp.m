@@ -33,7 +33,7 @@ function varargout = ramsey_dp(varargin)
  
     switch args.dataTyp
         case 'P'
-            % pass
+            R.state = 2;
         case 'S21'
             R.swapdata = true;
             R.name = 'iq';
@@ -51,7 +51,7 @@ function varargout = ramsey_dp(varargin)
     function procFactory(delay)
         I.ln = delay;
 		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
-        proc = X2*I*X2_;
+        proc = X2_*I*X2;
         proc.Run();
         R.delay = proc.length;
     end

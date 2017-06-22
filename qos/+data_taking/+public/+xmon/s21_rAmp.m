@@ -2,7 +2,7 @@ function varargout = s21_rAmp(varargin)
 % scan resonator s21 vs frequency and raadout amplitude(iq), no qubit drive
 % 
 % <_o_> = s21_rAmp('qubit',_c&o_,...
-%       'freq',[_f_],'amp',[_f_],...
+%       'freq',[_f_],'amp',<[_f_]>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -22,25 +22,29 @@ function varargout = s21_rAmp(varargin)
     import sqc.*
     import sqc.op.physical.*
     
-    args = util.processArgs(varargin,{'r_avg',[],'gui',false,'notes','','save',true});
+    args = util.processArgs(varargin,{'amp',[],'r_avg',[],'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
     
-    data_taking.public.util.setZDC(q.name,q.zdc_amp); %add by GM, 20170415
+    data_taking.public.util.setZDC(q); %add by GM, 20170415
     
     if ~isempty(args.r_avg) %add by GM, 20170414
         q.r_avg=args.r_avg;
     end
     
+    if isempty(args.amp)
+        args.amp = q.r_amp;
+    end
+    
     R = measure.resonatorReadout_ss(q);
     R.swapdata = true;
-    R.name = '|IQ|';
+    R.name = 'IQ';
     R.datafcn = @(x)mean(x);
     
     x = expParam(R,'mw_src_frequency');
     x.offset = q.r_fc - q.r_freq;
     x.name = [q.name,' readout frequency'];
     y = expParam(R,'r_amp');
-    y.name = [q.name,' readout amplitude'];
+    y.name = [q.name,' readout pulse amplitude'];
     s1 = sweep(x);
     s1.vals = args.freq;
     s2 = sweep(y);
