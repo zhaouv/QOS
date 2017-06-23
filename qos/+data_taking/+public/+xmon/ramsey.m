@@ -54,15 +54,13 @@ function varargout = ramsey(varargin)
         f=@(a,x)(a(1)-a(2)*exp(-(x/a(3)).^2-x/T1).*cos(a(4)*2*pi.*x+a(5)));
         a=[(max(Ramsey_data)+min(Ramsey_data))/2,(max(Ramsey_data)-min(Ramsey_data))/2,Ramsey_time(end)/2,detuning,1];
         b=nlinfit(Ramsey_time,Ramsey_data,f,a);
-        vpa(b(3),6);
         hf=figure;
         plot(Ramsey_time,Ramsey_data,'o',Ramsey_length2,b(1)-b(2).*exp(-(Ramsey_length2./b(3)).^2-Ramsey_length2/T1).*cos(b(4)*2*pi.*Ramsey_length2+b(5)),'linewidth',2);
         decay=b(3);
-        delay=b(5);
         deltaf=b(4);
-        title(['T_2^*=' num2str(decay/1e3,'%.2f') 'us, detuning freq=' num2str(1e3*b(4),'%.2f') 'MHz'])
-        xlabel('Pulse length (ns)');
-        ylabel('Amp');
+        title(['T_2^*=' num2str(decay/1e3,'%.2f') 'us, detuning freq=' num2str(1e3*deltaf,'%.2f') 'MHz'])
+        xlabel('Pulse delay (ns)');
+        ylabel('P');
         if args.save
             QS = qes.qSettings.GetInstance();
             dataSvName = fullfile(QS.loadSSettings('data_path'),...
