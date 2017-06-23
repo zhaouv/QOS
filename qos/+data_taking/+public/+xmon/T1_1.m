@@ -27,7 +27,7 @@ varargout{1} = T1_111('biasQubit',args.qubit,'biasAmp',args.biasAmp,'biasDelay',
     'backgroundWithZBias',args.backgroundWithZBias,'driveQubit',args.qubit,...
     'readoutQubit',args.qubit,'time',args.time,'r_avg',args.r_avg,'notes',args.notes,'gui',args.gui,'save',args.save);
 
-if args.fit
+if args.fit % Add by GM, 170623
     data=cell2mat(varargout{1,1}.data{1,1}');
     for ii=1:size(data,2)/2
         z(ii,:)=(data(:,2*ii-1)-data(:,2*ii))';
@@ -72,7 +72,6 @@ if args.fit
             A(ii) = A_;
             B(ii) = B_;
             td(ii) = td_;
-            zf = toolbox.data_tool.fitting.expDecay([A_,B_,td_],tf);
         end
         
         if args.gui

@@ -24,7 +24,7 @@ function varargout = ramsey_dz(varargin)
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'detuning',0,'dataTyp','P',...
+    args = util.processArgs(varargin,{'detuning',0,'biasAmp',0,'dataTyp','P',...
         'gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
@@ -63,7 +63,7 @@ function varargout = ramsey_dz(varargin)
     e.name = 'Ramsey(Detune by Z)';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    e.datafileprefix = sprintf('%s', q.name);
+    e.datafileprefix = sprintf('%s_Ramsey', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

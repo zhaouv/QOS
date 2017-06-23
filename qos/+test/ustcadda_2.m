@@ -13,18 +13,20 @@ ustcaddaObj = ustcadda_v1.GetInstance();
 ustcaddaObj.close()
 %% run all channels
 numChnls = 44;
-numRuns = 10;
-wavedata=[zeros(1,4000),65535*ones(1,4000)];
+numRuns = 10000;
+t=1:4000;
+wavedata=32768+32768/2*cos(2*pi*t/40);
 ustcaddaObj.runReps = 1e3;
 tic
 for jj = 1:numRuns
-    for ii = 1:numChnls
+    for ii = 36:numChnls
         ustcaddaObj.SendWave(ii,wavedata);
         ustcaddaObj.SendWave(ii,wavedata);
     end
-    [datai,dataq] = ustcaddaObj.Run(true);
+    [datai,dataq] = ustcaddaObj.Run(false);
     t = toc;
     disp(sprintf('%0.0f, elapsed time: %0.1fs',jj,t));
+    pause(0.5)
 end
 %% sync test, and use the mimimum oscillascope vertical range to check zero offset
 ustcaddaObj.runReps = 1e4;
@@ -38,9 +40,9 @@ clc
 t=1:4000;
 wave1=32768+32768/2*cos(2*pi*t/40);
 wave2=32768+32768/2*sin(2*pi*t/40);
-ustcaddaObj.runReps = 1000000;
-ustcaddaObj.SendWave(6,wave1); % 620
-ustcaddaObj.SendWave(5,wave2); % 750
+ustcaddaObj.runReps = 100000;
+ustcaddaObj.SendWave(2,wave1); % 620
+ustcaddaObj.SendWave(1,wave2); % 750
 [datai,dataq] = ustcaddaObj.Run(false);
 % plot(mean(datai,1));hold on;plot(datai(1,:));hold off;
 figure(11);
@@ -54,8 +56,8 @@ t=1:4000;
 wave1=32768+32768/2*cos(2*pi*t/40);
 wave2=32768+32768/2*sin(2*pi*t/40);
 ustcaddaObj.runReps = 1000;
-ustcaddaObj.SendWave(2,wave1); % 620
-ustcaddaObj.SendWave(1,wave2); % 750
+ustcaddaObj.SendWave(42,wave1); % 620
+ustcaddaObj.SendWave(41,wave2); % 750
 [datai,dataq] = ustcaddaObj.Run(true);
 plot(datai);hold on;plot(dataq);hold off;
 %%

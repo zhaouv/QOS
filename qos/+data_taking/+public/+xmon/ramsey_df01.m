@@ -23,7 +23,7 @@ function varargout = ramsey_df01(varargin)
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'dataTyp','P','detuning',0,'gui',false,'notes','','save',true});
+    args = util.processArgs(varargin,{'dataTyp','P','detuning',0,'biasAmp',0,'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     X2 = gate.X2p(q);
@@ -61,7 +61,7 @@ function varargout = ramsey_df01(varargin)
 	e.name = 'Ramsey(Detune by Sb. Freq.)';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    e.datafileprefix = sprintf('%s', q.name);
+    e.datafileprefix = sprintf('%s_Ramsey', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;
