@@ -2,7 +2,7 @@ function varargout = spectroscopy1_zpa(varargin)
 % spectroscopy1, bias, drive, readout all on one qubit
 % 
 % <_o_> = spectroscopy1_zpa('qubit',_c&o_,...
-%       'biasAmp',<[_f_]>,'driveFreq',<[_f_]>,...
+%       'biasAmp',<[_f_]>,'driveFreq',<[_f_]>,'dataTyp',<_c_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -20,7 +20,7 @@ function varargout = spectroscopy1_zpa(varargin)
 import qes.*
 import data_taking.public.xmon.spectroscopy111_zpa
 args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'driveFreq',[],'r_avg',[],'gui',false,'notes','','save',true});
-varargout{1} = spectroscopy111_zpa('biasQubit',args.qubit,'biasAmp',args.biasAmp,'driveQubit',args.qubit,...
-    'driveFreq',args.driveFreq,'readoutQubit',args.qubit,'notes',args.notes,'gui',args.gui,'save',args.save,'dataTyp',args.dataTyp);
+varargout{1} = spectroscopy111_zpa('biasQubit',args.qubit,'biasAmp',args.biasAmp,'driveQubit',args.qubit,'dataTyp',args.dataTyp,...
+    'driveFreq',args.driveFreq,'readoutQubit',args.qubit,'notes',args.notes,'gui',args.gui,'save',args.save);
 
 end

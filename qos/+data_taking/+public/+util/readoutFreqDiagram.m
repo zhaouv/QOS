@@ -42,7 +42,11 @@ function readoutFreqDiagram(qubits,maxSidebandFreq)
     qNames = cell(1,numQs);
     for ii = 1:numQs
         fr(ii) = qubits{ii}.r_fr;
-        fci(ii) = qubits{ii}.r_fc;
+        if ~isempty(qubits{ii}.r_fc)
+            fci(ii) = qubits{ii}.r_fc;
+        else
+            fci(ii) = NaN;
+        end
         qNames{ii} = qubits{ii}.name;
     end
     
@@ -69,7 +73,7 @@ function readoutFreqDiagram(qubits,maxSidebandFreq)
     ylabel(ax,'frequency(GHz)');
     set(ax,'XLim',[0,numQs+1],'YLim',[flb,fub]);
 
-    if numel(unique(fci)) == 1
+    if numel(unique(fci)) == 1 && ~isnan(fci(1))
         fc = fci(1);
     else
         warning('qubits have different readout fc values.');

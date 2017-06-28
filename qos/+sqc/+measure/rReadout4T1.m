@@ -26,7 +26,7 @@ classdef rReadout4T1 < sqc.measure.resonatorReadout_ss
                 obj.numericscalardata = true;
             end
             obj.drive_mw_src = drive_mw_src;
-            obj.name = 'P|1>';
+            obj.name = 'diff(P|1>)';
         end
         function Run(obj)
 %             obj.drive_mw_src.on = true;

@@ -97,7 +97,7 @@ function [rPoint, ang, threshold, polarity, hf] =...
                 hold(ax2,'off');
                 legend(ax2,{'|0>','|1>'},'Location','southeast');
                 xlabel(ax2,'dashed line in the left plot');
-                ylabel(ax2,'counts');
+                ylabel(ax2,'distribution');
                 nEval4plot = [nEval4plot, nEval];
                 v4plot = [v4plot,v];
                 plot(ax3,nEval4plot,v4plot,'-');
@@ -108,7 +108,7 @@ function [rPoint, ang, threshold, polarity, hf] =...
     %             % temp, save for demo;
     %             saveas(hf,['F:\data\matlab\20161221\zdc2f01\',datestr(now,'mmddHHMMSS'),'.png']);
             catch
-                % we need to go on even if the plot is accidentally closed by user
+                % we need to go on even if the plot is closed by user
             end
         end
     end
@@ -119,7 +119,7 @@ function [rPoint, ang, threshold, polarity, hf] =...
     tol_iq = max(diff(rmm),diff(imm))*1e-4;
     tol_a = 0.1/2*pi;
     xsol = qes.util.fminsearchbnd(@invVisibility,[real(iq_raw_0_mean),imag(iq_raw_0_mean),theta10],...
-        [rmm(1),imm(1),theta10-pi/2],[rmm(2),imm(2),theta10+pi/2],optimset('Display','off','MaxIter',20));
+        [rmm(1),imm(1),theta10-pi/2],[rmm(2),imm(2),theta10+pi/2],optimset('Display','off','MaxIter',15));
 
     rPoint = xsol(1)+1j*xsol(2);
     ang = xsol(3);
