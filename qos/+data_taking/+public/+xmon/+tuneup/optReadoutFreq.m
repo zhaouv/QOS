@@ -44,18 +44,16 @@ function varargout = optReadoutFreq(varargin)
             'inproper r_freq or t_rrDipFWHM_est value, dip(s) out of range.'));
     end
 
-    data(:,1) = smooth(data(:,1),3);
-    data(:,2) = smooth(data(:,2),3);
+%     data(:,1) = smooth(data(:,1),3);
+%     data(:,2) = smooth(data(:,2),3);
     
     [~, idx] = max(abs(data(:,1) - data(:,2)));
     optFreq = frequency(idx);
     
     if args.gui
-        figure(51);
-        plot(frequency,abs(data(:,1)),'--.r',frequency,abs(data(:,2)),'--.b');legend('|1>','|0>');
         hf = qes.ui.qosFigure(sprintf('Opt. Readout Freq. | %s', q.name),true);
         ax_ = axes('parent',hf);
-        plot(ax_,frequency,abs(data(:,1)),'--.r',frequency,abs(data(:,2)),'--.b');legend('|1>','|0>');
+        plot(ax_,frequency,abs(data(:,1)),'--.r',frequency,abs(data(:,2)),'--.b');legend('|0>','|1>');
         hf = qes.ui.qosFigure(sprintf('Opt. Readout Freq. | %s', q.name),true);
         ax = axes('parent',hf);
         plot(ax,data(:,1),'--.r');
@@ -83,6 +81,14 @@ function varargout = optReadoutFreq(varargin)
         set(ax,'PlotBoxAspectRatio',[1,1,1]);
         pbaspect(ax,[1,1,1]);
         drawnow;
+    end
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
     end
     if args.save
         QS = qes.qSettings.GetInstance();

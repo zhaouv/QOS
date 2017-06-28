@@ -70,7 +70,7 @@ X = gate.X(q);
 I = gate.I(q);
     function proc = procFactory(delay)
         I.ln = delay;
-        proc = X*I;
+        proc = I*X;
         proc.Run();
     end
 R = measure.resonatorReadout_ss(q);

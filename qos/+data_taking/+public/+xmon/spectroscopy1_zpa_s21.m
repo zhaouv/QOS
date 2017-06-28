@@ -22,6 +22,9 @@ function varargout = spectroscopy1_zpa_s21(varargin)
 
 % Yulin Wu, 2017/3/13
 
+
+error('spectroscopy1_zpa_s21 is obsolete, use spectroscopy1_zpa with dataTyp set to ''S21''');
+
 import qes.*
 import data_taking.public.xmon.spectroscopy111_zpa_s21
 args = util.processArgs(varargin,{'biasAmp',0,'driveFreq',[],'r_avg',[],'gui',false,'notes','','save',true});

@@ -6,10 +6,12 @@ classdef ustc_ad_v1 < qes.hwdriver.hardware
     properties
         recordLength
 		range
+		demodFreq
     end
     properties (SetAccess = private)
         numChnls
 		samplingRate
+		demodMode
     end
     properties (Dependent = true)
         delayStep % unit: DA sampling points
@@ -44,6 +46,11 @@ classdef ustc_ad_v1 < qes.hwdriver.hardware
 				obj.ustcaddaObj.ReleaseADChnls(chnlMap_);
 				throw(MException('QOS_ustc_ad:samplingRateMismatch','building a ad object on channels with different sampling rate is not allowed '));
 			end
+			if obj.ustcaddaObj.GetADDemod()
+				obj.demodMode = true;
+			else
+				obj.demodMode = false;
+			end
         end
     end
     methods
@@ -64,7 +71,11 @@ classdef ustc_ad_v1 < qes.hwdriver.hardware
         end
         function [I,Q] = Run(obj,N)
             obj.ustcaddaObj.runReps = N; % this only takes ~70us, the next line takes ~300ms
-            [I,Q] = obj.ustcaddaObj.Run(true);
+			if obj.demodMode
+				[I,Q] = obj.ustcaddaObj.Run(obj.demodFreq);
+			else
+				[I,Q] = obj.ustcaddaObj.Run(true);
+			end
         end
 		
 		function delete(obj)

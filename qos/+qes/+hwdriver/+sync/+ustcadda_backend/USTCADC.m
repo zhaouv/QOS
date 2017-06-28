@@ -5,19 +5,28 @@
 % 	Modified: 2017.2.26
 %   Description:The class of ADC
 classdef USTCADC < handle
+
+    properties % Yulin Wu, 170427
+        mac = zeros(1,6)   %ä¸Šä½æœºç½‘å¡åœ°å€
+        name = ''
+        channel_amount = 2     %ADCé€šé“ï¼Œæœªä½¿ç”¨ï¼Œå®žé™…ä½¿ç”¨Iã€Qä¸¤ä¸ªé€šé“ã€‚
+        sample_rate = 1e9      %ADCé‡‡æ ·çŽ‡ï¼Œæœªä½¿ç”¨
+        demod@logical scalar = false;
+    end
+  
     properties(SetAccess = private)
-        netcard_no;         %ÉÏÎ»»úÍø¿¨ºÅ
-        mac = zeros(1,6);   %ÉÏÎ»»úÍø¿¨µØÖ·
-        isopen;             %´ò¿ª±êÊ¶
-        status;             %´ò¿ª×´Ì¬
+        netcard_no;         %ä¸Šä½æœºç½‘å¡å·
+        mac = zeros(1,6);   %ä¸Šä½æœºç½‘å¡åœ°å€
+        isopen;             %æ‰“å¼€æ ‡è¯†
+        status;             %æ‰“å¼€çŠ¶æ€
     end
     
     properties(SetAccess = private)
-        name = '';              %ADCÃû×Ö
-        sample_rate = 1e9;      %ADC²ÉÑùÂÊ£¬Î´Ê¹ÓÃ
-        channel_amount = 2;     %ADCÍ¨µÀ£¬Î´Ê¹ÓÃ£¬Êµ¼ÊÊ¹ÓÃI¡¢QÁ½¸öÍ¨µÀ¡£
-        sample_depth = 2000;    %ADC²ÉÑùÉî¶È
-        sample_count = 100;     %ADCÊ¹ÄÜºó²ÉÑù´ÎÊý
+        name = '';              %ADCåå­—
+        sample_rate = 1e9;      %ADCé‡‡æ ·çŽ‡ï¼Œæœªä½¿ç”¨
+        channel_amount = 2;     %ADCé€šé“ï¼Œæœªä½¿ç”¨ï¼Œå®žé™…ä½¿ç”¨Iã€Qä¸¤ä¸ªé€šé“ã€‚
+        sample_depth = 2000;    %ADCé‡‡æ ·æ·±åº¦
+        sample_count = 100;     %ADCä½¿èƒ½åŽé‡‡æ ·æ¬¡æ•°
     end
     
     properties (GetAccess = private,Constant = true)
@@ -60,16 +69,18 @@ classdef USTCADC < handle
         end
         
         function Open(obj)
-            if ~obj.isopen
-                ret = calllib(obj.driver,'OpenADC',int32(obj.netcard_no));
-                if(ret == 0)
-                    obj.status = 'open';
-                    obj.isopen = true;
-                else
-                   error('USTCADC:OpenError','Open ADC failed!');
-                end 
-                obj.Init()
+            if obj.isopen
+                return;
             end
+            ret = calllib(obj.driver,'OpenADC',int32(obj.netcard_no));
+            if(ret == 0)
+                obj.status = 'open';
+                obj.isopen = true;
+            else
+               throw(MException('USTCADC:OpenError',...
+                   sprintf('Open ADC %s failed!',obj.name))); % Yulin Wu
+            end 
+            obj.Init()
         end
         
         function Init(obj)
@@ -85,7 +96,8 @@ classdef USTCADC < handle
                     obj.status = 'close';
                     obj.isopen = false;
                 else
-                   error('USTCADC:CloseError','Close ADC failed!');
+                   throw(MException('USTCADC:CloseError',...
+                        sprintf('Close ADC %s failed!',obj.name))); % Yulin Wu
                 end 
             end
         end
@@ -96,7 +108,8 @@ classdef USTCADC < handle
                 pdata = libpointer('uint8Ptr', data);
                 [ret,~] = calllib(obj.driver,'SendData',int32(4),pdata);
                 if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetSampleDepth failed!');
+                   throw(MException('USTCADC:SetSampleDepthError',...
+                        sprintf('Set SampleDepth failed on ADC %s.',obj.name))); % Yulin Wu
                 end 
             end
         end
@@ -116,7 +129,8 @@ classdef USTCADC < handle
                 pdata = libpointer('uint8Ptr', data);
                 [ret,~] = calllib(obj.driver,'SendData',int32(4),pdata);
                 if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetTrigCount failed!');
+                   throw(MException('USTCADC:SetTrigCountError',...
+                        sprintf('Set TrigCount failed on ADC %s.',obj.name))); % Yulin Wu
                 end 
             end
         end
@@ -155,69 +169,74 @@ classdef USTCADC < handle
            end
         end
         
-        function SetMode(obj,isdemo)
-            if obj.isopen
-                if(isdemo == 0)
-                    data = [1,1,17,17,17,17,17,17];
-                else
-                    data = [1,1,34,34,34,34,34,34];
-                end
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetMode failed!');
-                end
-            end       
-        end
+% the following block has to be removed on Newton system, Yulin Wu, 170628
+%        function SetMode(obj,isdemo)
+%            if obj.isopen
+%                if(isdemo == 0)
+%                    data = [1,1,17,17,17,17,17,17];
+%                else
+%                    data = [1,1,34,34,34,34,34,34];
+%                end
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetMode failed!');
+%                end
+%            end       
+%        end
         
-        function SetWindowLength(obj,length)
-            if obj.isopen
-                data = [0,20,floor(length/256),mod(length,256),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetWindowLength failed!');
-                end
-            end       
-        end
+%        function SetWindowLength(obj,length)
+%            if obj.isopen
+%                data = [0,20,floor(length/256),mod(length,256),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetWindowLength failed!');
+%                end
+%            end       
+%        end
         
-        function SetWindowStart(obj,pos)
-            if obj.isopen
-                data = [0,21,floor(pos/256),mod(pos,256),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetWindowStart failed!');
-                end
-            end 
-        end
+%        function SetWindowStart(obj,pos)
+%            if obj.isopen
+%                data = [0,21,floor(pos/256),mod(pos,256),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetWindowStart failed!');
+%                end
+%            end 
+%        end
         
-        function SetDemoFre(obj,fre)
-            if obj.isopen
-                step = fre/1e9*65536;
-                data = [0,22,floor(step/256),mod(step,256),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetDemoFre failed!');
-                end
-            end 
-        end
+%        function SetDemoFre(obj,fre)
+%            if obj.isopen
+%                step = fre/1e9*65536;
+%                data = [0,22,floor(step/256),mod(step,256),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetDemoFre failed!');
+%                end
+%            end 
+%        end
         
-        function SetGain(obj,mode)
-            if obj.isopen
-                switch mode
-                    case 1,code = [80,80];
-                    case 2,code = [0,0];
-                    case 3,code = [255,255];
-                end
-                data = [0,23,code(1),code(2),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetGain failed!');
-                end
-            end 
+%        function SetGain(obj,mode)
+%            if obj.isopen
+%                switch mode
+%                    case 1,code = [80,80];
+%                    case 2,code = [0,0];
+%                    case 3,code = [255,255];
+%                end
+%                data = [0,23,code(1),code(2),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetGain failed!');
+%                end
+%            end 
+%        end
+% an empty SetMode function is used on Newton system: Yulin Wu, 170628
+        function SetMode(obj,mode)
+            % pass
         end
         
         function [ret,I,Q] = RecvData(obj,row,column)

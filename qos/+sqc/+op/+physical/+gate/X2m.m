@@ -32,7 +32,7 @@ classdef X2m < sqc.op.physical.gate.XY_base
     methods (Hidden = true)
         function GenWave(obj)
             GenWave@sqc.op.physical.gate.XY_base(obj);
-            obj.xy_wv{1}.phase = pi;
+            obj.xy_wv{1}.phase = obj.qubits{1}.g_XY_phaseOffset+pi;
         end
     end
 end

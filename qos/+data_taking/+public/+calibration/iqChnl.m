@@ -2,8 +2,8 @@ function varargout = iqChnl(varargin)
     % run this function to calibrate iq channels
     % 
     % iqChnl('awgName',_c_,'chnlSet',_c_,'maxSbFreq',_f_,'sbFreqStep',_f_...
-	%		'loFreqStart',_f_,'loFreqStop',_f_,'loFreqStep',_f_,...
-    %       'gui',<_b_>,'save',<_b_>);
+	%		'loFreqStart',_f_,'loFreqStop',_f_,'loFreqStep',_f_,'spcAvgNum',<_i_>,...
+    %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>);
 	% awgName: name of the awg to calibrate
 	% chnlSet: channel set to calibrate, it is a settings group in:
 	% settingsRoot\calibration\awgName\
@@ -13,7 +13,7 @@ function varargout = iqChnl(varargin)
 % Yulin Wu, 2017
 
     fcn_name = 'data_taking.public.calibration.iqChnl'; % this and args will be saved with data
-    args = qes.util.processArgs(varargin,{'debug',false,'avgnum',1,'gui',false,'save',true});
+    args = qes.util.processArgs(varargin,{'notes','','spcAvgNum',1,'gui',false,'save',true});
     try
         QS = qes.qSettings.GetInstance();
     catch
@@ -26,14 +26,16 @@ function varargout = iqChnl(varargin)
     awgchnls = s.chnls;
     spcAnalyzer = qes.qHandle.FindByClassProp('qes.hwdriver.sync.spectrumAnalyzer','name',s.spc_analyzer);
     spcAmpObj = qes.measurement.specAmp(spcAnalyzer);
-    spcAmpObj.avgnum = args.avgnum;
+    spcAmpObj.avgnum = args.spcAvgNum;
     
     mwSrc = qes.qHandle.FindByClassProp('qes.hwdriver.sync.mwSource','name',s.lo_source);
     loSource = mwSrc.GetChnl(s.lo_chnl);
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
-    Calibrator.debug = args.debug;
     Calibrator.pulse_ln = s.pulse_ln;
+    if args.gui
+        Calibrator.showProcess = true;
+    end
     
     x = qes.expParam(Calibrator,'lo_freq');
     y = qes.expParam(Calibrator,'sb_freq');
@@ -76,19 +78,27 @@ function varargout = iqChnl(varargin)
     iqAmp = data(1).iqAmp;
     loPower = data(1).loPower;
     
-    timeStamp = now;
     if args.save
         dataFileDir = fullfile(QS.root,'calibration',args.awgName,'iq',args.chnlSet,'_data');
         if isempty(dir(dataFileDir))
             mkdir(dataFileDir);
         end
-        filename=fullfile(dataFileDir,datestr(timeStamp,'yymmDDTHHMMSS'));
+        filename=fullfile(dataFileDir,datestr(now,'yymmDDTHHMMSS'));
+        notes = args.notes;
         save(filename,...
-            'iZeros','qZeros','sbCompensation','iqAmp','loPower','timeStamp','loFreq','sbFreq');
-        figure;plot(loFreq,iZeros,'-o',loFreq,qZeros,'-o','linewidth',2);legend('iZeros','qZeros');xlabel('LoFreq');ylabel('Amp')
+            'iZeros','qZeros','sbCompensation','iqAmp','loPower','loFreq','sbFreq','notes');
+        figure;plot(loFreq,iZeros,'-o',loFreq,qZeros,'-o','linewidth',2);
+        legend('iZeros','qZeros');
+        xlabel('LoFreq');
+        ylabel('Amp');
         saveas(gcf,[filename '_Zeros.fig']);
-        figure;subplot(2,1,1);surface(sbFreq,loFreq,real(sbCompensation),'edgecolor','none');ylabel('LoFreq');xlabel('SbFreq');title('Real');colorbar
-        subplot(2,1,2);surface(sbFreq,loFreq,imag(sbCompensation),'edgecolor','none');ylabel('LoFreq');xlabel('SbFreq');title('Image');colorbar
+        figure;
+        subplot(2,1,1);
+        surface(sbFreq,loFreq,real(sbCompensation),'edgecolor','none');
+        ylabel('LoFreq');xlabel('SbFreq');title('Real');colorbar;
+        subplot(2,1,2);
+        surface(sbFreq,loFreq,imag(sbCompensation),'edgecolor','none');
+        ylabel('LoFreq');xlabel('SbFreq');title('Image');colorbar;
         saveas(gcf,[filename '_Sb.fig']);
     end
     varargout{1} = e.data{1};

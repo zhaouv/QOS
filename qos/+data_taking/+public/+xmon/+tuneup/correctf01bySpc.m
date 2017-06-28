@@ -27,7 +27,7 @@ function varargout = correctf01bySpc(varargin)
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 
     f = q.f01-5*q.t_spcFWHM_est:q.t_spcFWHM_est/15:q.f01+5*q.t_spcFWHM_est;
-    e = spectroscopy1_zpa('qubit',q,'driveFreq',f,'save',false,'gui',false);
+    e = spectroscopy1_zpa('qubit',q,'driveFreq',f,'save',false,'gui',true);
     P = e.data{1};
     
     % to deal with a bug(firt point always wrong), may not be needed in future versions
@@ -39,8 +39,11 @@ function varargout = correctf01bySpc(varargin)
         throw(MException('QOS_correctf01bySpc:visibilityTooLow',...
 				'visibility(%0.2f) too low, run correctf01bySpc at low visibility might produce wrong result, thus not supported.', rP));
     end
-
-    [pks,locs,~,p] = findpeaks(smooth(P,3),'SortStr','descend','MinPeakHeight',rP/2,...
+    
+    Ps = smooth(P,3);
+    Ps = Ps - min(Ps); % P might have negative value in case of iq2prob parameters have drifted away
+    rP = range(Ps);
+    [pks,locs,~,p] = findpeaks(Ps,'SortStr','descend','MinPeakHeight',rP/2,...
         'MinPeakProminence',rP/2,'MinPeakDistance',numel(P)/5,...
         'WidthReference','halfprom');
     if numel(pks)
@@ -71,9 +74,18 @@ function varargout = correctf01bySpc(varargin)
         set(ax,'YLim',ylim);
         drawnow;
     end
+    
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
 	if args.save
         QS = qes.qSettings.GetInstance();
-        QS.saveSSettings({q.name,'f01'},f01);
+        QS.saveSSettings({q.name,'f01'},num2str(f01,'%0.5f'));
     end
 	varargout{2} = f01;
 end

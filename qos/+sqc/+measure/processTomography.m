@@ -8,11 +8,11 @@ classdef processTomography < qes.measurement.measurement
 	end
 	properties (SetAccess = private)
 		qubits
+        process
     end
     properties (GetAccess = private, SetAccess = private)
 		stateTomoObj
 		statePrepGates
-        process
     end
     methods
         function obj = processTomography(qubits, process)
@@ -21,31 +21,38 @@ classdef processTomography < qes.measurement.measurement
 						'the input is not a valid quantum operator.'));
 			end
 			import sqc.op.physical.gate.*
-            obj.process = process;
 			if ~iscell(qubits)
-				if ischar(qubits) % single qubit name
-					qubits = {qubits};
-				else
-					throw(MException('QOS_processTomography:invalidInput',...
-						'the input qubits should be a cell array of qubit objects or qubit names.'));
+                qubits = {qubits};
+            end
+            numTomoQs = numel(qubits);
+            for ii = 1:numTomoQs
+                if ischar(qubits{ii})
+                    qs = sqc.util.loadQubits();
+                    qubits{ii} = qs{qes.util.find(qubits{ii},qs)};
 				end
-			end
+            end
+            obj = obj@qes.measurement.measurement([]);
+            obj.process = process;
 			obj.qubits = qubits;
-			numTomoQs = numel(obj.tomoQubits);
+			numTomoQs = numel(obj.qubits);
 			obj.statePrepGates = cell(numTomoQs);
 			for ii = 1:numTomoQs
-				obj.statePrepGates{ii} = {I(obj.tomoQubits{ii}),...
-										X(obj.tomoQubits{ii})};
+				% gates that prepares the qubit onto states: {|0>, |1>, |0>+|1>, |0>+i|1>}
+				obj.statePrepGates{ii} = {I(obj.qubits{ii}),...
+										X(obj.qubits{ii}),...
+										Y2p(obj.qubits{ii}),...
+										X2m(obj.qubits{ii}),...
+										};
             end
 			obj.stateTomoObj = sqc.measure.stateTomography(qubits);
             obj.numericscalardata = false;
         end
         function Run(obj)
             Run@qes.measurement.measurement(obj);
-			numTomoQs = numel(obj.tomoQubits);
+			numTomoQs = numel(obj.qubits);
 			lpr = qes.util.looper_(obj.statePrepGates);
-			data = NaN*ones(2^numTomoQs,3^numTomoQs,2^numTomoQs);
-			numShots = 2^numTomoQs;
+			data = NaN*ones(4^numTomoQs,3^numTomoQs,2^numTomoQs);
+			numShots = 4^numTomoQs;
 			idx = 0;
 			while true
 				idx = idx + 1;
@@ -60,7 +67,8 @@ classdef processTomography < qes.measurement.measurement
 				P = pGates{1};
 				for ii = 2:numTomoQs
 					P = P.*pGates{ii};
-				end
+                end
+                P = P*obj.process;
 				obj.stateTomoObj.setProcess(P);
 				data(idx,:,:) = obj.stateTomoObj();
 			end

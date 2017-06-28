@@ -35,6 +35,8 @@ if ~isempty(args.r_avg) %add by GM, 20170414
 end
 
 q.spc_zLonger = args.biasLonger;
+q.spc_sbFreq = q.f01-q.qr_xy_fc;
+
 X = op.mwDrive4Spectrum(q);
 X.amp = args.xyDriveAmp;
 Z = op.zBias4Spectrum(q);
@@ -51,7 +53,6 @@ end
 switch args.dataTyp
     case 'P'
         R.state = 2;
-        % pass
     case 'S21'
         R.swapdata = true;
         R.name = '|S21|';

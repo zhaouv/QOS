@@ -40,9 +40,9 @@ function varargout = singleQStateTomo(varargin)
             p = gate.Y2p(q);
         case '|0>-|1>'
             p = gate.Y2m(q);
-        case '|0>+i|1>'
-            p = gate.X2p(q);
         case '|0>-i|1>'
+            p = gate.X2p(q);
+        case '|0>+i|1>'
             p = gate.X2m(q);
         otherwise
             throw(MException('QOS_singleQStateTomo',...

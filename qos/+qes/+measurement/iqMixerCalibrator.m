@@ -12,7 +12,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
         pulse_ln = 25000
 %         chnls
         
-        debug = false;
+        showProcess@logical scalar = false
     end
 	properties (SetAccess = private, GetAccess = private)
 		awg
@@ -32,6 +32,9 @@ classdef iqMixerCalibrator < qes.measurement.measurement
         qZeros
         sbFreqs
         sbCompensations
+        
+        SPC_AMP_MIN = -130
+        MAX_ITER_NUM = 25;
 	end
     methods
         function obj = iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource)
@@ -56,8 +59,8 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             numIQCalDataSet = numel(obj.awg.iqCalDataSet);
             if numIQCalDataSet==0
                 obj.awg.iqCalDataSet = struct(...
-                        'chnls',[],'loFreq',[],'iZero',[],'qZero',[],'sbFreq',[],'sbCompensation',[]);
-                    obj.iqCalDataSetIdx = numIQCalDataSet+1;
+                        'chnls',[],'loFreq',[],'iZero',[],'qZero',[],'sbFreq',[],'sbCompensation',[]); % loPower is import but not needed by the awg, thus not included
+                obj.iqCalDataSetIdx = numIQCalDataSet+1;
             end
             for ii = 1:numIQCalDataSet
                 if all(obj.awg.iqCalDataSet(ii).chnls == [obj.i_chnl,obj.q_chnl])
@@ -65,7 +68,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                     break;
                 elseif ii == numIQCalDataSet
                     obj.awg.iqCalDataSet(end+1) = struct(...
-                        'chnls',[],'loFreq',[],'iZero',[],'qZero',[],'sbFreq',[],'sbCompensation',[]);
+                        'chnls',[],'loFreq',[],'iZero',[],'qZero',[],'sbFreq',[],'sbCompensation',[]); % loPower is import but not needed by the awg, thus not included
                     obj.iqCalDataSetIdx = numIQCalDataSet+1;
                 end
             end
@@ -104,14 +107,15 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             [loFreqs_,idx] = sort(loFreqs_,'ascend');
             iZeros_ = iZeros_(idx);
             qZeros_ = qZeros_(idx);
-            
+
             obj.awg.iqCalDataSet(obj.iqCalDataSetIdx) =...
-                struct('loFreq',loFreqs_,'chnls',[obj.i_chnl, obj.q_chnl],...
+                struct('chnls',[obj.i_chnl, obj.q_chnl],...
+                'loFreq',loFreqs_,...
                 'iZero',iZeros_,'qZero',qZeros_,...
                 'sbFreq',[],'sbCompensation',[]);
             
             sbCompensation = CalibrateSideband(obj);
-			            
+			
             obj.data = struct('iZeros',obj.iZero,'qZeros',obj.qZero,'chnls',[obj.i_chnl, obj.q_chnl],...
 				'sbCompensation',sbCompensation,...
                 'iqAmp',obj.iqAmp,'loPower',obj.lo_power);
@@ -138,18 +142,84 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             p2 = qes.expParam(Q,'dcval');
             p1.callbacks = {@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
             p2.callbacks = p1.callbacks;
-            
             obj.spc_amp_obj.freq = obj.lo_freq;
             f = qes.expFcn([p1, p2],obj.spc_amp_obj);
             
-            opts = optimset('Display','none','MaxIter',30,'TolX',0.2,'TolFun',0.1,'PlotFcns',{@optimplotfval});%,'PlotFcns',''); % current value and history
-            lb = [-obj.awg.vpp/8, -obj.awg.vpp/8];
-            ub = [obj.awg.vpp/8, obj.awg.vpp/8];
+            % search method 1
+            opts = optimset('Display','none','MaxIter',obj.MAX_ITER_NUM,'TolX',0.2,'TolFun',0.1,'PlotFcns',{@optimplotfval});%,'PlotFcns',''); % current value and history
+            lb = [-obj.awg.vpp/10, -obj.awg.vpp/10];
+            ub = [obj.awg.vpp/10, obj.awg.vpp/10];
             xsol = qes.util.fminsearchbnd(f.fcn,[0,0],lb,ub,opts);
-            x = round(xsol(1));
-            y = round(xsol(2));
-			
-			if obj.debug
+            x = xsol(1);
+            y = xsol(2);
+
+            % search method 2
+%             precision = obj.awg.vpp/50;
+%             stopPrecision = obj.awg.vpp/1e5;
+%             if obj.showProcess
+%                 h = qes.ui.qosFigure(sprintf('IQ Calibration | DAC %s, I channel %0.0f, Q channel %0.0f',...
+%                     obj.awg.name, obj.i_chnl, obj.q_chnl),true);
+%                 ax1 = axes('Parent',h,'Box','on');
+%                 ax2 = axes('Parent',h,'Box','on','Color','none','YAxisLocation','right');
+%                 hl1 = line(NaN,NaN,'LineStyle','-','Color',[1,0,0],'parent',ax1);
+%                 hl2 = line(NaN,NaN,'LineStyle',':','Color',[0,1,0],'parent',ax2);
+%                 hold(ax2,'on');
+%                 hl3 = line(NaN,NaN,'LineStyle',':','Color',[0,0,1],'parent',ax2);
+%                 hold(ax2,'off');
+%                 xlabel(ax1,'Number of steps')
+%                 ylabel(ax1,'Lo leakage(dBm)');
+%                 ylabel(ax2,'IQ amplitude');
+%                 linkaxes([ax1, ax2], 'x');
+%                 set(ax1,'XLim',[1,20]);
+%             end
+%             n_ = 0;
+%             a_ = NaN;
+%             x_ = 0;
+%             y_ = 0;
+%             x = 0;
+%             y = 0;
+%             while precision > stopPrecision
+%                 lx = f([x-precision, y]);
+%                 cx = f([x,y]);
+%                 rx = f([x+precision,y]);
+%                 dx = precision*qes.util.minPos(lx, cx, rx);
+%                 x = x+dx;
+%                 
+%                 ly = f([x-precision, y]);
+%                 cy = f([x,y]);
+%                 ry = f([x+precision,y]);
+%                 dy = precision*qes.util.minPos(ly, cy, ry);
+%                 y = y+dx;
+%                 
+%                 if cx < obj.SPC_AMP_MIN && cy < obj.SPC_AMP_MIN
+%                     break;
+%                 end
+%                 
+%                 if abs(dx) < precision && abs(dy) < precision
+%                     precision = precision/2;
+%                 end
+%                 if obj.showProcess
+%                     n_ = [n_,n_(end)+1];
+%                     a_ = [a_,cy];
+%                     x_ = [x_,x];
+%                     y_ = [y_,y];
+%                     try
+%                         set(hl1,'XData',n_,'YData',a_);
+%                         set(hl2,'XData',n_,'YData',x_);
+%                         set(hl3,'XData',n_,'YData',y_);
+%                         drawnow;
+%                     catch % incase of figure being closed
+%                     end
+%                 end
+%             end
+%             if obj.showProcess
+%                 try
+%                 	title(ax,'Done.')
+%                 catch
+%                 end
+%             end
+            
+			if obj.showProcess
                 f([0,0]);
                 instr = qes.qHandle.FindByClass('qes.hwdriver.sync.spectrumAnalyzer');
                 spcAnalyzerObj = instr{1};
@@ -182,11 +252,12 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 
                 freq4plot=[obj.lo_freq-obj.sb_freq, obj.lo_freq, obj.lo_freq+obj.sb_freq];
 
-                figure(42);
-                plot(freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
-                xlabel('Frequency(GHz)');
-                ylabel('Amplitude');
-                legend({'before calibration','after calibration'});
+                hf = qes.ui.qosFigure('IQ Mixer Calibration | DC',true);
+				ax = axes('Parent',hf);
+                plot(ax, freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
+                xlabel(ax, 'Frequency(GHz)');
+                ylabel(ax, 'Amplitude');
+                legend(ax, {'before calibration','after calibration'});
 
                 spcAnalyzerObj.startfreq = startfreq_backup;
                 spcAnalyzerObj.stopfreq = stopfreq_backup;
@@ -200,6 +271,10 @@ classdef iqMixerCalibrator < qes.measurement.measurement
         function z = CalibrateSideband(obj)
 			% todo: correct mixer zero with the calibration
 			% result of the previous step.
+            if obj.sb_freq < 5e6 % in practice, sb_freq are  several tens of MHz at least
+                z = 0;
+                return;
+            end
 			
             pulse_ln = qes.util.best_fit_count(abs(obj.sb_freq));
             
@@ -207,15 +282,15 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 			awgchnl_ = [obj.i_chnl, obj.q_chnl];
             IQ = qes.waveform.dc(pulse_ln);
             IQ.dcval = obj.iqAmp;
+            IQ.df = obj.sb_freq/obj.awg.samplingRate;
             IQ.fc = obj.lo_freq;
-            
-            IQ.df = obj.sb_freq/2e9;
+
             IQ.awg = awg_;
             IQ.awgchnl = awgchnl_;     
             
 %% Complex component method.            
 			IQ_op = copy(IQ);
-			IQ_op.df = -obj.sb_freq/2e9;
+			IQ_op.df = -obj.sb_freq/obj.awg.samplingRate;
             
             function wv = calWv(comp_)
 				wv = IQ + comp_(1)*IQ_op+comp_(2)*1j*IQ_op;
@@ -234,7 +309,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 %                 res=f(a(1)+1j*a(2));
 %             end
             
-            opts = optimset('Display','none','MaxIter',30,'TolX',0.01,'TolFun',0.1,'PlotFcns',{@optimplotfval});
+            opts = optimset('Display','none','MaxIter',obj.MAX_ITER_NUM,'TolX',0.01,'TolFun',0.1,'PlotFcns',{@optimplotfval});
             z1 = qes.util.fminsearchbnd(f.fcn,[0,0],[-0.5,-0.5],[0.5,0.5],opts);
             z=z1(1)+1j*z1(2);
             
@@ -339,7 +414,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 %             obj.iZero=i0;
 %             obj.qZero=q0;            
 %%			
-			if obj.debug
+			if obj.showProcess
                 f([0,0]);
                 instr = qes.qHandle.FindByClass('qes.hwdriver.sync.spectrumAnalyzer');
                 spcAnalyzerObj = instr{1};
@@ -372,15 +447,16 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 
                 freq4plot=[obj.lo_freq-obj.sb_freq, obj.lo_freq, obj.lo_freq+obj.sb_freq];
 
-                figure(42);
-                plot(freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
-                xlabel('Frequency(GHz)');
-                ylabel('Amplitude');
-                legend({'after calibration zero','after calibration phase'});
+                hf = qes.ui.qosFigure('IQ Mixer Calibration | DC',true);
+				ax = axes('Parent',hf);
+                plot(ax,freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
+                xlabel(ax,'Frequency(GHz)');
+                ylabel(ax,'Amplitude');
+                legend(ax,{'after calibration zero','after calibration phase'});
                 if am-bm>0
-                    title('BAD!','color','r')
+                    title(ax,'BAD!','color','r')
                 else
-                    title('GOOD!','color','g')
+                    title(ax,'GOOD!','color','g')
                 end
                 
 %                 spcAnalyzerObj.startfreq = obj.lo_freq-abs(obj.sb_freq) - 1e6;

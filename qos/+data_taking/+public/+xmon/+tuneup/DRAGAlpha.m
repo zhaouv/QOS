@@ -53,8 +53,16 @@ function varargout = DRAGAlpha(varargin)
 	if visibility < MINIMUMVISIBILITY2
 		throw(MException('QOS_DRAGAlpha:visibilityTooLow',...
 				'visibility(%0.2f) too low, run DRAGAlpha at low visibility might produce wrong result, thus not supported.', PN));
-	end
+    end
 
+    if ischar(args.save)
+        args.save = false;
+        choice  = questdlg('Update settings?','Save options',...
+                'Yes','No','No');
+        if ~isempty(choice) && strcmp(choice, 'Yes')
+            args.save = true;
+        end
+    end
 %     if args.save
 %         QS.saveSSettings({q.name,'zdc_amp2f01'},param);
 %     end

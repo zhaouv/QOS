@@ -2,7 +2,7 @@ function varargout = spectroscopy1_zdc(varargin)
 % spectroscopy1, bias, drive, readout all on one qubit
 % 
 % <_o_> = spectroscopy1_zdc('qubit',_c&o_,...
-%       'biasAmp',<[_f_]>,'driveFreq',<[_f_]>,...
+%       'biasAmp',<[_f_]>,'driveFreq',<[_f_]>,'dataTyp',<_c_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -19,7 +19,7 @@ function varargout = spectroscopy1_zdc(varargin)
 
 import qes.*
 import data_taking.public.xmon.spectroscopy111_zdc
-args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'driveFreq',[],'gui',false,'r_avg',0,'notes','','save',true});
+args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'driveFreq',[],'gui',false,'r_avg',[],'notes','','save',true});
 varargout{1} = spectroscopy111_zdc('biasQubit',args.qubit,'biasAmp',args.biasAmp,'driveQubit',args.qubit,'dataTyp',args.dataTyp,...
     'driveFreq',args.driveFreq,'readoutQubit',args.qubit,'notes',args.notes,'r_avg',args.r_avg,'gui',args.gui,'save',args.save);
 

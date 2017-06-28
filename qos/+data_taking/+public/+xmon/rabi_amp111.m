@@ -11,6 +11,7 @@ function varargout = rabi_amp111(varargin)
 %       'readoutQubit',_c&o_,...
 %       'xyDriveAmp',[_f_],'detuning',<[_f_]>,'driveTyp',<_c_>,...
 %       'dataTyp','_c_',...   % S21 or P
+%		'numPi',<_i_>,... % number of pi rotations, default 1, use numPi > 1, e.g. 11 for pi pulse amplitude fine tuning.
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -31,7 +32,7 @@ import sqc.*
 import sqc.op.physical.*
 
 args = util.processArgs(varargin,{'biasAmp',0,'biasLonger',0,'detuning',0,'driveTyp','X','dataTyp','P',...
-    'r_avg',0,'gui',false,'notes','','save',true});
+    'numPi',1,'r_avg',0,'gui',false,'notes','','save',true});
 [readoutQubit, biasQubit, driveQubit] =...
     data_taking.public.util.getQubits(args,{'readoutQubit', 'biasQubit', 'driveQubit'});
 
@@ -78,9 +79,10 @@ I = gate.I(driveQubit);
 I.ln = args.biasLonger;
 Z = op.zBias4Spectrum(biasQubit);
 Z.amp = args.biasAmp;
+m = n*args.numPi;
 function procFactory(amp_)
     g.amp = amp_;
-    XY = g^n;
+    XY = g^m;
     Z.ln = XY.length + 2*args.biasLonger;
     proc = Z.*(XY*I);
     R.delay = proc.length;
@@ -91,10 +93,9 @@ R = measure.resonatorReadout_ss(readoutQubit);
 switch args.dataTyp
     case 'P'
         R.state = 2;
-        % pass
     case 'S21'
         R.swapdata = true;
-        R.name = '|S21|';
+        R.name = '|IQ|';
         R.datafcn = @(x)mean(abs(x));
     otherwise
         throw(MException('QOS_rabi_amp111:unsupportedDataTyp',...

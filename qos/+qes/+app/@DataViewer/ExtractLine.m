@@ -10,15 +10,27 @@ function ExtractLine(obj)
         idx = find(obj.previewfiles == obj.currentfile,1);
         data = obj.loadeddata{idx};
         if obj.plotfunc == 1
-            if isfield(data,'Info')  && isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn) && ischar(data.Info.plotfcn)
-                PlotFcn = str2func(data.Info.plotfcn);
-            elseif isfield(data,'Config')  && isfield(data.Config,'plotfcn') && ~isempty(data.Config.plotfcn) && ischar(data.Config.plotfcn)
-                PlotFcn = str2func(data.Config.plotfcn);
+            if isfield(data,'Info')  && isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn) &&...
+                    (ischar(data.Info.plotfcn) ||...
+                    isa(data.Info.plotfcn,'function_handle'))
+                if ischar(data.Info.plotfcn)
+                    PlotFcn = str2func(data.Info.plotfcn);
+                else
+                    PlotFcn = data.Info.plotfcn;
+                end
+            elseif isfield(data,'Config')  && isfield(data.Config,'plotfcn') &&...
+                    ~isempty(data.Config.plotfcn) && (ischar(data.Config.plotfcn) ||...
+                    isa(data.Config.plotfcn,'function_handle'))
+                if ischar(data.Config.plotfcn)
+                    PlotFcn = str2func(data.Config.plotfcn);
+                else
+                    PlotFcn = data.Config.plotfcn;
+                end
             else
-                PlotFcn = @expplotfcn.OneMeas_Def; % default
+                PlotFcn = @qes.util.plotfcn.OneMeas_Def; % default
             end
         else
-            PlotFcn = str2func(['expplotfcn.',obj.availableplotfcns{obj.plotfunc}]);
+            PlotFcn = str2func(['qes.util.plotfcn.',obj.availableplotfcns{obj.plotfunc}]);
         end
         [x,y,z] = feval(PlotFcn,data.Data, data.SweepVals,'',data.SwpMainParam,'',ax,true);
         delete(h);
@@ -26,21 +38,21 @@ function ExtractLine(obj)
             z = abs(z);
         end
     catch
-        qes.ui.qes.ui.msgbox('Unable to extract data, make sure the selected plot function supports the currents data set and has data exportation functionality.','modal');
+        qes.ui.msgbox('Unable to extract data, make sure the selected plot function supports the currents data set and has data exportation functionality.');
         if ishghandle(h)
             delete(h);
         end
         return;
     end
     if isempty(z)
-        qes.ui.qes.ui.msgbox('Extract line data is for 3D data only.','modal');
+        qes.ui.msgbox('Extract line data is for 3D data only.','modal');
         return;
     end
     if isempty(x) || isempty(y)
-        qes.ui.qes.ui.msgbox('x data or y data empty.','modal');
+        qes.ui.msgbox('x data or y data empty.','modal');
         return;
     elseif any(isnan(x)) || any(isnan(y))
-        qes.ui.qes.ui.msgbox('x data or y data contains empty data(NaN)','modal');
+        qes.ui.msgbox('x data or y data contains empty data(NaN)','modal');
         return;
     end
     choice  = questdlg('Select mode:','','Horizontal','Vertical','Free line','Horizontal');
@@ -48,7 +60,7 @@ function ExtractLine(obj)
         set(obj.uihandles.mainax,'HandleVisibility','on');
         axes(obj.uihandles.mainax);
         try
-            cp = DataViewer.Ginput(1);
+            cp = qes.app.DataViewer.Ginput(1);
         catch
             set(obj.uihandles.mainax,'HandleVisibility','callback');
             return;
@@ -59,17 +71,18 @@ function ExtractLine(obj)
         xrange = range(x);
         yrange = range(y);
         if (isempty(choice) || strcmp(choice, 'Horizontal')) && (x_e < min(x)-0.05*xrange || x_e > max(x)+0.05*xrange)
-            qes.ui.qes.ui.msgbox('Out of data range, click within the data range to extract.','modal');
+            qes.ui.msgbox('Out of data range, click within the data range to extract.','modal');
             return;
         elseif y_e < min(y)-0.05*yrange || y_e > max(y)+0.05*yrange
-            qes.ui.qes.ui.msgbox('Out of data range, click within the data range to extract.','modal');
+            qes.ui.msgbox('Out of data range, click within the data range to extract.','modal');
             return;
         end
         if isempty(choice) || strcmp(choice, 'Horizontal')
             [~,y_idx] = (min(abs(y - y_e)));
-            choice  = questdlg('Where to plot horizontal line data?','Plot options','A new plot','Append to the current axes(if exists)','A new plot');
+            choice  = questdlg('Where to plot horizontal line data?',...
+                'Plot options','A new plot','Append to the current axes(if exists)','A new plot');
             if ~isempty(choice) && strcmp(choice, 'A new plot')
-                h1 = figure();
+                h1 = qes.ui.qosFigure('Horizontal Trace',false);
                 warning('off');
                 jf = get(h1,'JavaFrame');
                 jf.setFigureIcon(javax.swing.ImageIcon(...
@@ -77,7 +90,7 @@ function ExtractLine(obj)
                 warning('on');
                 ha1 = axes('Parent',h1);
             else
-                qes.ui.qes.ui.msgbox('Raise the axis to add the plot to the front by cliking on it.');
+                qes.ui.msgbox('Raise the axis to add the plot to the front by cliking on it.');
                 pause(5);
                 ha1 = gca();
                 hold(ha1,'on');
@@ -85,14 +98,16 @@ function ExtractLine(obj)
             plot(ha1,x,z(:,y_idx));
             xlabel(ha1,'x');
             ylabel(ha1,'z');
-            title(ha1,'horizontal line data, data also exported to base workspace as ''x_{ex}'',''z_{ex}''');
+            title(ha1,'horizontal line data, data also exported to base workspace as ''x_{ex}'',''z_{ex}''',...
+                'FontSize',10,'FontWeight','normal');
             assignin('base','x_ex',x);
             assignin('base','x_ex',z(:,y_idx));
         else
             [~,x_idx] = (min(abs(x - x_e)));
-            choice  = questdlg('Where to plot vertical line data?','Plot options','A new plot','Append to the current axes(if exists)','A new plot');
+            choice  = questdlg('Where to plot vertical line data?','Plot options',...
+                'A new plot','Append to the current axes(if exists)','A new plot');
             if ~isempty(choice) && strcmp(choice, 'A new plot')
-                h2 = figure();
+                h2 = qes.ui.qosFigure('Vertical Trace',false);
                 warning('off');
                 jf = get(h2,'JavaFrame');
                 jf.setFigureIcon(javax.swing.ImageIcon(...
@@ -105,15 +120,16 @@ function ExtractLine(obj)
                 warning('on');
                 ha2 = axes('Parent',h2);
             else
-                qes.ui.qes.ui.msgbox('Raise the axis to add the plot to the front by cliking on it.');
-                pause(5);
+                qes.ui.msgbox('Raise the axis to add the plot to the front by cliking on it.');
+                pause(3);
                 ha2 = gca;
                 hold(ha2,'on');
             end
             plot(ha2,y,z(x_idx,:));
             xlabel(ha2,'y');
             ylabel(ha2,'z');
-            title(ha2,'vertical line data, data also exported to base workspace as ''y_{ex}'',''z_{ex}''');
+            title(ha2,'vertical line data, data exported to base workspace as ''y_{ex}'',''z_{ex}''',...
+                'FontSize',10,'FontWeight','normal');
             assignin('base','y_ex',y);
             assignin('base','z_ex',z(x_idx,:));
         end
@@ -187,7 +203,8 @@ function SelectFreeLineData(obj,data_x,data_y,data_z)
              y_e_u = [y_e_u,temp(1:end-1)];
          end
          zi = interp2(data_x,data_y,data_z',x_e_u,y_e_u);
-         h2 = figure('Position',[123   246   950   420]);
+         h2 = qes.ui.qosFigure('Freeline Trace',false);
+         set(h2,'Position',[123   246   950   420]);
          hax_new = copyobj(obj.uihandles.mainax,h2);
          set(hax_new,'Units','normalized','Position',[0.08,0.12,0.40,0.8]);
          hold(hax_new,'on');
@@ -201,7 +218,8 @@ function SelectFreeLineData(obj,data_x,data_y,data_z)
          plot(hax_line,1:length(zi),zi);
          xlabel(hax_line,['idx of selected points, up sampled ',num2str(R,'%0.0f'),' times']);
          ylabel(hax_line,'z');
-         title(hax_line,'extrated free line data, data also exported to base workspace as ''x_{ex}'',''y_{ex}'',''z_{ex}''');
+         title(hax_line,{'extrated free line data,', 'data exported to base workspace as: ''x_{ex}'',''y_{ex}'',''z_{ex}'''},...
+             'FontSize',10,'FontWeight','normal');
          assignin('base','x_ex',x_e_u);
          assignin('base','y_ex',y_e_u);
          assignin('base','z_ex',zi);

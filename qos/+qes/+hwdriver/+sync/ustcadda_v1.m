@@ -191,7 +191,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.trig_sel=s.trigger_source;
                 %è®¾ç½®master?¿ï¼Œé»˜è®¤å€¼ä¸ºç¬¬ä¸€ä¸ªæ??
 %                 obj.da_list(k).da.set('ismaster', 0); % ismaster is false byt default, Yulin Wu, 170427
-                if(isfield(s,'da_master') && strcmpi(s.da_boards{k}.name,s.da_master))
+                if isfield(s,'da_master') && s.da_master == k
                     % Yulin Wu, 170427
                     obj.da_list(k).da.ismaster=true;
                     obj.da_master_index = k;
@@ -216,26 +216,24 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
 %             obj.da_list(obj.da_master_index).da.trig_interval=s.triggerInterval;
                         % æ˜ å°„é€šé??
             for k = 1:length(s.da_chnl_map)
-                channel = fieldnames(s.da_chnl_map{k});
-                channel_info = s.da_chnl_map{k}.(channel{1});
-%                 channel_info = regexp(channel_info,' ', 'split');
-				channel_info = regexp(channel_info,'\s+', 'split'); % be lenient, Yulin Wu
-                da_name = channel_info{1};
-                channel_name = channel_info{2};
-                % da_index = 1;
-				da_index = [];
-                for x = 1:length(obj.da_list)
-                    if(strcmpi(da_name,obj.da_list(x).da.name))
-                        da_index = x;
-						break; % Yulin Wu
-                    end
+                % da_chnl_map settting format changed, the following
+                % lines has been changed accordingly, Yulin Wu, 170526
+                chnlMap_i = strsplit(regexprep(s.da_chnl_map{k},'\s+',''),',');
+                da_index = round(str2double(chnlMap_i{1}));
+                ch = round(str2double(chnlMap_i{2}));
+                numDAs = numel(obj.da_list);
+                if da_index < 0
+                    throw(MException('QOS_ustcadda:badSettings',...
+                        sprintf('invalid settings found in da_chnl_map{%0.0f}: DA board index can not be an negative number.',...
+                        ii, da_index)));
+                elseif da_index > numDAs
+                    throw(MException('QOS_ustcadda:badSettings',...
+                        sprintf('da_chnl_map{%0.0f} points to DA board #%0.0f while only %0.0f DA boards exist.',...
+                        ii, da_index, numDAs)));
                 end
-				% We need to check the settings. Yulin Wu
-				ch = str2double(channel_name(3:length(channel_name)));
-				if isempty(da_index) 
-					throw(MException('QOS_ustcadda:badSettings',sprintf('DA %s in da_chnl_map not exist.',da_name)));
-				elseif ch > obj.da_list(da_index).da.channel_amount
-					throw(MException('QOS_ustcadda:badSettings',sprintf('Channel %s dose not exist on DA %s',channel_info{2}, da_name)));
+                if ch > obj.da_list(da_index).da.channel_amount
+					throw(MException('QOS_ustcadda:badSettings',...
+                        sprintf('Channel %0.0f dose not exist on DA #%s',ch, obj.da_list(da_index).da.name)));
 				end
                 obj.da_channel_list(k).index = da_index; % bug fix: obj.da_channel_list(ch) -> obj.da_channel_list(k), Yulin Wu
                 obj.da_channel_list(k).ch = ch;
@@ -254,32 +252,29 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.ad_list(k).ad.sample_rate=s.ad_boards{k}.samplingRate;
                 obj.ad_list(k).ad.channel_amount=s.ad_boards{k}.numChnls;
                 obj.ad_list(k).ad.mac=s.ad_boards{k}.mac;
+				obj.ad_list(k).ad.demod = s.ad_boards{k}.demod;
             end
             % æ˜ å°„ADCçš„é???
             for k = 1:length(s.ad_chnl_map)
-                channel = fieldnames(s.ad_chnl_map{k});
-
-                channel_info = s.ad_chnl_map{k}.(channel{1}); %20170411
-
-                % channel_info = regexp(channel_info,' ', 'split');
-				channel_info = regexp(channel_info,'\s+', 'split'); % Yulin Wu
-                ad_name = channel_info{1};
-                channel_name = channel_info{2};
-                ad_index = 1;
-                for x = 1:length(obj.ad_list)
-                    if(strcmpi(ad_name,obj.da_list(x).da.name))
-                        ad_index = x;
-						break; % Yulin Wu
-                    end
+                % ad_chnl_map settting format changed, the following
+                % lines has been changed accordingly, Yulin Wu, 170526
+                chnlMap_i = strsplit(regexprep(s.ad_chnl_map{k},'\s+',''),',');
+                ad_index = round(str2double(chnlMap_i{1}));
+                ch = round(str2double(chnlMap_i{2}));
+                numADs = numel(obj.ad_list);
+                if ad_index < 0
+                    throw(MException('QOS_ustcadda:badSettings',...
+                        sprintf('invalid settings found in ad_chnl_map{%0.0f}: AD board index can not be an negative number.',...
+                        ii, ad_index)));
+                elseif ad_index > numADs
+                    throw(MException('QOS_ustcadda:badSettings',...
+                        sprintf('ad_chnl_map{%0.0f} points to AD board #%0.0f while only %0.0f AD boards exist.',...
+                        ii, ad_index, numADs)));
                 end
-				
-				% We need to check the settings. Yulin Wu
-				ch = str2double(channel_name(3:length(channel_name)));
-				if isempty(ad_index) 
-					throw(MException('QOS_ustcadda:badSettings',sprintf('AD %s in ad_chnl_map not exist.',ad_name)));
-				elseif ch > obj.ad_list(ad_index).ad.channel_amount
-					throw(MException('QOS_ustcadda:badSettings',sprintf('Channel %s dose not exist on AD %s',channel_info{2}, ad_name)));
-				end
+                if ch > obj.ad_list(ad_index).ad.channel_amount
+					throw(MException('QOS_ustcadda:badSettings',...
+                        sprintf('Channel %0.0f dose not exist on AD #%s',ch, obj.ad_list(ad_index).ad.name)));
+                end
 				
                 obj.ad_channel_list(k).index = ad_index; % bug fix: obj.ad_channel_list(ch) -> obj.ad_channel_list(k), Yulin Wu
                 obj.ad_channel_list(k).ch = ch;
@@ -319,13 +314,21 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 len = len - 1;
             end
         end
+		
+		function [I,Q] = Run(obj,freqOrIssample)
+			 if obj.ad_list(1).ad.demod
+				[I,Q] = RunDemo_(obj,freqOrIssample);
+			 else
+				[I,Q] = Run_(obj,freqOrIssample);
+			 end
+		end
         
-        function [I,Q] = Run(obj,isSample)
+        function [I,Q] = Run_(obj,isSample)
             I=0;Q=0;ret = -1;
 
             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps); %20170411
 
-		
+            obj.ad_list(1).ad.SetMode(0);
             obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
             % ?œæ­¢é™¤è¿žç»­æ³¢å½¢å¤–çš„é??“ï¼Œ?¯åŠ¨è§¦å?‘é???
@@ -359,6 +362,54 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 I = (reshape(I,[obj.adRecordLength,obj.runReps]))';
                 Q = (reshape(Q,[obj.adRecordLength,obj.runReps]))';
             end
+            % å¹¶æ¸…ç©ºé??“è®°å½?
+            for k = 1:obj.numDABoards
+                obj.da_list(k).mask_plus = 0;
+                obj.da_list(k).da_trig_delay = 0;
+            end
+        end
+        
+        function [I,Q] = RunDemo_(obj,frequency) %Unit:Hz
+            I=0;Q=0;ret = -1;
+            
+            obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps); %20170411
+            
+%             obj.ad_list(1).ad.SetGain(1); % Temp
+            obj.ad_list(1).ad.SetMode(1);          
+            obj.ad_list(1).ad.SetWindowStart(9);
+            obj.ad_list(1).ad.SetWindowLength(obj.adRecordLength);
+            obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength +24);  
+            obj.ad_list(1).ad.SetDemoFre(frequency);
+            obj.ad_list(1).ad.SetTrigCount(obj.runReps);
+            
+            % ?œæ­¢é™¤è¿žç»­æ³¢å½¢å¤–çš„é??“ï¼Œ?¯åŠ¨è§¦å?‘é???
+            for k = 1:obj.numDABoards
+                obj.da_list(k).da.StartStop((15 - obj.da_list(k).mask_min)*16);
+                obj.da_list(k).da.StartStop(obj.da_list(k).mask_plus);
+                obj.da_list(k).da.SetTrigDelay(obj.da_list(k).da_trig_delay);
+            end
+            % æ£?Ÿ¥æ˜¯å?¦æ?åŠŸå†™å…¥å®Œæ¯?
+            
+            for k=1:obj.numDABoards
+%                 tic
+                isSuccessed = obj.da_list(k).da.CheckStatus();
+%                 toc
+                if(isSuccessed ~= 1)
+                    error('ustcadda_v1:Run','There were some task failed!');
+                end
+            end
+            % é‡‡é›†æ•°æ??
+            while(ret ~= 0)
+                obj.ad_list(1).ad.EnableADC();  
+                obj.da_list(obj.da_master_index).da.SendIntTrig();
+                [ret,I,Q] = obj.ad_list(1).ad.RecvData(obj.runReps,obj.adRecordLength);
+                if ret ~= 0
+                    pause(1)
+                end
+            end
+            % å°†æ•°?®æ•´?†æ?å›ºå®šæ ¼å?
+            I = double(I)/256/obj.adRecordLength*2/2^12;
+            Q = double(Q)/256/obj.adRecordLength*2/2^12;
             % å¹¶æ¸…ç©ºé??“è®°å½?
             for k = 1:obj.numDABoards
                 obj.da_list(k).mask_plus = 0;
@@ -483,6 +534,10 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 name{ii} = da.name;
             end
         end
+		
+		function d = GetADDemod(obj)
+			d = obj.ad_list(1).ad.demod;
+		end
         
         function delete(obj) % Yulin Wu
             try % the object should be deletable under any circunstance
