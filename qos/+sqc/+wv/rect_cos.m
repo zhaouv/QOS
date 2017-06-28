@@ -19,6 +19,12 @@ classdef (Sealed = true) rect_cos < qes.waveform.waveform
             obj = obj@qes.waveform.waveform(ln);
             % obj.tcut = obj.t0 + ln;
         end
+        function set.rise_time(obj,val)
+            if val < 1
+                throw(MException('QOS_rect_cos:invalidArgument','rise_time < 1.'));
+            end
+            obj.rise_time = val;
+        end
     end
     methods (Static = true, Hidden=true)
         function v = TimeFcn(obj,t)

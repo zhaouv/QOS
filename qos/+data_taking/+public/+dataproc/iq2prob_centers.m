@@ -32,10 +32,10 @@ function [center0, center1, F00,F11,hf] =...
  
     e0 = real(iq_raw_0_);
 	e0_ = abs(e0 - mean(e0));
-	e0(e0_ > 3*median(e0_)) = []; % remove possible outerliers
+	e0(e0_ > 2*std(e0_)) = []; % remove outerliers
 	e1 = real(iq_raw_1_);
 	e1_ = abs(e1 - mean(e1));
-	e1(e1_ > 3*median(e1_)) = []; % remove possible outerliers
+	e1(e1_ > 2*std(e1_)) = []; % remove outerliers
 
 	x_0 = min(e0);
     x_1 = max(e0);
@@ -53,10 +53,10 @@ function [center0, center1, F00,F11,hf] =...
     %%
 	e0 = imag(iq_raw_0_);
 	e0_ = abs(e0 - mean(e0));
-	e0(e0_ > 3*median(e0_)) = []; % remove possible outerliers
+	e0(e0_ > 2*std(e0_)) = []; % remove outerliers
 	e1 = imag(iq_raw_1_);
 	e1_ = abs(e1 - mean(e1));
-	e1(e1_ > 3*median(e1_)) = []; % remove possible outerliers
+	e1(e1_ > 2*std(e1_)) = []; % remove outerliers
 
 	x_0 = min(e0);
     x_1 = max(e0);

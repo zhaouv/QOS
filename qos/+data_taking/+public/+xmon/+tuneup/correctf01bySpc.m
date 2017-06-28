@@ -27,7 +27,7 @@ function varargout = correctf01bySpc(varargin)
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 
     f = q.f01-5*q.t_spcFWHM_est:q.t_spcFWHM_est/15:q.f01+5*q.t_spcFWHM_est;
-    e = spectroscopy1_zpa('qubit',q,'driveFreq',f,'save',false,'gui',false);
+    e = spectroscopy1_zpa('qubit',q,'driveFreq',f,'save',false,'gui',true);
     P = e.data{1};
     
     % to deal with a bug(firt point always wrong), may not be needed in future versions
@@ -85,7 +85,7 @@ function varargout = correctf01bySpc(varargin)
     end
 	if args.save
         QS = qes.qSettings.GetInstance();
-        QS.saveSSettings({q.name,'f01'},f01);
+        QS.saveSSettings({q.name,'f01'},num2str(f01,'%0.5f'));
     end
 	varargout{2} = f01;
 end
