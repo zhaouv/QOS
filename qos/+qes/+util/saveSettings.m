@@ -116,7 +116,7 @@ function saveSettings(spath, field,value)
                                 	'value type of the current settings field is numeric, %s given.', class(value));
                             else
                                 value = regexprep(value,'\s+','');
-                                if ~ismember(value,{'true','True','false','False'})
+                                if ~ismember(value,{'true','True','false','False',''})
                                     value = regexprep(value,',\.',',0\.');
                                     value = regexprep(value,'\[\.','[0\.');
                                     if isnan(str2double(value)) &&...

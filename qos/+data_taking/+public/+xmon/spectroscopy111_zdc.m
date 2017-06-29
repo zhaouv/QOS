@@ -8,7 +8,7 @@ function varargout = spectroscopy111_zdc(varargin)
 % 
 % <_o_> = spectroscopy111_zdc('biasQubit',_c&o_,'biasAmp',<[_f_]>,...
 %       'driveQubit',_c&o_,'driveFreq',<[_f_]>,...
-%       'readoutQubit',_c&o_,...
+%       'readoutQubit',_c&o_,'dataTyp',<_c_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -45,7 +45,6 @@ R.delay = X.length;
 switch args.dataTyp %add by GM, 20170415
     case 'P'
         R.state = 2;
-        % pass
     case 'S21'
         R.swapdata = true;
         R.name = '|S21|';

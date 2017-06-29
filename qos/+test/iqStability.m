@@ -16,6 +16,7 @@ function varargout = iqStability(varargin)
 % Yulin Wu, 2017/1/13
 
     fcn_name = 'data_taking.public.xmon.s21_rAmp'; % this and args will be saved with data
+
     import qes.*
     import sqc.*
     import sqc.op.physical.*
@@ -28,7 +29,6 @@ function varargout = iqStability(varargin)
     if ~isempty(args.r_avg) %add by GM, 20170414
         q.r_avg=args.r_avg;
     end
-    
     if isempty(args.amp)
         args.amp = q.r_amp;
     end

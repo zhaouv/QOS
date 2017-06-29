@@ -1,31 +1,32 @@
-% 	FileName:USTCADC.m
+ % 	FileName:USTCADC.m
 % 	Author:GuoCheng
 % 	E-mail:fortune@mail.ustc.edu.cn
 % 	All right reserved @ GuoCheng.
 % 	Modified: 2017.2.26
 %   Description:The class of ADC
 classdef USTCADC < handle
+
     properties % Yulin Wu, 170427
-        mac = zeros(1,6)   %ÉÏÎ»»úÍø¿¨µØÖ·
+        mac = zeros(1,6)   %ä¸Šä½æœºç½‘å¡åœ°å€
         name = ''
-        channel_amount = 2     %ADCÍ¨µÀ£¬Î´Ê¹ÓÃ£¬Êµ¼ÊÊ¹ÓÃI¡¢QÁ½¸öÍ¨µÀ¡£
-        sample_rate = 1e9      %ADC²ÉÑùÂÊ£¬Î´Ê¹ÓÃ
-		demod = false
+        channel_amount = 2     %ADCé€šé“ï¼Œæœªä½¿ç”¨ï¼Œå®žé™…ä½¿ç”¨Iã€Qä¸¤ä¸ªé€šé“ã€‚
+        sample_rate = 1e9      %ADCé‡‡æ ·çŽ‡ï¼Œæœªä½¿ç”¨
+        demod@logical scalar = false;
+    end
+  
+    properties(SetAccess = private)
+        netcard_no;         %ä¸Šä½æœºç½‘å¡å·
+        mac = zeros(1,6);   %ä¸Šä½æœºç½‘å¡åœ°å€
+        isopen;             %æ‰“å¼€æ ‡è¯†
+        status;             %æ‰“å¼€çŠ¶æ€
     end
     
     properties(SetAccess = private)
-        netcard_no         %ÉÏÎ»»úÍø¿¨ºÅ
-        % mac = zeros(1,6)   %ÉÏÎ»»úÍø¿¨µØÖ· % Yulin Wu, 170427
-        isopen             %´ò¿ª±êÊ¶
-        status             %´ò¿ª×´Ì¬
-    end
-
-    properties(SetAccess = private)
-        % name = ''              %ADCÃû×Ö % Yulin Wu, 170427
-        % sample_rate = 1e9      %ADC²ÉÑùÂÊ£¬Î´Ê¹ÓÃ % Yulin Wu, 170427
-        % channel_amount = 2     %ADCÍ¨µÀ£¬Î´Ê¹ÓÃ£¬Êµ¼ÊÊ¹ÓÃI¡¢QÁ½¸öÍ¨µÀ¡£ % Yulin Wu, 170427
-        sample_depth = 2000;    %ADC²ÉÑùÉî¶È
-        sample_count = 100     %ADCÊ¹ÄÜºó²ÉÑù´ÎÊý
+        name = '';              %ADCåå­—
+        sample_rate = 1e9;      %ADCé‡‡æ ·çŽ‡ï¼Œæœªä½¿ç”¨
+        channel_amount = 2;     %ADCé€šé“ï¼Œæœªä½¿ç”¨ï¼Œå®žé™…ä½¿ç”¨Iã€Qä¸¤ä¸ªé€šé“ã€‚
+        sample_depth = 2000;    %ADCé‡‡æ ·æ·±åº¦
+        sample_count = 100;     %ADCä½¿èƒ½åŽé‡‡æ ·æ¬¡æ•°
     end
     
     properties (GetAccess = private,Constant = true)
@@ -33,7 +34,7 @@ classdef USTCADC < handle
         driverh = 'USTCADCDriver.h';
     end
     
-	methods(Static = true) % GuoCheng 170605
+    methods(Static = true)
         function list = ListAdpter()
             driverfilename = [USTCADC.driver,'.dll'];
             if(~libisloaded(USTCADC.driver))
@@ -55,6 +56,7 @@ classdef USTCADC < handle
             end
         end
     end
+    
     methods
         function obj = USTCADC(num)
             obj.netcard_no = num;
@@ -64,12 +66,6 @@ classdef USTCADC < handle
             if(~libisloaded(obj.driver))
                 loadlibrary(driverfilename,obj.driverh);
             end
-        end
-        
-        function set.mac(obj,val)
-            % Yulin Wu, 170427
-            mac_str = regexp(val,'-', 'split');
-            obj.mac = hex2dec(mac_str);
         end
         
         function Open(obj)
@@ -173,80 +169,77 @@ classdef USTCADC < handle
            end
         end
         
-		function SetMode(obj,isdemo) % GuoCheng 170605
-            if obj.isopen
-                if(isdemo == 0)
-                    data = [1,1,17,17,17,17,17,17];
-                else
-                    data = [1,1,34,34,34,34,34,34];
-                end
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetMode failed!');
-                end
-            end       
-        end
+% the following block has to be removed on Newton system, Yulin Wu, 170628
+%        function SetMode(obj,isdemo)
+%            if obj.isopen
+%                if(isdemo == 0)
+%                    data = [1,1,17,17,17,17,17,17];
+%                else
+%                    data = [1,1,34,34,34,34,34,34];
+%                end
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetMode failed!');
+%                end
+%            end       
+%        end
         
-        function SetWindowLength(obj,length) % GuoCheng 170605
-            if obj.isopen
-                data = [0,20,floor(length/256),mod(length,256),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetWindowLength failed!');
-                end
-            end       
-        end
+%        function SetWindowLength(obj,length)
+%            if obj.isopen
+%                data = [0,20,floor(length/256),mod(length,256),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetWindowLength failed!');
+%                end
+%            end       
+%        end
         
-        function SetWindowStart(obj,pos) % GuoCheng 170605
-            if obj.isopen
-                data = [0,21,floor(pos/256),mod(pos,256),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetWindowStart failed!');
-                end
-            end 
-        end
+%        function SetWindowStart(obj,pos)
+%            if obj.isopen
+%                data = [0,21,floor(pos/256),mod(pos,256),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetWindowStart failed!');
+%                end
+%            end 
+%        end
         
-        function SetDemoFre(obj,fre) % GuoCheng 170605
-            if obj.isopen
-                step = fre/1e9*65536;
-                data = [0,22,floor(step/256),mod(step,256),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetDemoFre failed!');
-                end
-            end 
-        end
+%        function SetDemoFre(obj,fre)
+%            if obj.isopen
+%                step = fre/1e9*65536;
+%                data = [0,22,floor(step/256),mod(step,256),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetDemoFre failed!');
+%                end
+%            end 
+%        end
         
-        function SetGain(obj,mode) % GuoCheng 170605
-            if obj.isopen
-                switch mode
-                    case 1,code = [80,80];
-                    case 2,code = [0,0];
-                    case 3,code = [255,255];
-                end
-                data = [0,23,code(1),code(2),0,0,0,0];
-                pdata = libpointer('uint8Ptr', data);
-                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
-                if(ret ~= 0)
-                   error('USTCADC:SendPacket','SetGain failed!');
-                end
-            end 
+%        function SetGain(obj,mode)
+%            if obj.isopen
+%                switch mode
+%                    case 1,code = [80,80];
+%                    case 2,code = [0,0];
+%                    case 3,code = [255,255];
+%                end
+%                data = [0,23,code(1),code(2),0,0,0,0];
+%                pdata = libpointer('uint8Ptr', data);
+%                [ret,~] = calllib(obj.driver,'SendData',int32(8),pdata);
+%                if(ret ~= 0)
+%                   error('USTCADC:SendPacket','SetGain failed!');
+%                end
+%            end 
+%        end
+% an empty SetMode function is used on Newton system: Yulin Wu, 170628
+        function SetMode(obj,mode)
+            % pass
         end
         
         function [ret,I,Q] = RecvData(obj,row,column)
-            if obj.demod
-                [ret,I,Q] = RecvDemo(obj,row);
-            else
-                [ret,I,Q] = RecvRawData(obj,row,column);
-            end
-        end
-        
-        function [ret,I,Q] = RecvRawData(obj,row,column)
             if obj.isopen
                 I = zeros(row*column,1);
                 Q = zeros(row*column,1);
@@ -256,37 +249,38 @@ classdef USTCADC < handle
             end
         end
         
-        % removed by Yulin Wu, 170427
-		function [ret,I,Q] = RecvDemo(obj,row) % GuoCheng 170605
+        function [ret,I,Q] = RecvDemo(obj,row)
             if obj.isopen
                 IQ = zeros(2*row,1);
                 pIQ = libpointer('int32Ptr', IQ);
                 [ret,IQ] = calllib(obj.driver,'RecvDemo',int32(row),pIQ);
-                I = IQ(1:2:length(IQ));
-                Q = IQ(2:2:length(IQ));
-%                 if(ret ~= 0)
-%                     error('USTCADC:RecvDemo','Recive demode data error!')
-%                 end
+                if(ret == 0)
+                    I = IQ(1:2:length(IQ));
+                    Q = IQ(2:2:length(IQ));
+                else
+                    error('USTCADC:RecvDemo','Recive demode data error!')
+                end
             end
         end
-%         function set(obj,properties,value)
-%             switch properties
-%                 case 'mac'
-%                     mac_str = regexp(value,'-', 'split');
-%                     obj.mac = hex2dec(mac_str);
-%                 case 'name'; obj.name = value;
-%                 case 'sample_rate'; obj.sample_rate = value;
-%                 case 'channel_amount';obj.channel_amount = value;
-%             end
-%         end
-%         
-%         function value = get(obj,properties)
-%             switch properties
-%                 case 'mac';value = obj.mac;
-%                 case 'name'; value = obj.name;
-%                 case 'sample_rate'; value = obj.sample_rate;
-%                 case 'channel_amount';value = obj.channel_amount;
-%             end
-%         end
+        
+        function set(obj,properties,value)
+            switch properties
+                case 'mac';
+                    mac_str = regexp(value,'-', 'split');
+                    obj.mac = hex2dec(mac_str);
+                case 'name'; obj.name = value;
+                case 'sample_rate'; obj.sample_rate = value;
+                case 'channel_amount';obj.channel_amount = value;
+            end
+        end
+        
+        function value = get(obj,properties)
+            switch properties
+                case 'mac';value = obj.mac;
+                case 'name'; value = obj.name;
+                case 'sample_rate'; value = obj.sample_rate;
+                case 'channel_amount';value = obj.channel_amount;
+            end
+        end
      end
 end
