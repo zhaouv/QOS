@@ -44,7 +44,7 @@ function hwobj = hwCreator(s)
             else
                 switch s.interface.class
                     case 'visa'
-                        if ~isfield(s.interface,'vendor') || ~ismember(s.interface.vendor,{'ni','agilent'})
+                        if ~isfield(s.interface,'vendor') || ~ismember(s.interface.vendor,{'ni','agilent','tek'})
                             error('HardwareCreator:UnrecognizedHaredwareSettings','empty or unsupported visa vendor class ''%s'' in settings ''%s''', s.interface.vendor, s.name);
                         end
                         if ~isfield(s.interface,'rscname') || ~ischar(s.interface.rscname)

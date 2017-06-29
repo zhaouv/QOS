@@ -43,6 +43,7 @@ function varargout = ramsey(varargin)
             throw(MException('QOS_spin_echo:illegalModeTyp',...
                 sprintf('available modes are: df01, dz and dp, %s given.', args.mode)));
     end
+    varargout{1} = e;
     if args.fit % Add by GM, 170623
         Ramsey_data=e.data{1,1};
         Ramsey_time=args.time/2;
@@ -69,5 +70,4 @@ function varargout = ramsey(varargin)
             saveas(hf,dataSvName);
         end
     end
-    varargout{1} = e;
 end

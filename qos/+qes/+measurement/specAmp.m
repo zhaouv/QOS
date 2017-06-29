@@ -28,10 +28,20 @@ classdef specAmp < qes.measurement.measurement
 %             obj.InstrumentObject.stopfreq = obj.freq + 50;
 %             obj.InstrumentObject.numpts = 101;
 
-            obj.instrumentObject.bandwidth = 200;
-            obj.instrumentObject.startfreq = obj.freq - 100;
-            obj.instrumentObject.stopfreq = obj.freq + 100;
-            obj.instrumentObject.numpts = 201;
+            if ~isempty(strfind(obj.instrumentObject.name,'tek_rsa607a'))
+                obj.instrumentObject.bandwidth = 100;
+                obj.instrumentObject.startfreq = obj.freq - 500;
+                obj.instrumentObject.stopfreq = obj.freq + 500;
+%                 obj.instrumentObject.bandwidth = 1e6;
+%                 obj.instrumentObject.startfreq = obj.freq - 200e6;
+%                 obj.instrumentObject.stopfreq = obj.freq + 200e6;
+                obj.instrumentObject.numpts = 801;
+            else % agilent_N9030B
+                obj.instrumentObject.bandwidth = 200;
+                obj.instrumentObject.startfreq = obj.freq - 100;
+                obj.instrumentObject.stopfreq = obj.freq + 100;
+                obj.instrumentObject.numpts = 201;
+            end
             pause(0.3);
         end
         function set.avgnum(obj,val)
