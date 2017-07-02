@@ -137,7 +137,11 @@ function saveSettings(spath, field,value)
                             value = str(2:end);
                         end
                         newfilename = [field{1},'=',value,'.key'];
-                        movefile(fullfile(spath,fileinfo(ii).name),fullfile(spath,newfilename));
+                        try
+                            movefile(fullfile(spath,fileinfo(ii).name),fullfile(spath,newfilename));
+                        catch
+                            % pass, in case of setting to the current value
+                        end
                         % regist old_value to history
                         history_dir = fullfile(spath,'_history');
                         if ~exist(history_dir,'dir')

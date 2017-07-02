@@ -52,7 +52,7 @@ function doTheReset(qName)
 	setQSettings('f01',6e9,qName);
 	setQSettings('f02',11.5e9,qName);
 	
-	setQSettings('g_I_ln','',qName);
+	setQSettings('g_I_ln',0,qName);
 	setQSettings('g_X_amp','',qName);
 	setQSettings('g_X2m_amp','',qName);
 	setQSettings('g_X2p_amp','',qName);

@@ -205,7 +205,11 @@ classdef resonatorReadout < qes.measurement.prob
             obj.r_amp = val;
         end
 		function set.delay(obj,val)
-            if ~isempty(obj.startWv) && wvObj.length > obj.delay
+            if isempty(val) || val < 0
+                throw(MException('resonatorReadout:invalidInput',...
+					'delay value empty or negative.'));
+            end
+            if ~isempty(obj.startWv) && wvObj.length > val
                 throw(MException('QOS_resonatorReadout:delayTooShort',...
                     sprintf('startWv length(%0.0f) exceeding delay(%0.0f).',...
                     wvObj.length,val)));

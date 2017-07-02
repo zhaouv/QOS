@@ -43,7 +43,7 @@ function varargout = ramsey_dp(varargin)
 			'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 	
-	detuning = util.hvar(0);
+	detuning = qes.util.hvar(0);
 	da = qHandle.FindByClassProp('qes.hwdriver.hardware','name',...
 		q.channels.xy_i.instru);
 	daSamplingRate = da.samplingRate;

@@ -21,7 +21,7 @@ function qubits = loadQubits()
     num_fields = numel(fnames);
     qubits = {};
     for ii = 1:num_fields
-        if ismember(fnames{ii},{'public','data_path'}) ||...
+        if ismember(fnames{ii},{'shared','public','data_path'}) ||...
                 ~isstruct(s.(fnames{ii}))
             continue;
         end

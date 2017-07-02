@@ -18,8 +18,7 @@ function varargout = xyGateAmpTuner(varargin)
     % Yulin Wu, 2017/1/8
     import data_taking.public.xmon.rabi_amp1
 	
-	NUM_RABI_SAMPLING_PTS = 70;
-	NUM_RABI_SAMPLING_PTS_AE = 35;
+	NUM_RABI_SAMPLING_PTS = 40;
 	MIN_VISIBILITY = 0.3;
 	AE_NUM_PI = 11; % must be an positive odd number
 	
@@ -45,8 +44,43 @@ function varargout = xyGateAmpTuner(varargin)
 			throw(MException('QOS_xyGateAmpTuner:unsupportedGataType',...
 				sprintf('gate %s is not supported, supported types are %s',args.gateTyp,...
 				'X Y X/2 -X/2 X2m X2p X/4 -X/4 X4m X4p Y/2 -Y/2 Y2m Y2p Y/4 -Y/4 Y4m Y4p')));
-	end
-	amps = linspace(0,(1-da.dynamicReserve)*da.vpp/2,NUM_RABI_SAMPLING_PTS);
+    end
+    
+    
+    
+    QS = qes.qSettings.GetInstance();
+	switch args.gateTyp
+        case 'X'
+            gateAmpSettingsKey ='g_X_amp';
+        case {'X/2','X2p'}
+            gateAmpSettingsKey ='g_X2p_amp';
+        case {'-X/2','X2m'}
+            gateAmpSettingsKey ='g_X2m_amp';
+        case {'X/4','X4p'}
+            gateAmpSettingsKey ='g_X4p_amp';
+        case {'-X/4','X4m'}
+            gateAmpSettingsKey ='g_X4m_amp';
+        case 'Y'
+            gateAmpSettingsKey ='g_Y_amp';
+        case {'Y/2', 'Y2p'}
+            gateAmpSettingsKey ='g_Y2p_amp';
+        case {'-Y/2', 'Y2m'}
+            gateAmpSettingsKey ='g_Y2m_amp';
+        case {'Y/4','Y4p'}
+            gateAmpSettingsKey ='g_Y4p_amp';
+        case {'-Y/4','Y4m'}
+            gateAmpSettingsKey ='g_Y4m_amp';
+        otherwise
+            throw(MException('QOS_xyGateAmpTuner:unsupportedGataType',...
+                sprintf('gate %s is not supported, supported types are %s',args.gateTyp,...
+                'X Y X/2 -X/2 X2m X2p X/4 -X/4 X4m X4p Y/2 -Y/2 Y2m Y2p Y/4 -Y/4 Y4m Y4p')));
+    end
+    currentGateAmp = QS.loadSSettings({q.name,gateAmpSettingsKey});
+    if isempty(currentGateAmp)
+        amps = linspace(0,(1-da.dynamicReserve)*da.vpp/2,NUM_RABI_SAMPLING_PTS*2);
+    else
+        amps = linspace(0.5*currentGateAmp,min(1.5*currentGateAmp,(1-da.dynamicReserve)*da.vpp/2),NUM_RABI_SAMPLING_PTS);
+    end
 	e = rabi_amp1('qubit',q,'biasAmp',0,'biasLonger',0,'xyDriveAmp',amps,...
 		'detuning',0,'driveTyp',args.gateTyp,'gui',false,'save',false);
 	P = e.data{1};
@@ -116,11 +150,11 @@ function varargout = xyGateAmpTuner(varargin)
 
         switch args.gateTyp
             case {'X','Y'}
-                amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+                amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS);
             case {'X/2','-X/2','X2m','X2p','Y/2','-Y/2','Y2m','Y2p'}
-                amps_ae = linspace(0.85*gateAmp,min(da.vpp,1.15*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+                amps_ae = linspace(0.85*gateAmp,min(da.vpp,1.15*gateAmp),NUM_RABI_SAMPLING_PTS);
             case {'X/4','-X/4','X4m','X4p','Y/4','-Y/4','Y4m','Y4p'}
-                amps_ae = linspace(0.8*gateAmp,min(da.vpp,1.2*gateAmp),NUM_RABI_SAMPLING_PTS_AE);
+                amps_ae = linspace(0.8*gateAmp,min(da.vpp,1.2*gateAmp),NUM_RABI_SAMPLING_PTS);
         end
 		e = rabi_amp1('qubit',q,'biasAmp',0,'biasLonger',0,'xyDriveAmp',amps_ae,...
 			'detuning',0,'numPi',AE_NUM_PI,'driveTyp',args.gateTyp,'gui',false,'save',false);
@@ -179,29 +213,7 @@ function varargout = xyGateAmpTuner(varargin)
         end
     end
     if args.save
-        QS = qes.qSettings.GetInstance();
-		switch args.gateTyp
-			case 'X'
-				QS.saveSSettings({q.name,'g_X_amp'},gateAmp);
-			case {'X/2','X2p'}
-				QS.saveSSettings({q.name,'g_X2p_amp'},gateAmp);
-			case {'-X/2','X2m'}
-				QS.saveSSettings({q.name,'g_X2m_amp'},gateAmp);
-            case {'X/4','X4p'}
-				QS.saveSSettings({q.name,'g_X4p_amp'},gateAmp);
-            case {'-X/4','X4m'}
-				QS.saveSSettings({q.name,'g_X4m_amp'},gateAmp);
-			case 'Y'
-				QS.saveSSettings({q.name,'g_Y_amp'},gateAmp);
-			case {'Y/2', 'Y2p'}
-				QS.saveSSettings({q.name,'g_Y2p_amp'},gateAmp);
-			case {'-Y/2', 'Y2m'}
-				QS.saveSSettings({q.name,'g_Y2m_amp'},gateAmp);
-            case {'Y/4','Y4p'}
-				QS.saveSSettings({q.name,'g_Y4p_amp'},gateAmp);
-            case {'-Y/4','Y4m'}
-				QS.saveSSettings({q.name,'g_Y4m_amp'},gateAmp);
-		end
+        QS.saveSSettings({q.name,gateAmpSettingsKey},gateAmp);
     end
 	varargout{1} = gateAmp;
 end

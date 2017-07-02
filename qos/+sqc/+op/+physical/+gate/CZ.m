@@ -1,45 +1,24 @@
-classdef CZ < sqc.op.physical.operator
-    % controled Z gate
+function g = CZ(control_q, target_q)
+	% controled Z gate
     
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
-
-	properties
-		swapTime
-		swapAmp
-		swapW
-		paddingLn
-	end
-    methods
-        function obj = CZ(control_q, target_q)
-            obj = obj@sqc.op.physical.operator({control_q, target_q});
+	import sqc.op.physical.gate.*
+    
+%     aczSettingsKey = sprintf('%c_%2.3f_%c_%2.3f',...
+%                 control_q.name,control_q.f01/1e9,...
+%                 target_q.name,target_q.f01/1e9);
             
-            error('to be implemeted');
-			% use sqc.op.physical.op.Detune to detune other qubits
-        end
-    end
-	methods (Hidden = true)
-        function GenWave(obj)
-            obj.z_wv{1} = sqc.wv.rect_acz(obj.length,obj.qubits{1}.);
-            persistent da1
-            if isempty(da1)
-                da1 = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
-                        'name',obj.qubits{1}.channels.z_pulse.instru);
-            end
-            obj.z_wv{1}.awg = da1;
-            obj.z_wv{1}.awgchnl = [obj.qubits{1}.channels.z_pulse.chnl];
-			
-			obj.z_wv{2} = sqc.wv.flattop(obj.length,obj.qubits{2}.);
-            persistent da2
-            if isempty(da2)
-                da2 = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
-                        'name',obj.qubits{2}.channels.z_pulse.instru);
-            end
-            obj.z_wv{2}.awg = da2;
-            obj.z_wv{2}.awgchnl = [obj.qubits{2}.channels.z_pulse.chnl];
-			
-			% apply detune to other qubits
-			% todo...
-        end
-    end
+    aczSettingsKey = sprintf('%s_%s',control_q.name,target_q.name);
+            
+    QS = qes.qSettings.GetInstance();
+    scz = QS.loadSSettings({'shared','g_cz',aczSettingsKey});
+    
+	switch scz.typ
+		case {'acz','ACZ'}
+			g = ACZ(control_q, target_q, scz);
+		otherwise
+			error('unrecognized ACZ gate type: %s, available z gate options are: acz',...
+				scz.typ);
+	end
 end
