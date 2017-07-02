@@ -1,22 +1,22 @@
-function g = CZ(control_q, target_q)
-	% controled Z gate
+function g = CZ(q1, q2)
+	% controled Z gate:
+    % [1,0,0,0
+    %  0,1,0,0
+    %  0,0,1,0
+    %  0,0,0,-1];
     
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 	import sqc.op.physical.gate.*
-    
-%     aczSettingsKey = sprintf('%c_%2.3f_%c_%2.3f',...
-%                 control_q.name,control_q.f01/1e9,...
-%                 target_q.name,target_q.f01/1e9);
-            
-    aczSettingsKey = sprintf('%s_%s',control_q.name,target_q.name);
+       
+    aczSettingsKey = sprintf('%s_%s',q1.name,q2.name);
             
     QS = qes.qSettings.GetInstance();
     scz = QS.loadSSettings({'shared','g_cz',aczSettingsKey});
     
 	switch scz.typ
 		case {'acz','ACZ'}
-			g = ACZ(control_q, target_q, scz);
+			g = ACZ(q1, q2, scz);
 		otherwise
 			error('unrecognized ACZ gate type: %s, available z gate options are: acz',...
 				scz.typ);

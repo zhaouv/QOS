@@ -18,7 +18,8 @@ classdef ACZ < sqc.op.physical.operator
         meetUpDetuneFreq
     end
     properties (SetAccess = private, GetAccess = private)
-        tuneDown
+        aczQ
+        meetUpQ
     end
     methods
         function obj = ACZ(control_q, target_q, scz)
@@ -30,10 +31,12 @@ classdef ACZ < sqc.op.physical.operator
             obj.lam3 = scz.lam3;
             obj.padLn = scz.padLn;
             obj.length = scz.length;
-            if obj.qubits{1}.f01 > obj.qubits{2}.f01
-                obj.tuneDown = true;
+            if scz.aczFirstQ
+                obj.aczQ = 1;
+                obj.meetUpQ = 2;
             else
-                obj.tuneDown = false;
+                obj.aczQ = 2;
+                obj.meetUpQ = 1;
             end
             obj.ln = scz.length;
         end
@@ -50,14 +53,8 @@ classdef ACZ < sqc.op.physical.operator
             obj.z_wv{1}.thi = obj.thi;
             obj.z_wv{1}.lam2 = obj.lam2;
             obj.z_wv{1}.lam3 = obj.lam3;
-            
-            if obj.tuneDown
-                acz_q = obj.qubits{1};
-                meetUp_q = obj.qubits{2};
-            else
-                acz_q = obj.qubits{2};
-                meetUp_q = obj.qubits{1};
-            end
+            acz_q = obj.qubits{obj.aczQ};
+            meetUp_q = obj.qubits{obj.meetUpQ};
             persistent da1
             if isempty(da1)
                 da1 = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...

@@ -30,11 +30,13 @@ function varargout = acz_ramsey(varargin)
     if args.cState == '0'
         X.amp = 0;
     end
-
+    Ip = gate.I(qt);
+    Ip.ln = X.length;
             
     X2 = gate.X2p(qt);
-    I = gate.I(qt);
-    I.ln = args.czDelay;
+    % H = gate.
+    Id = gate.I(qt);
+    Id.ln = args.czDelay;
     CZ = gate.CZ(qc,qt);
     R = measure.resonatorReadout_ss(qt);
     R.state = 2;
@@ -44,7 +46,8 @@ function varargout = acz_ramsey(varargin)
     function procFactory(amp)
         CZ.ln = czLength.val;
         CZ.amp = amp;
-        proc = (X.*X2_)*I*CZ*I*X2;
+        % proc = (X.*X2_)*Id*CZ*Id*X2;
+        proc = ((X.*Ip)*X2_)*Id*CZ*Id*X2;
         proc.Run();
         R.delay = proc.length;
     end
@@ -60,7 +63,7 @@ function varargout = acz_ramsey(varargin)
     s2.vals = args.czAmp;
     e = experiment();
     e.name = 'ACZ amplitude';
-    e.sweeps = [s2];
+    e.sweeps = [s1,s2];
     e.measurements = R;
     e.datafileprefix = sprintf('CZ%s%s', qc.name,qt.name);
     if ~args.gui
