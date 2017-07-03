@@ -53,6 +53,7 @@ classdef (Sealed = true) flattop < qes.waveform.waveform
 %             v3 = obj.overshoot*sign(obj.amp)*(exp(-1j*2*pi*f*obj.t0)+exp(-1j*2*pi*f*(obj.t0 + obj.length-1)));
             v3 = obj.overshoot*sign(obj.amp)*(exp(-1j*2*pi*f*obj.t0)+exp(-1j*2*pi*f*(obj.t0 + obj.length)));
             v = v1.*v2+v3;
+            % v = (v1+v3).*v2; % the same as v1.*v2+v3
         end
     end
 end
