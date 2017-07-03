@@ -1,4 +1,7 @@
 function varargout = acz_ramsey(varargin)
+% ramsey: ramsey oscillation,..
+% detune by changing the second pi/2 pulse tracking frame
+% 
 % <_o_> = acz_ramsey('controlQ',_c&o_,'targetQ',_c&o_,...
 %       'czLength',[_i_],'czAmp',[_f_],'czDelay',<_i_>,'cState','0'...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
@@ -43,8 +46,7 @@ function varargout = acz_ramsey(varargin)
     function procFactory(amp)
         CZ.ln = czLength.val;
         CZ.amp = amp;
-        proc = ((X.*Ip)*Y2m)*Id*CZ*Id*Y2p;  % CNOT
-        % proc = (X.*Y2m)*Id*CZ*Id*Y2p;
+        proc = ((X.*Ip)*Y2m)*Id*CZ*Id*Y2p;
         proc.Run();
         R.delay = proc.length;
     end

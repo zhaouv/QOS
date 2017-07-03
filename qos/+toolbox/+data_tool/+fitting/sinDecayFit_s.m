@@ -44,4 +44,4 @@ C = Coefficients(2);
 D = Coefficients(3);
 freq = Coefficients(4);
 td = Coefficients(5);
-P = B*(exp(-t/td).*(sin(2*pi*freq*t+D)+C));
+P = B*(exp(-(t/td)).*(sin(2*pi*freq*t+D)+C));

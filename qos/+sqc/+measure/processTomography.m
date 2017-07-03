@@ -1,8 +1,10 @@
 classdef processTomography < qes.measurement.measurement
     % process tomography
+    % data: 4^n by 3^n by 2^n, n, number of qubits
     
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
+
 	properties
 		showProgress@logical scalar = true; % print measurement progress to command window or not
 	end
@@ -35,7 +37,7 @@ classdef processTomography < qes.measurement.measurement
             obj.process = process;
 			obj.qubits = qubits;
 			numTomoQs = numel(obj.qubits);
-			obj.statePrepGates = cell(numTomoQs);
+			obj.statePrepGates = cell(1,numTomoQs);
 			for ii = 1:numTomoQs
 				% gates that prepares the qubit onto states: {|0>, |1>, |0>+|1>, |0>+i|1>}
 				obj.statePrepGates{ii} = {I(obj.qubits{ii}),...

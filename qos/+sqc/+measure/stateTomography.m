@@ -31,7 +31,7 @@ classdef stateTomography < qes.measurement.measurement
             end
             obj = obj@qes.measurement.measurement([]);
 			obj.qubits = qubits;
-			obj.readoutGates = cell(numTomoQs);
+			obj.readoutGates = cell(1,numTomoQs);
 			for ii = 1:numTomoQs
 				obj.readoutGates{ii} = {Y2m(obj.qubits{ii}),...
 										X2p(obj.qubits{ii}),...

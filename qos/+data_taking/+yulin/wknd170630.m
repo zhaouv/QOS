@@ -7,7 +7,7 @@ tuneup.optReadoutFreq('qubit','q7','gui',true,'save','askMe');
 % tuneup.correctf01bySpc('qubit','q7','gui',true,'save','askMe');
 tuneup.correctf01byRamsey('qubit','q7','gui',true,'save','askMe');
 %%
-tuneup.xyGateAmpTuner('qubit','q7','gateTyp','X/2','AE',true,'gui',true,'save','askMe');
+tuneup.xyGateAmpTuner('qubit','q7','gateTyp','X','AE',true,'gui',true,'save','askMe');
 
 
 %%
@@ -20,7 +20,7 @@ tuneup.optReadoutFreq('qubit','q8','gui',true,'save','askMe');
 % tuneup.correctf01bySpc('qubit','q8','gui',true,'save','askMe');
 tuneup.correctf01byRamsey('qubit','q8','gui',true,'save','askMe');
 %%
-tuneup.xyGateAmpTuner('qubit','q8','gateTyp','X','AE',true,'gui',true,'save','askMe');
+tuneup.xyGateAmpTuner('qubit','q8','gateTyp','-Y/2','AE',true,'gui',true,'save','askMe');
 
 
 %%

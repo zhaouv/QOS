@@ -51,7 +51,7 @@ function varargout = correctf01byRamsey(varargin)
     
     [B,C,D,freqp,tdp,cip] =...
         toolbox.data_tool.fitting.sinDecayFit_s(...
-        t,Pp,0.5,1,pi/2,MAXFREQDRIFT,5e-6);
+        t,Pp,0.5,1,pi/2,toolbox.data_tool.fitting.FFT_Peak(t,Pp),5e-6);
     Ppf = B*(exp(-tf/tdp).*(sin(2*pi*freqp*tf+D)+C));
     
     
@@ -75,7 +75,7 @@ function varargout = correctf01byRamsey(varargin)
 
     [B,C,D,freqn,tdn,cin] =...
         toolbox.data_tool.fitting.sinDecayFit_s(...
-        t,Pn,0.5,1,pi/2,MAXFREQDRIFT,5e-6);
+        t,Pn,0.5,1,pi/2,toolbox.data_tool.fitting.FFT_Peak(t,Pn),5e-6);
     
     Pnf = B*(exp(-tf/tdn).*(sin(2*pi*freqn*tf+D)+C));
     

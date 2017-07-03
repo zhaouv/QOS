@@ -81,3 +81,8 @@ figure();plot(freqs, real(sampleSpectrum), freqs, real(s));
 %         fast_phase = -2.0 * np.pi * (self.end+self.start)/2  * f
 % 
 %         return (interpSpecFuncR(f) + 1j*interpSpecFuncI(f)) * np.exp(1j*fast_phase) * kernel
+%%
+g = sqc.wv.acz(100);
+t = -10:0.2:110;
+figure();plot(t,g(t));
+
