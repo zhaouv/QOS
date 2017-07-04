@@ -81,4 +81,9 @@ g3.df = df;
 hold on;plot(t, g3(t));
 
 
+%%
+g = sqc.wv.acz(100);
+t = -10:0.2:110;
+figure();plot(t,g(t));
+
 

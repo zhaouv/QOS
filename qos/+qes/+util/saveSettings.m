@@ -116,7 +116,7 @@ function saveSettings(spath, field,value)
                                 	'value type of the current settings field is numeric, %s given.', class(value));
                             else
                                 value = regexprep(value,'\s+','');
-                                if ~ismember(value,{'true','True','false','False'})
+                                if ~ismember(value,{'true','True','false','False',''})
                                     value = regexprep(value,',\.',',0\.');
                                     value = regexprep(value,'\[\.','[0\.');
                                     if isnan(str2double(value)) &&...
@@ -137,7 +137,11 @@ function saveSettings(spath, field,value)
                             value = str(2:end);
                         end
                         newfilename = [field{1},'=',value,'.key'];
-                        movefile(fullfile(spath,fileinfo(ii).name),fullfile(spath,newfilename));
+                        try
+                            movefile(fullfile(spath,fileinfo(ii).name),fullfile(spath,newfilename));
+                        catch
+                            % pass, in case of setting to the current value
+                        end
                         % regist old_value to history
                         history_dir = fullfile(spath,'_history');
                         if ~exist(history_dir,'dir')

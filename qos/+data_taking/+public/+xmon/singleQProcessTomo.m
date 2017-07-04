@@ -25,7 +25,7 @@ function varargout = singleQProcessTomo(varargin)
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'state','|0>','reps',1,'gui',false,'notes','','detuning',0,'save',true});
+    args = util.processArgs(varargin,{'reps',1,'gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     switch args.process

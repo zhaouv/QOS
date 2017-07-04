@@ -112,8 +112,8 @@ classdef (Abstract = true)prob_iq_ustc_ad < qes.measurement.prob
             else
 				p = zeros(obj.num_qs,obj.n);
                 for ii = 1:obj.num_qs
-                    d0 = abs(iq_raw(ii,:) - obj.center0);
-                    d1 = abs(iq_raw(ii,:) - obj.center1);
+                    d0 = abs(iq_raw(ii,:) - obj.center0(ii));
+                    d1 = abs(iq_raw(ii,:) - obj.center1(ii));
                     [~,minIdx] = min([d0; d1],[],1);
 					p(ii,:) = minIdx-1;
                 end

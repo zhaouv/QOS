@@ -18,6 +18,7 @@ classdef iq_ustc_ad < qes.measurement.iq
         eps_a = 0 % mixer amplitude correction
         eps_p = 0 % mixer phase correction
         upSampleNum = 1 % upsample to match DA sampling rate
+        iqWeight
     end
     properties (SetAccess = private, GetAccess = private)
         % Cached variables
@@ -57,7 +58,8 @@ classdef iq_ustc_ad < qes.measurement.iq
 					obj.IQ = NaN*zeros(numel(obj.freq),obj.n);
 				end
 				calcCachedVar(obj);
-			end
+            end
+            obj.iqWeight = cell(1,numel(obj.freq));
         end
         function set.upSampleNum(obj,val)
             if isempty(val)
@@ -132,13 +134,13 @@ classdef iq_ustc_ad < qes.measurement.iq
 				Vi = double(Vi) -127;
 				Vq = double(Vq) -127;
 %             tic
-%             IQ = obj.Run_BothChnl(Vi,Vq);
+%             IQ = obj.demod(Vi,Vq);
 % %             toc 
 %             obj.data = mean(IQ);
 %             obj.extradata = IQ;
 
 %              tic
-				obj.Run_BothChnl(Vi,Vq);
+				obj.demod(Vi,Vq);
 			end           
 %               toc 
             obj.data = mean(obj.IQ);
@@ -168,8 +170,8 @@ classdef iq_ustc_ad < qes.measurement.iq
                 end
             end
         end
-%         function IQ = Run_BothChnl(obj,Vi, Vq)
-          function Run_BothChnl(obj, Vi, Vq)
+%         function IQ = demod(obj,Vi, Vq)
+          function demod(obj, Vi, Vq)
 %             NperSeg = obj.instrumentObject.recordLength;
 %             if isempty(obj.endidx)
 %                 eidx = NperSeg;
@@ -186,10 +188,19 @@ classdef iq_ustc_ad < qes.measurement.iq
             Vq = Vq(:,obj.selectidx);
 
             for ii = 1:numel(obj.freq)
-                for jj = 1:obj.n
-                    IQ_ = obj.kernel(ii,:).*(Vi(jj,:)+1j*Vq(jj,:));
-                    IQ_ = mean(obj.Mc*[real(IQ_);imag(IQ_)],2); % correct mixer imballance
-                    obj.IQ(ii,jj) = IQ_(1)+1j*IQ_(2);
+                if isempty(obj.iqWeight{ii})
+                    for jj = 1:obj.n
+                        IQ_ = obj.kernel(ii,:).*(Vi(jj,:)+1j*Vq(jj,:));
+                        IQ_ = mean(obj.Mc*[real(IQ_);imag(IQ_)],2); % correct mixer imballance
+                        obj.IQ(ii,jj) = IQ_(1)+1j*IQ_(2);
+                    end
+                else
+                    for jj = 1:obj.n
+                        IQ_ = obj.kernel(ii,:).*(Vi(jj,:)+1j*Vq(jj,:));
+                        IQ_ = mean(obj.Mc*[real(IQ_)*obj.iqWeight{ii}(1,:);...
+                            imag(IQ_)*obj.iqWeight{ii}(2,:)],2); % correct mixer imballance
+                        obj.IQ(ii,jj) = IQ_(1)+1j*IQ_(2);
+                    end
                 end
             end
         end

@@ -26,7 +26,7 @@ function varargout = correctf01bySpc(varargin)
     args = qes.util.processArgs(varargin,{'gui',false,'save',true});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 
-    f = q.f01-5*q.t_spcFWHM_est:q.t_spcFWHM_est/15:q.f01+5*q.t_spcFWHM_est;
+    f = q.f01-10*q.t_spcFWHM_est:q.t_spcFWHM_est/15:q.f01+10*q.t_spcFWHM_est;
     e = spectroscopy1_zpa('qubit',q,'driveFreq',f,'save',false,'gui',false);
     P = e.data{1};
     
@@ -85,7 +85,7 @@ function varargout = correctf01bySpc(varargin)
     end
 	if args.save
         QS = qes.qSettings.GetInstance();
-        QS.saveSSettings({q.name,'f01'},f01);
+        QS.saveSSettings({q.name,'f01'},num2str(f01,'%0.5f'));
     end
 	varargout{2} = f01;
 end

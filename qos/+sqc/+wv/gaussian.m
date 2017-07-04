@@ -25,7 +25,10 @@ classdef (Sealed = true) gaussian < qes.waveform.waveform
 %             v = obj.amp*exp(-(t- obj.t0 -(obj.length-1)/2).^2/(2*(obj.rsigma*obj.length)^2))...
 %                 .*exp(1j*2*pi*obj.freq*t-1j*obj.phase); % this is just frequency mixing
 %             v = obj.amp*exp(-(t- obj.t0 -(obj.length-1)/2).^2/(2*(obj.rsigma*obj.length)^2));
-            v = obj.amp*exp(-(t- obj.t0 -(obj.length-1)/2).^2/(2*(obj.rsigma*(obj.length-1))^2));
+
+             v = obj.amp*exp(-(t- obj.t0 -(obj.length-1)/2).^2/(2*(obj.rsigma*(obj.length-1))^2));
+
+%            v = obj.amp*exp(-(t- obj.t0 -obj.length/2).^2/(2*(obj.rsigma*obj.length)^2));
         end
         function v = FreqFcn(obj,f)
             sigma = obj.rsigma*(obj.length-1);

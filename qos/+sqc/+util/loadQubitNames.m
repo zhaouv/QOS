@@ -25,7 +25,7 @@ function qNames = loadQubitNames()
             continue;
         end
         qs = s.(fnames{ii});
-        if ~isfield(qs,'type') || ~strcmp(qs.type,'qubit')
+        if ~isfield(qs,'type') || ~strcmp(qs.type,'qubit') 
             continue;
         end
         if ~isfield(qs,'class')
