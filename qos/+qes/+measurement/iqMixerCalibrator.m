@@ -277,11 +277,11 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 return;
             end
 			
-            pulse_ln = qes.util.best_fit_count(abs(obj.sb_freq));
+            pulse_len = qes.util.best_fit_count(abs(obj.sb_freq));
             
 			awg_ = obj.awg;
 			awgchnl_ = [obj.i_chnl, obj.q_chnl];
-            IQ = qes.waveform.dc(pulse_ln);
+            IQ = qes.waveform.dc(pulse_len);
             IQ.dcval = obj.iqAmp;
             IQ.df = obj.sb_freq/obj.awg.samplingRate;
             IQ.fc = obj.lo_freq;
@@ -293,20 +293,22 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 			IQ_op = copy(IQ);
 			IQ_op.df = -obj.sb_freq/obj.awg.samplingRate;
             
-            WaveformObj=IQ;
+            WaveformObj=qes.util.hvar;
             
             function wv = calWv(comp_)
 				wv = IQ + comp_(1)*IQ_op+comp_(2)*1j*IQ_op;
 				wv.awg = awg_;
 				wv.awgchnl = awgchnl_;
                 wv.fc=IQ.fc;
-                WaveformObj=wv
+                WaveformObj.val=wv;
+%                 qes.waveform.fcns.Show(comp_(1)*IQ_op);
+%                 qes.waveform.fcns.Show(WaveformObj);
 			end
 			
 			p = qes.expParam(@calWv);
 %             p.callbacks ={@(x_) x_.awg.RunContinuousWv(x_)};
 % 			p.callbacks ={@(x_) disp(x_)};
-            p.callbacks ={@(x_) awg_.RunContinuousWv(WaveformObj)};
+            p.callbacks ={@(x_) awg_.RunContinuousWv(WaveformObj.val)};
             
             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
             f = qes.expFcn(p,obj.spc_amp_obj);
