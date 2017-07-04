@@ -29,6 +29,10 @@ function varargout = twoQProcessTomo(varargin)
     [q1,q2] = data_taking.public.util.getQubits(args,{'qubit1','qubit2'});
 
     switch args.process
+        case 'I'
+            I1 = gate.I(q1);
+            I2 = gate.I(q2);
+            p = I2*I1;
         case 'CZ'
             p = gate.CZ(q1,q2); % q1, control qubit, q2, target qubit
         case 'CNOT'
