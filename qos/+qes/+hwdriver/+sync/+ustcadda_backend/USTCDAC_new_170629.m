@@ -2,39 +2,40 @@
 % 	Author:GuoCheng
 % 	E-mail:fortune@mail.ustc.edu.cn
 % 	All right reserved @ GuoCheng.
-% 	Modified: 2017.2.26
+% 	Modified: 2017.4.26
 %   Description:The class of DAC
 
 classdef USTCDAC < handle
     properties (SetAccess = private)
-        id = [];            %è®¾å¤‡æ ‡è¯†
-        ip = '';            %è®¾å¤‡ip
-        port = 80;          %ç«¯å?£å??
-        status = 'close';   %æ‰“å¼€çŠ¶æ?
-        isopen = 0;         %æ‰“å¼€çŠ¶æ?
-        isblock = 0;        %æ˜¯å?¦ä»¥é˜»å¡žæ¨¡å¼?è¿?è¡?
+        id = [];            
+        ip = '';           
+        port = 80;         
+        status = 'close';   
+        isopen = 0;         
+        isblock = 0;        
     end
     
-    properties (SetAccess = private)
-        name = '';              %DACå??å­—
-        channel_amount = 4;     %DACé€šé?“æ•°ç›®
-        sample_rate = 2e9;      %é‡‡æ ·çŽ?
-        sync_delay = 0;         %DACæ?¿å­?çš„å?Œæ­¥å»¶æ—?
-        trig_delay = 0;         %DACè§¦å?‘è¾“å‡ºå»¶æ—¶
-        da_range = 0.8;         %æœ?¤§ç”µåŽ‹ï¼Œæœªä½¿ç”¨
-        gain = zeros(1,4);      %é€šé?“å¢žç›Š
-        offset = zeros(1,4);    %é€šé?“å??ç½®
-        offsetcorr  = zeros(1,4); % å…³é—­DACç”µåŽ‹
+    properties % (SetAccess = private) % changed to public, Yulin Wu, 170427
+        name = '';              
+        channel_amount = 4;     
+        sample_rate = 2e9;      
+        sync_delay = 0;        
+        trig_delay = 0;         
+        da_range = 0.8;         
+        gain = zeros(1,4);     
+        offset = zeros(1,4);    
+        offsetcorr  = zeros(1,4); 
         
-        trig_sel = 0;           %è§¦å?‘æº?é?æ‹?
-        trig_interval = 200e-6; %ä¸»æ?¿è¿žç»­è§¦å?‘è¾“å‡ºæ—¶é—´é—´éš”
-        ismaster = 0;           %ä¸»æ?¿æ ‡è¯†
-        daTrigDelayOffset = 0;  %æœªä½¿ç”?
+        trig_sel = 0;           
+        trig_interval = 200e-6;
+%         ismaster = 0;           
+        ismaster = false;           %Yulin Wu
+        daTrigDelayOffset = 0;  
     end
     
     properties (GetAccess = private,Constant = true)
-        driver  = 'USTCDACDriver';   %é©±åŠ¨å??
-        driverh = 'USTCDACDriver.h'; %å¤´æ–‡ä»¶å??
+        driver  = 'USTCDACDriver';   
+        driverh = 'USTCDACDriver.h'; 
     end
     
     methods (Static = true)
@@ -44,7 +45,8 @@ classdef USTCDAC < handle
                 driverfilename = [USTCDAC.driver,'.dll'];
                 loadlibrary(driverfilename,USTCDAC.driverh);
             end
-            [ret,version] = calllib(USTCDAC.driver,'GetSoftInformation','');
+            str = libpointer('cstring',blanks(50));
+            [ret,version] = calllib(USTCDAC.driver,'GetSoftInformation',str);
             if(ret == 0)
                 info = version;
             else
@@ -78,16 +80,18 @@ classdef USTCDAC < handle
         end
              
         function Open(obj)              %open the device
-            if ~obj.isopen
-                [ret,obj.id,~] = calllib(obj.driver,'Open',0,obj.ip,obj.port);
-                if(ret == 0)
-                    obj.status = 'open';
-                    obj.isopen = true;
-                else
-                   error('USTCDA:OpenError','Open DAC failed!');
-                end
-                 obj.Init();
+            if obj.isopen
+                return;
             end
+            [ret,obj.id,~] = calllib(obj.driver,'Open',0,obj.ip,obj.port);
+            if(ret == 0)
+                obj.status = 'open';
+                obj.isopen = true;
+            else
+               throw(MException('USTCDAC:OpenError',...
+                   sprintf('Open DAC %s failed!',obj.name))); % Yulin Wu
+            end
+             obj.Init();
         end
          
         function Init(obj)
@@ -113,16 +117,27 @@ classdef USTCDAC < handle
             
             while(try_count > 0 && ~isDACReady)
                 obj.isblock = 1;
+                arr = zeros(1,8);
+                idx = 1;
+                for addr = 1136:1139
+                    arr(idx) = obj.ReadAD9136_1(addr);
+                    arr(idx+1) = obj.ReadAD9136_2(addr);
+                    idx = idx + 2;
+                end
                 ret = obj.ReadReg(5,8);
                 obj.isblock = 0;
-                if(mod(floor(ret/(2^20)),4) == 3)
-                    isDACReady = 1;
-                else
+                
+                arr = mod(arr,256);
+                if(sum(arr == 255) == length(arr) && mod(floor(ret/(2^20)),4) == 3)
+                    isDACReady= 1;
+                else                 
                     obj.InitBoard();
                     try_count =  try_count - 1;
-                    pause(0.1);
+                    pause(1);
                 end
+                
             end
+            
             if(isDACReady == 0)
                 error('USTCDAC:InitError','Config DAC failed!');
             end
@@ -140,7 +155,8 @@ classdef USTCDAC < handle
             if obj.isopen
                 ret = calllib(obj.driver,'Close',uint32(obj.id));
                 if(ret == -1)
-                    error('USTCDA:CloseError','Close DA failed.');              
+                    throw(MException('USTCDAC:CloseError',...
+                        sprintf('Close DAC %s failed!',obj.name))); % Yulin Wu         
                 end
                 obj.id = [];
                 obj.status = 'closed';
@@ -162,10 +178,11 @@ classdef USTCDAC < handle
             obj.AutoOpen();
             ret = calllib(obj.driver,'WriteInstruction', obj.id,uint32(hex2dec('00000405')),uint32(index),0);
             if(ret == -1)
-                error('USTCDAC:StartStopError','Start/Stop failed.');
+                throw(MException('USTCDAC:StartStopError',...
+                        sprintf('Start/Stop DAC %s failed!',obj.name))); % Yulin Wu   
             end
         end
-       % è¯¥å‡½æ•°æœªä½¿ç”¨
+
         function FlipRAM(obj,index)
             obj.AutoOpen();
             ret = calllib(obj.driver,'WriteInstruction', obj.id,uint32(hex2dec('00000305')),uint32(index),0);
@@ -268,7 +285,7 @@ classdef USTCDAC < handle
         
         function SetGain(obj,channel,data)
              obj.AutoOpen();
-             map = [2,3,0,1];       %æœ‰bugï¼Œéœ€è¦?å?šä¸?¬¡æ˜ å°„
+             map = [2,3,0,1];       
              channel = map(channel+1);
              ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00000702')),uint32(channel),uint32(data));
              if(ret == -1)
@@ -278,7 +295,7 @@ classdef USTCDAC < handle
         
         function SetOffset(obj,channel,data)
             obj.AutoOpen();
-            map = [6,7,4,5];       %æœ‰bugï¼Œéœ€è¦?å?šä¸?¬¡æ˜ å°„
+            map = [6,7,4,5];       
             channel = map(channel+1);
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00000702')),uint32(channel),uint32(data));
             if(ret == -1)
@@ -288,7 +305,6 @@ classdef USTCDAC < handle
         
         function SetDefaultVolt(obj,channel,volt)
             obj.AutoOpen();
-            volt = mod(volt,256)*256 + floor(volt/256);    %é«˜ä½Žä½?åˆ‡æ??
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00001B05')),uint32(channel),uint32(volt));
             if(ret == -1)
                  error('USTCDAC:WriteOffset','WriteOffset failed.');
@@ -297,7 +313,7 @@ classdef USTCDAC < handle
         
         function WriteReg(obj,bank,addr,data)
              obj.AutoOpen();
-             cmd = bank*256 + 2; %1è¡¨ç¤ºReadRegï¼ŒæŒ‡ä»¤å’Œbankå­˜å‚¨åœ¨ä¸€ä¸ªDWORDæ•°æ?®ä¸?
+             cmd = bank*256 + 2; 
              ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(cmd),uint32(addr),uint32(data));
              if(ret == -1)
                  error('USTCDAC:WriteRegError','WriteReg failed.');
@@ -306,10 +322,8 @@ classdef USTCDAC < handle
         
         function WriteWave(obj,ch,offset,wave)
             obj.AutoOpen();
-            % èŒƒå›´é™?åˆ¶
             wave(wave > 65535) = 65535;
             wave(wave < 0) = 0;
-            % è¡¥å¤Ÿ512bitçš„ä½?å®½æ•´æ•°å?
             data = wave;
             len = length(wave);
             if(mod(len,32) ~= 0)
@@ -317,15 +331,12 @@ classdef USTCDAC < handle
                 data = zeros(1,len);
                 data(1:length(wave)) = wave;
             end            
-            % é¢ å?å‰?å?Žæ•°æ?®ï¼Œè¿™æ˜¯ç”±äºŽFPGAæŽ¥æ”¶å­—èŠ‚åº?é—®é¢?
             for k = 1:length(data)/2
                 temp = data(2*k);
                 data(2*k) = data(2*k-1);
                 data(2*k-1) = temp;
             end
-            % æ•°æ?®å??ç›¸ï¼Œä¸´æ—¶éœ€è¦?
             data = 65535 - data;
-            % ä»?é€šé?“å¼?§‹ç¼–å?·
             ch = ch - 1;
             ch(ch < 0) = 0;
             startaddr = ch*2*2^18+2*offset;
@@ -339,7 +350,6 @@ classdef USTCDAC < handle
         
         function WriteSeq(obj,ch,offset,seq)
             obj.AutoOpen();
-            % è¡¥å¤Ÿ512bitä½?å®½
             len = length(seq);
             data = seq;
             if(mod(len,32) ~= 0)
@@ -347,18 +357,16 @@ classdef USTCDAC < handle
                 data = zeros(1,len);
                 data(1:length(seq)) = seq;
             end
-            % ä»?é€šé?“å¼?§‹ç¼–å?·
             ch = ch - 1;
             ch(ch < 0) = 0;
-            startaddr = (ch*2+1)*2^18+offset*8; %åº?åˆ—çš„å†…å­˜èµ·å§‹åœ°å??¼Œå?•ä½?æ˜¯å­—èŠ‚ã?
-            len = length(data)*2;               %å­—èŠ‚ä¸ªæ•°ã€?
+            startaddr = (ch*2+1)*2^18+offset*8; 
+            len = length(data)*2;             
             pval = libpointer('uint16Ptr', data);
             [ret,~] = calllib(obj.driver,'WriteMemory',obj.id,uint32(hex2dec('00000004')),uint32(startaddr),uint32(len),pval);
             if(ret == -1)
                 error('USTCDAC:WriteSeqError','WriteSeq failed.');
             end
         end
-       % è¯¥å‡½æ•°æœªä½¿ç”¨
         function wave = ReadWave(obj,ch,offset,len)
               obj.AutoOpen();
               wave = [];
@@ -372,7 +380,6 @@ classdef USTCDAC < handle
                   error('USTCDAC:ReadWaveError','ReadWave failed.');
               end
         end
-       % è¯¥å‡½æ•°æœªä½¿ç”¨
         function seq = ReadSeq(obj,ch,offset,len)
               obj.AutoOpen();
               startaddr = (ch*2+1)*2^18 + offset*8;
@@ -388,7 +395,7 @@ classdef USTCDAC < handle
         
         function reg = ReadReg(obj,bank,addr)
              obj.AutoOpen();
-             cmd = bank*256 + 1; %1è¡¨ç¤ºReadRegï¼ŒæŒ‡ä»¤å’Œbankå­˜å‚¨åœ¨ä¸€ä¸ªDWORDæ•°æ?®ä¸?
+             cmd = bank*256 + 1; 
              reg = 0;
              ret = calllib(obj.driver,'ReadInstruction',obj.id,uint32(cmd),uint32(addr));
              if(ret == 0)
@@ -497,43 +504,44 @@ classdef USTCDAC < handle
             obj.SetTrigStop(floor((obj.trig_delay+ num)/8)+ 10);
         end
         
-        function value = get(obj,properties)
-            switch lower(properties)
-                case 'isblock';value = obj.isblock ;
-                case 'channel_amount';value = obj.channel_amount;
-                case 'gain';value = obj.gain;
-                case 'offset';value = obj.offset;
-                case 'name';value = obj.name;
-                case 'ismaster';value = obj.ismaster;
-                case 'trig_sel';value = obj.trig_sel;
-                case 'trig_interval';value = obj.trig_interval;
-                case 'sync_delay';value = obj.sync_delay;
-                case 'trig_delay';value = obj.trig_delay;
-                case 'sample_rate';value = obj.sample_rate;
-                otherwise; error('USTCDAC:get','do not exsis the properties')
-            end
-        end
-        
-        function set(obj,properties,value)
-             switch lower(properties)
-                case 'isblock';obj.isblock = value;
-                case 'channel_amount'
-                    obj.channel_amount = value;
-                    obj.offset = zeros(1,obj.channel_amount);
-                    obj.gain = zeros(1,obj.channel_amount);
-                case 'gain';obj.gain = value;
-                case 'offset';obj.offset = value;
-                case 'name';obj.name = value;
-                case 'ismaster';obj.ismaster = value;
-                case 'trig_sel';obj.trig_sel = value;
-                case 'trig_interval';obj.trig_interval = value;
-                case 'sync_delay';obj.sync_delay = value;
-                case 'trig_delay';obj.trig_delay = value;
-                case 'sample_rate';obj.sample_rate = value;
-                case 'datrigdelayoffset'; obj.daTrigDelayOffset = value;
-                case 'offsetcorr';obj.offsetcorr = value;
-                otherwise; error('USTCDAC:get','do not exsis the properties')
-            end
-        end
+        % removed by Yulin Wu, 170427
+%         function value = get(obj,properties)
+%             switch lower(properties)
+%                 case 'isblock';value = obj.isblock ;
+%                 case 'channel_amount';value = obj.channel_amount;
+%                 case 'gain';value = obj.gain;
+%                 case 'offset';value = obj.offset;
+%                 case 'name';value = obj.name;
+%                 case 'ismaster';value = obj.ismaster;
+%                 case 'trig_sel';value = obj.trig_sel;
+%                 case 'trig_interval';value = obj.trig_interval;
+%                 case 'sync_delay';value = obj.sync_delay;
+%                 case 'trig_delay';value = obj.trig_delay;
+%                 case 'sample_rate';value = obj.sample_rate;
+%                 otherwise; error('USTCDAC:get','do not exsis the properties')
+%             end
+%         end
+%         
+%         function set(obj,properties,value)
+%              switch lower(properties)
+%                 case 'isblock';obj.isblock = value;
+%                 case 'channel_amount'
+%                     obj.channel_amount = value;
+%                     obj.offset = zeros(1,obj.channel_amount);
+%                     obj.gain = zeros(1,obj.channel_amount);
+%                 case 'gain';obj.gain = value;
+%                 case 'offset';obj.offset = value;
+%                 case 'name';obj.name = value;
+%                 case 'ismaster';obj.ismaster = value;
+%                 case 'trig_sel';obj.trig_sel = value;
+%                 case 'trig_interval';obj.trig_interval = value;
+%                 case 'sync_delay';obj.sync_delay = value;
+%                 case 'trig_delay';obj.trig_delay = value;
+%                 case 'sample_rate';obj.sample_rate = value;
+%                 case 'datrigdelayoffset'; obj.daTrigDelayOffset = value;
+%                 case 'offsetcorr';obj.offsetcorr = value;
+%                 otherwise; error('USTCDAC:get','do not exsis the properties')
+%             end
+%         end
     end
 end

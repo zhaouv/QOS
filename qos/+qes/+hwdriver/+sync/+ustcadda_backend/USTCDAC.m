@@ -8,8 +8,8 @@
 classdef USTCDAC < handle
     properties (SetAccess = private)
         id = [];            
-        ip = '';           
-        port = 80;         
+        ip = '';            
+        port = 80;          
         status = 'close';   
         isopen = 0;         
         isblock = 0;        
@@ -19,16 +19,16 @@ classdef USTCDAC < handle
         name = '';              
         channel_amount = 4;     
         sample_rate = 2e9;      
-        sync_delay = 0;        
+        sync_delay = 0;         
         trig_delay = 0;         
+
         da_range = 0.8;         
-        gain = zeros(1,4);     
+        gain = zeros(1,4);      
         offset = zeros(1,4);    
-        offsetcorr  = zeros(1,4); 
-        
+        offsetcorr  = zeros(1,4);      
         trig_sel = 0;           
-        trig_interval = 200e-6;
-%         ismaster = 0;           
+        trig_interval = 200e-6; 
+%         ismaster = 0;          
         ismaster = false;           %Yulin Wu
         daTrigDelayOffset = 0;  
     end
@@ -124,18 +124,22 @@ classdef USTCDAC < handle
                     arr(idx+1) = obj.ReadAD9136_2(addr);
                     idx = idx + 2;
                 end
+                arr = mod(arr,256);
+                if(sum(arr == 255) == length(arr))
+                    islaneReady = 1;
+                else
+                    islaneReady = 0;
+                end
                 ret = obj.ReadReg(5,8);
                 obj.isblock = 0;
-                
-                arr = mod(arr,256);
-                if(sum(arr == 255) == length(arr) && mod(floor(ret/(2^20)),4) == 3)
-                    isDACReady= 1;
-                else                 
+                if(mod(floor(ret/(2^20)),4) == 3)
+                    isDACReady = islaneReady;
+                else
+                    isDACReady = 0;
                     obj.InitBoard();
                     try_count =  try_count - 1;
-                    pause(1);
+                    pause(0.1);
                 end
-                
             end
             
             if(isDACReady == 0)
@@ -182,7 +186,6 @@ classdef USTCDAC < handle
                         sprintf('Start/Stop DAC %s failed!',obj.name))); % Yulin Wu   
             end
         end
-
         function FlipRAM(obj,index)
             obj.AutoOpen();
             ret = calllib(obj.driver,'WriteInstruction', obj.id,uint32(hex2dec('00000305')),uint32(index),0);
@@ -296,6 +299,8 @@ classdef USTCDAC < handle
         function SetOffset(obj,channel,data)
             obj.AutoOpen();
             map = [6,7,4,5];       
+
+
             channel = map(channel+1);
             ret = calllib(obj.driver,'WriteInstruction',obj.id,uint32(hex2dec('00000702')),uint32(channel),uint32(data));
             if(ret == -1)

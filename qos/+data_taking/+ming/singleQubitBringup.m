@@ -17,7 +17,11 @@ setQSettings('spc_sbFreq',300e6);
 %%
 setQSettings('zdc_amp',0);
 %%
-setQSettings('r_uSrcPower',-7);
+setQSettings('channels.xy_mw.chnl',2);
+setQSettings('qr_xy_uSrcPower',7);
+%%
+setQSettings('channels.r_mw.chnl',5);
+setQSettings('r_uSrcPower',15);
 %%
 for II=1:10
     setZDC(qubits{II},0);
@@ -32,18 +36,21 @@ for II=1:10
     s21_zdc_networkAnalyzer('qubit',qubits{II},'NAName',[],'startFreq',dips(II)-3e6,'stopFreq',dips(II)+3e6,'numFreqPts',500,'avgcounts',5,'NApower',-20,'biasAmp',[-3e4:1e3:3e4],'bandwidth',2000,'notes','','gui',true,'save',true)
 end
 %% S21
-II=5;
-s21_zdc('qubit', qubits{II},...
-    'freq',dips(1)-5e6:0.3e6:dips(end)+5e6,'amp',0,...
+s21_rAmp('qubit', qubits{1},...
+    'freq',dips(1)-5e6:1e6:dips(end)+5e6,'amp',1e4,...
+    'notes','','gui',true,'save',true);
+%%
+s21_rAmp('qubit', qubits{9},...
+    'freq',6.55e9:1e6:7.1e9,'amp',3e4,...
     'notes','','gui',true,'save',true);
 %% S21 fine scan for each qubit dip, you can scan the power(by scan amp in log scale) to find the dispersive shift
 amps=[logspace(log10(1000),log10(30000),41)];
-for II = 8:10
+for II = 10:-1:1
     data1{II}=s21_rAmp('qubit',qubits{II},'freq',[dips(II)-2e6:0.1e6:dips(II)+1e6],'amp',amps,...  % logspace(log10(1000),log10(32768),25)
         'notes','23dB @ RT','gui',true,'save',true,'r_avg',1000);
 end
 %% figure out dispersive shift
-for II=8:10
+for II=1:10
     dd=abs(cell2mat(data1{1,II}.data{1,1}));
     z_ = 20*log10(abs(dd));
     sz=size(z_);
@@ -78,7 +85,7 @@ for II=10
         'notes',[qubits{II}],'gui',true,'save',true);
 end
 %% Get all S21 curves with current readout setup, and update r_freq
-for II=2:10
+for II=10
     r_freq=getQSettings('r_freq', qubits{II});
     s_r_freq=r_freq-0.5e6:0.01e6:r_freq+0.5e6;
     data2{II}=s21_rAmp('qubit', qubits{II},...
@@ -107,39 +114,40 @@ for II=3:6
         'notes',[qubits{II} ', S21 vs Z pulse'],'gui',true,'save',true,'r_avg',300);
 end
 %% spectroscopy1_zpa
-for II=[10 9]
+for II=10
     cP=getQSettings('qr_xy_uSrcPower', qubits{II});
     setQSettings('qr_xy_uSrcPower',15, qubits{II});
-    QS.saveSSettings({qubits{II},'spc_driveAmp'},5000)
+    QS.saveSSettings({qubits{II},'spc_driveAmp'},3000)
     data0{II}=spectroscopy1_zpa('qubit',qubits{II},...
-        'biasAmp',[-2e4:2e3:2e4],'driveFreq',[5.5e9:1e6:6.3e9],...
+        'biasAmp',[-2e4:2e3:2e4],'driveFreq',[5.6e9:2e6:6.3e9],...
         'r_avg',1000,'notes','20dB in RT','gui',true,'save',true,'dataTyp','S21');
     setQSettings('qr_xy_uSrcPower',cP, qubits{II});
 end
 %%
-for II=1
+for II=10
     cP=getQSettings('qr_xy_uSrcPower', qubits{II});
-    setQSettings('qr_xy_uSrcPower',-17, qubits{II});
+    setQSettings('qr_xy_uSrcPower',7, qubits{II});
+    setQSettings('spc_sbFreq',300e6, qubits{II});
     QS.saveSSettings({qubits{II},'spc_driveAmp'},3000)
     data0{II}=spectroscopy1_zpa('qubit',qubits{II},...
-        'biasAmp',000,'driveFreq',[5.1e9:1e6:5.8e9],...
-        'r_avg',1000,'notes','100M sb','gui',true,'save',true,'dataTyp','S21');
+        'biasAmp',000,'driveFreq',[5.6e9:1e6:6.4e9],...
+        'r_avg',1000,'notes','300M sb','gui',true,'save',true,'dataTyp','S21');
     setQSettings('qr_xy_uSrcPower',cP, qubits{II});
 end
-%%
-data_taking.public.scripts.qubitStability('qubit','q3','Repeat',1,...
-    'biasAmp',0,'driveFreq',[6.45e9:2e6:6.55e9],...
-    'r_avg',1000,'notes','','gui',true,'save',true);
+%% qubitStability
+data=data_taking.public.scripts.qubitStability('qubit','q2','Repeat',200,...
+    'biasAmp',2e4,'driveFreq',[5.5e9:2e6:6.2e9],'dataTyp','S21',...
+    'r_avg',1000,'notes','','gui',false,'save',false);
 
 %%
 % setZDC('q2',-2000);
-rabi_amp1('qubit','q10','biasAmp',-000,'biasLonger',10,...
+rabi_amp1('qubit','q5','biasAmp',-000,'biasLonger',10,...
     'xyDriveAmp',[0:500:3e4],'detuning',0,'driveTyp','X','notes','20dB attn.',...
-    'dataTyp','S21','r_avg',5000,'gui',true,'save',true);
+    'dataTyp','S21','r_avg',1000,'gui',true,'save',true);
 % rabi_amp1('qubit','q2','xyDriveAmp',[0:500:3e4]);  % lazy mode
 %% 
-rabi_long1('qubit','q10','biasAmp',0,'biasLonger',10,...
-    'xyDriveAmp',[1e3],'xyDriveLength',[5:5:2000],'detuning',[0],'driveTyp','X','notes','20dB attn.',...
+rabi_long1('qubit','q4','biasAmp',0,'biasLonger',10,...
+    'xyDriveAmp',[1e3],'xyDriveLength',[5:5:2000],'detuning',[0],'driveTyp','X','notes','10dB attn.',...
     'dataTyp','S21','r_avg',3000,'gui',true,'save',true);
 %%
 s21_01('qubit','q3','freq',6.93e9:1e5:6.938e9,'notes','','gui',true,'save',true);

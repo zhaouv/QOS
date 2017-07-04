@@ -52,12 +52,12 @@ function varargout = ramsey(varargin)
         T1=args.T1;
         
         Ramsey_length2=linspace(min(Ramsey_time),max(Ramsey_time),1000);
-        f=@(a,x)(a(1)-a(2)*exp(-(x/a(3)).^2-x/T1).*cos(a(4)*2*pi.*x+a(5)));
+        f=@(a,x)(a(1)+a(2)*exp(-(x/a(3)).^2-x/T1).*cos(a(4)*2*pi.*x+a(5)));
         a=[(max(Ramsey_data)+min(Ramsey_data))/2,(max(Ramsey_data)-min(Ramsey_data))/2,Ramsey_time(end)/2,detuning,1];
         b=nlinfit(Ramsey_time,Ramsey_data,f,a);
         hf=figure;
-        plot(Ramsey_time,Ramsey_data,'o',Ramsey_length2,b(1)-b(2).*exp(-(Ramsey_length2./b(3)).^2-Ramsey_length2/T1).*cos(b(4)*2*pi.*Ramsey_length2+b(5)),'linewidth',2);
-        decay=b(3);
+        plot(Ramsey_time,Ramsey_data,'o',Ramsey_length2,b(1)+b(2).*exp(-(Ramsey_length2./b(3)).^2-Ramsey_length2/T1).*cos(b(4)*2*pi.*Ramsey_length2+b(5)),'linewidth',2);
+        decay=abs(b(3));
         deltaf=b(4);
         title(['T_2^*=' num2str(decay/1e3,'%.2f') 'us, detuning freq=' num2str(1e3*deltaf,'%.2f') 'MHz'])
         xlabel('Pulse delay (ns)');
