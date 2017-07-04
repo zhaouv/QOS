@@ -22,9 +22,9 @@ function chi = processTomoData2Rho(data)
              chi = conj(lambda)*rho_*lambda.'/4;
         case 2
             rho = cell(4,4);
-            for ii = 1:4
-                for jj = 1:4
-                    rho{ii,jj} = sqc.qfcns.stateTomoData2Rho(squeeze(data((ii-1)*4+jj,:,:)));
+            for sq1 = 1:4
+                for sq2 = 1:4
+                    rho{sq2,sq1} = sqc.qfcns.stateTomoData2Rho(squeeze(data((sq2-1)*4+sq1,:,:)));
                 end
             end
             rho_ = cell(4,4);
@@ -56,7 +56,7 @@ function chi = processTomoData2Rho(data)
             I = [1 0;0 1];
             P = kron(I,kron(r11+r23+r32+r44,I));
             r_ = (P.')*r*P;
-            lambda = [1 0 0 1; 0 1 1 0; 0 1j -1j 0; 1 0 0 -1]/2;
+            lambda = [1 0 0 1; 0 1 1 0; 0 1 -1 0; 1 0 0 -1]/2;
             lambda2 = kron(lambda,lambda);
             chi_ = lambda2*r_*lambda2; % chi_ is the process matrix for operator set E = {I,X,-iY,Z};
             U = [1 0 0 0;

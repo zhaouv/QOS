@@ -95,8 +95,9 @@ numC2Gates = n-1;
 tblC2 = NaN*ones(numC2Gates,numC2Gates);
 tic
 for ii = 1:numC2Gates
-    parfor jj = 1:numC2Gates
+    for jj = 1:numC2Gates
         mij = C2{ii}*C2{jj};
+        tic
         for uu = 1:numC2Gates
             mi = C2{uu}*mij;
             if abs(abs(mi(1,1)) + abs(mi(2,2)) + abs(mi(3,3)) + abs(mi(4,4)) - 4) < 0.0001 &&...
@@ -112,6 +113,7 @@ for ii = 1:numC2Gates
                 error('error!');
             end
         end
+        toc
         tblC2(ii,jj) = uu;
     end
     timeElpsed = toc;
