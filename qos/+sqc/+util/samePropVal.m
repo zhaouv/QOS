@@ -18,9 +18,9 @@ function b = samePropVal(objs, prop_names)
 	function propVal = getPorpVal(obj,propName)
 		if iscell(propName)
 			S = struct();
-			for ii = 1:numel(propName)
-				S(ii).type = '.';
-				S(ii).subs = propName{ii};
+			for iii = 1:numel(propName)
+				S(iii).type = '.';
+				S(iii).subs = propName{iii};
 				propVal = subsref(obj,S);
 			end
 		else
@@ -28,17 +28,19 @@ function b = samePropVal(objs, prop_names)
 		end
 	end
     for ii = 1:numel(prop_names)
-        if isnumeric(objs{1}.(prop_names{ii}))
-            sz = size(objs{1}.(prop_names{ii}));
+        pv1 = getPorpVal(objs{1},prop_names{ii});
+        if isnumeric(pv1) || islogical(pv1)
+            sz = size(pv1);
             if all(sz>1)
-				val_1 = objs{1}.(prop_names{ii});
+				val_1 = pv1;
 				val_1 = val_1(:);
                 for jj = 1:numObjs
-					if numel(sz) ~= numel(objs{jj}.(prop_names{ii}))
+                    pv2 = getPorpVal(objs{jj},prop_names{ii});
+					if numel(sz) ~= numel(pv2)
 						b(ii) = false;
 						break;
 					else
-						val_jj = objs{jj}.(prop_names{ii});
+						val_jj = pv2;
 						if ~all(val_1(:) == val_jj(:))
 							b(ii) = false;
 							break;
@@ -49,7 +51,7 @@ function b = samePropVal(objs, prop_names)
             n_rows = max(sz);
             val = NaN(n_rows,numObjs);
             for jj = 1:numObjs
-                val_jj = objs{jj}.(prop_names{ii});
+                val_jj = getPorpVal(objs{jj},prop_names{ii});
                 if all(size(val_jj) == sz)
                     val(:,jj) = val_jj(:);
                 else
@@ -63,7 +65,7 @@ function b = samePropVal(objs, prop_names)
         else
             val = cell(1,numObjs);
             for jj = 1:numObjs
-                val{jj} = objs{jj}.(prop_names{ii});
+                val{jj} = getPorpVal(objs{jj},prop_names{ii});
             end
             if numel(unique(val)) > 1
                 b(ii) = false;

@@ -46,7 +46,7 @@ if plotfit
     drawnow;
 end
 B0 = 1; % amplitude estimation
-td0 = 30000; % decay time estimation
+td0 = 40000; % decay time estimation
 lb = [0.8*B0, 0.05*td0];
 ub = [B0/0.8, 3*td0];
 for ii = 1:nb

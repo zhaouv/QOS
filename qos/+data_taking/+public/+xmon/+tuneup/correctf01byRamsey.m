@@ -20,8 +20,8 @@ function varargout = correctf01byRamsey(varargin)
     % Yulin Wu, 2017/4/14
     % resolution low, not recommended, use correctf01bySpc instead
     
-    MAXFREQDRIFT = 10e6;
-    DELAYTIMERANGE = 4e-6;
+    MAXFREQDRIFT = 20e6;
+    DELAYTIMERANGE = 500e-9;
     
     import data_taking.public.xmon.ramsey
     
@@ -29,39 +29,96 @@ function varargout = correctf01byRamsey(varargin)
 	q = data_taking.public.util.getQubits(args,{'qubit'});
     da = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',...
 		q.channels.xy_i.instru);
-    ad = qes.qHandle.FindByClassProp('qes.hwdriver.hardware','name',...
-		q.channels.r_ad_i.instru);
-    adDelayStep = ad.delayStep;
     daSamplingRate = da.samplingRate;
     
-    t = unique(adDelayStep*round(...
-        linspace(0,DELAYTIMERANGE,DELAYTIMERANGE*2*MAXFREQDRIFT*2)*daSamplingRate/adDelayStep));
-    e = ramsey('qubit','q2','mode','dp',... 
+    t = unique(round((0:4e-9:DELAYTIMERANGE)*daSamplingRate));
+    e = ramsey('qubit',q,'mode','dp',... 
       'time',t,'detuning',MAXFREQDRIFT,'gui',false,'save',false);
     Pp = e.data{1};
-    rP = range(Pp);
-    if rP < 0.2
-        throw(MException('QOS_correctf01byRamsey:visibilityTooLow',...
-				'visibility(%0.2f) too low, run correctf01byRamsey at low visibility might produce wrong result, thus not supported.', rP));
+    maP = max(Pp);
+    miP = min(Pp);
+    if maP < 0.85 || maP > 1.15 || miP < -0.15 || miP > 0.15
+        throw(MException('QOS_correctf01byRamsey:probabilityNotProperlyCallibrated',...
+				'probability not properly callibrated to SNR too low.'));
     end
-    e = ramsey('qubit','q2','mode','dp',... 
+    e = ramsey('qubit',q,'mode','dp',... 
       'time',t,'detuning',-MAXFREQDRIFT,'gui',false,'save',false);
     Pn = e.data{1};
     t = t/daSamplingRate;
-    [Frequency,Amp] = qes.util.fftSpectrum(t,Pp);
-    idx = Frequency > 0.5*MAXFREQDRIFT;
-    Frequency = Frequency(idx);
-    Amp = Amp(idx);
-    [~, maxIdx] = max(Amp);
-    fp = Frequency(maxIdx);
     
-    [Frequency,Amp] = qes.util.fftSpectrum(t,Pn);
-    Frequency = Frequency(idx);
-    Amp = Amp(idx);
-    [~, maxIdx] = max(Amp);
-    fn = Frequency(maxIdx);
+    % P = B*(exp(-t/td)*(sin(2*pi*freq*t+D)+C));
+    tf = linspace(t(1),t(end),200);
     
-    f01 = q.f01+(fn-fp)/2;
+    [B,C,D,freqp,tdp,cip] =...
+        toolbox.data_tool.fitting.sinDecayFit_s(...
+        t,Pp,0.5,1,pi/2,toolbox.data_tool.fitting.FFT_Peak(t,Pp),5e-6);
+    Ppf = B*(exp(-tf/tdp).*(sin(2*pi*freqp*tf+D)+C));
+    
+    
+    dcip = diff(cip,1,2);
+    if  B < 0.3 || B > 0.7 || C < 0.5 || C > 2 ...
+        || freqp < 2e6 || freqp > 2*MAXFREQDRIFT || abs(tdp) < 200e-9 || any(abs(dcip([1,2,4])./[B;C;freqp]) > 0.20)
+    
+        if args.gui
+            h = qes.ui.qosFigure(sprintf('Correct f01 by ramsey | %s', q.name),true);
+            ax = axes('parent',h);
+            plot(ax,t,Pp,'.',tf,Ppf);
+            legend(ax,{num2str(MAXFREQDRIFT/1e6,'%0.2fMHz'),'fit'});
+            xlabel(ax,'time(us)');
+            ylabel(ax,'P|1>');
+            title('fitting failed.');
+        end    
+    
+        throw(MException('QOS_correctf01byRamsey:fittingFailed',...
+				'fitting failed.'));
+    end
+
+    [B,C,D,freqn,tdn,cin] =...
+        toolbox.data_tool.fitting.sinDecayFit_s(...
+        t,Pn,0.5,1,pi/2,toolbox.data_tool.fitting.FFT_Peak(t,Pn),5e-6);
+    
+    Pnf = B*(exp(-tf/tdn).*(sin(2*pi*freqn*tf+D)+C));
+    
+    dcip = diff(cin,1,2);
+    if B < 0.3 || B > 0.7 || C < 0.5 || C > 2 ...
+        || freqn < 2e6 || freqn > 2*MAXFREQDRIFT || abs(tdn) < 200e-9 || any(abs(dcip([1,2,4])./[B;C;freqn]) > 0.20)
+    
+        if args.gui
+            h = qes.ui.qosFigure(sprintf('Correct f01 by ramsey | %s', q.name),true);
+            ax = axes('parent',h);
+            plot(ax,tf/1e-6,Ppf,'-b',tf/1e-6,Pnf,'-r');
+            hold on;
+            plot(ax,t/1e-6,Pp,'.',t/1e-6,Pn,'.');
+            legend(ax,{'','',num2str(MAXFREQDRIFT/1e6,'%0.2fMHz'),num2str(-MAXFREQDRIFT/1e6,'%0.2fMHz')});
+            xlabel(ax,'time(us)');
+            ylabel(ax,'P|1>');
+            title('fitting failed.');
+            drawnow;
+        end 
+    
+        throw(MException('QOS_correctf01byRamsey:fittingFailed',...
+				'fitting failed.'));
+    end
+    
+    if ((freqn + freqp)/2-MAXFREQDRIFT)/MAXFREQDRIFT > 0.05
+        throw(MException('QOS_correctf01byRamsey:fittingFailed',...
+				'fitting failed or frequency drift out of measureable range.'));
+    end
+    
+    f01 = q.f01+(freqn - freqp)/2;
+    
+    if args.gui
+        h = qes.ui.qosFigure(sprintf('Correct f01 by ramsey | %s', q.name),true);
+		ax = axes('parent',h);
+        plot(ax,tf/1e-6,Ppf,'-b',tf/1e-6,Pnf,'-r');
+        hold on;
+		plot(ax,t/1e-6,Pp,'.',t/1e-6,Pn,'.');
+		legend(ax,{'','',num2str(MAXFREQDRIFT/1e6,'%0.2fMHz'),num2str(-MAXFREQDRIFT/1e6,'%0.2fMHz')});
+		xlabel(ax,'time(us)');
+		ylabel(ax,'P|1>');
+        title(sprintf('Original f01: %0.5fGHz, current f01: %0.5fGHz',q.f01/1e9,f01/1e9));
+        drawnow;
+    end
     
     if ischar(args.save)
         args.save = false;
