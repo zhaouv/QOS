@@ -150,8 +150,8 @@ classdef iqMixerCalibrator < qes.measurement.measurement
             lb = [-obj.awg.vpp/10, -obj.awg.vpp/10];
             ub = [obj.awg.vpp/10, obj.awg.vpp/10];
             xsol = qes.util.fminsearchbnd(f.fcn,[0,0],lb,ub,opts);
-            x = xsol(1);
-            y = xsol(2);
+            x = round(xsol(1));
+            y = round(xsol(2));
 
             % search method 2
 %             precision = obj.awg.vpp/50;
@@ -257,6 +257,7 @@ classdef iqMixerCalibrator < qes.measurement.measurement
                 plot(ax, freq4plot,[bm,b0,bp],'-o',freq4plot,[am,a0,ap],'-*');
                 xlabel(ax, 'Frequency(GHz)');
                 ylabel(ax, 'Amplitude');
+                title(['I0 = ' num2str(x) ', Q0=' num2str(y)])
                 legend(ax, {'before calibration','after calibration'});
 
                 spcAnalyzerObj.startfreq = startfreq_backup;
@@ -292,23 +293,24 @@ classdef iqMixerCalibrator < qes.measurement.measurement
 			IQ_op = copy(IQ);
 			IQ_op.df = -obj.sb_freq/obj.awg.samplingRate;
             
+            WaveformObj=IQ;
+            
             function wv = calWv(comp_)
 				wv = IQ + comp_(1)*IQ_op+comp_(2)*1j*IQ_op;
 				wv.awg = awg_;
 				wv.awgchnl = awgchnl_;
                 wv.fc=IQ.fc;
+                WaveformObj=wv
 			end
 			
 			p = qes.expParam(@calWv);
-			p.callbacks ={@(x_) x_.expobj.awg.RunContinuousWv(x_.expobj)};
+%             p.callbacks ={@(x_) x_.awg.RunContinuousWv(x_)};
+% 			p.callbacks ={@(x_) disp(x_)};
+            p.callbacks ={@(x_) awg_.RunContinuousWv(WaveformObj)};
             
             obj.spc_amp_obj.freq = obj.lo_freq-obj.sb_freq;
             f = qes.expFcn(p,obj.spc_amp_obj);
-            
-%             function res=f2(a)
-%                 res=f(a(1)+1j*a(2));
-%             end
-            
+                        
             opts = optimset('Display','none','MaxIter',obj.MAX_ITER_NUM,'TolX',0.01,'TolFun',0.1,'PlotFcns',{@optimplotfval});
             z1 = qes.util.fminsearchbnd(f.fcn,[0,0],[-0.5,-0.5],[0.5,0.5],opts);
             z=z1(1)+1j*z1(2);

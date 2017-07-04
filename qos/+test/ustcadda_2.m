@@ -40,7 +40,7 @@ clc
 t=1:4000;
 wave1=32768+32768/2*cos(2*pi*t/40);
 wave2=32768+32768/2*sin(2*pi*t/40);
-ustcaddaObj.runReps = 100000;
+ustcaddaObj.runReps = 1000000;
 ustcaddaObj.SendWave(2,wave1); % 620
 ustcaddaObj.SendWave(1,wave2); % 750
 [datai,dataq] = ustcaddaObj.Run(false);

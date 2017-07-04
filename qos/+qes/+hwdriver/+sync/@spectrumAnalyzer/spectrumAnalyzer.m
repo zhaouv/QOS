@@ -139,6 +139,7 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
                     
                     fprintf(obj.interfaceobj,'FETCH:SPECTRUM:TRACE1?');
                     val = binblockread(obj.interfaceobj,'single');
+                    fprintf(obj.interfaceobj,'DISPLAY:SPECTRUM:Y:SCALE:AUTO');
                     response=query(obj.interfaceobj,'*OPC?');
                     
             end

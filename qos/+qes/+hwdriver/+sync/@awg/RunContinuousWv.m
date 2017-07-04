@@ -27,7 +27,7 @@ switch TYP
 %                 WaveformData{1} = uint16(round(WaveformData{1}/WaveformObj.balance) + mzeros(1)+32768);
 %                 WaveformData{2} = uint16(WaveformData{2} + mzeros(2)+32768);
 %             end
-%             figure(55);plot(WaveformData{1});hold on;plot(WaveformData{2});axis tight;hold off;title(num2str([mean(WaveformData{1}) mean(WaveformData{2}) ]-32768))
+            figure(55);plot(WaveformData{1});hold on;plot(WaveformData{2});axis tight;hold off;title(num2str([mean(WaveformData{1}) mean(WaveformData{2}) ]-32768))
         else
             WaveformData = {uint16(real(y)+32768)};
         end

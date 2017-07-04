@@ -11,7 +11,7 @@ spc.bandwidth = 10e3;
 spc.numpts =801;
 spc.reflevel=-10;
 spc.trigmod=0;
-spc.avgnum = 1000;
+spc.avgnum = 10;
 spc.on = true;
 
 spc_amp=spc.get_trace();

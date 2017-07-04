@@ -48,7 +48,7 @@ classdef specAmp < qes.measurement.measurement
             if isempty(val) || ~isnumeric(val) || ~isreal(val) ||val <= 0
                 error('GetSpecAmp:InvalidInput','Invalid avgnum value.');
             end
-            obj.avgnum = ceil(val);
+            obj.instrumentObject.avgnum = ceil(val);
         end
         function Run(obj)
             if isempty(obj.freq) 
