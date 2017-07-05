@@ -13,7 +13,7 @@ classdef randBenchMarking < qes.measurement.measurement
         processIdx
     end
 	properties (GetAccess = private, Constant = true)  
-		singleQGateSet = {{'I'},{'X'},{'Y'},{'Y','X'},...
+		C1GateSet = {{'I'},{'X'},{'Y'},{'Y','X'},...
 					{'X2p','Y2p'},{'X2p','Y2m'},{'X2m','Y2p'},{'X2m','Y2m'},...
                     {'Y2p','X2p'},{'Y2p','X2m'},{'Y2m','X2p'},{'Y2m','X2m'},...
 					{'X2p'},{'X2m'},{'Y2p'},{'Y2m'},...
@@ -21,13 +21,15 @@ classdef randBenchMarking < qes.measurement.measurement
                     {'X','Y2p'},{'X','Y2m'},{'Y','X2p'},{'Y','X2m'},...
                     {'X2p','Y2p','X2p'},{'X2m','Y2p','X2m'}}
                 
-        numSingleQGates = 24
+        numC1Gates = 24
         s1Gates = {{'I'},{'Y2p','X2p'},{'X2m','Y2m'}}
         numS1Gates = 3;
         s1X2pGates = {{'X2p'},{'X2p','Y2p','X2p'},{'Y2m'}}
         numS1X2pGates = 3;
-        s1Y2pGates = {{'Y2p'},{'Y','X2p'},{'Y2p','X2m','Y2m'}}
+        s1Y2pGates = {{'Y2p'},{'Y','X2p'},{'X2m','Y2m','X2p'}}
         numS1Y2pGates = 3;
+        
+        C2GateSet = cell{};
     end
     properties (SetAccess = private, GetAccess = private)
         
@@ -45,7 +47,7 @@ classdef randBenchMarking < qes.measurement.measurement
             numQs = numel(qubits);
             if numQs > 2
 				throw(MException('QOS_randBenchMarking:invalidInput',...
-						'randBenchMarking on more than 2 qubits is not supported.'));
+						'randBenchMarking on more than 2 qubits is not implemented.'));
 			end
             for ii = 1:numQs
                 if ischar(qubits{ii})
@@ -58,8 +60,7 @@ classdef randBenchMarking < qes.measurement.measurement
 			obj.qubits = qubits;
             obj.numericscalardata = false;
             obj.numGates = numGates;
-            
-            
+
             className = class(process);
             className = strsplit(className,'.');
             className = className{end};
@@ -79,6 +80,9 @@ classdef randBenchMarking < qes.measurement.measurement
                 case 'Y2m'
                     obj.processIdx = 16;
             end
+            
+            
+            
         end
         function Run(obj)
             Run@qes.measurement.measurement(obj);
@@ -114,8 +118,8 @@ classdef randBenchMarking < qes.measurement.measurement
             gs = cell(1,obj.numGates);
 			switch numQs
                 case 1
-                    ridx = randi(obj.numSingleQGates,1,obj.numGates);
-                    gn = obj.singleQGateSet(ridx);
+                    ridx = randi(obj.numC1Gates,1,obj.numGates);
+                    gn = obj.C1GateSet(ridx);
                     for ii = 1:obj.numGates
                         g_ = feval(str2func(['@(q)sqc.op.physical.gate.',gn{ii}{1},'(q)']),obj.qubits);
                         for jj = 2:numel(gn{ii})
@@ -142,7 +146,7 @@ classdef randBenchMarking < qes.measurement.measurement
             mY2p = expm(-1j*(pi/2)*mY/2);
             mY2m = expm(-1j*(-pi/2)*mY/2);
 
-            singleQGateSet_m = {mI, mX, mY, mX*mY,...
+            C1GateSet_m = {mI, mX, mY, mX*mY,...
                                 mY2p*mX2p, mY2m*mX2p, mY2p*mX2m, mY2m*mX2m,...
                                 mX2p*mY2p, mX2m*mY2p, mX2p*mY2m, mX2m*mY2m,...
                                 mX2p, mX2m, mY2p, mY2m,...
@@ -150,14 +154,14 @@ classdef randBenchMarking < qes.measurement.measurement
                                 mY2p*mX, mY2m*mX, mX2p*mY, mX2m*mY,...
                                 mX2p*mY2p*mX2p, mX2m*mY2p*mX2m};
                             
-            gm = singleQGateSet_m(gidx);
+            gm = C1GateSet_m(gidx);
             gm_ = gm{1};
             for ii = 2:numel(gm)
                 gm_ = gm{ii}*gm_;
             end
             D = ones(1,24);
             for ii = 1:24
-                mi = singleQGateSet_m{ii}*gm_;
+                mi = C1GateSet_m{ii}*gm_;
                 if abs(mi(1,2)) + abs(mi(2,1)) < 0.001 &&...
                         (abs(angle(mi(1,1)) - angle(mi(2,2))) < 0.001 ||...
                         abs(abs(angle(mi(1,1)) - angle(mi(2,2)))- 2*pi) < 0.001)
@@ -167,7 +171,7 @@ classdef randBenchMarking < qes.measurement.measurement
                     error('error!');
                 end
             end
-            gfn = obj.singleQGateSet{ii};
+            gfn = obj.C1GateSet{ii};
             g = feval(str2func(['@(q)sqc.op.physical.gate.',gfn{1},'(q)']),obj.qubits);
             for jj = 2:numel(gfn)
                 g = g*feval(str2func(['@(q)sqc.op.physical.gate.',gfn{jj},'(q)']),obj.qubits);

@@ -41,10 +41,10 @@ function chi = processTomoData2Rho(data)
                 rho_{3,jj} = rho{3,jj}-1j*rho{4,jj}-(1-1i)*(rho{1,jj}+rho{2,jj})/2;
                 rho_{4,jj} = rho{2,jj};
             end
-            r = [rho_{1,1},rho_{1,2},rho_{1,3},rho_{1,4};
-                rho_{2,1},rho_{2,2},rho_{2,3},rho_{2,4};
-                rho_{3,1},rho_{3,2},rho_{3,3},rho_{3,4};
-                rho_{4,1},rho_{4,2},rho_{4,3},rho_{4,4};];
+            r = [rho_{1,1},rho_{1,2},rho_{2,1},rho_{2,2};
+                rho_{1,3},rho_{1,4},rho_{2,3},rho_{2,4};
+                rho_{3,1},rho_{3,2},rho_{4,1},rho_{4,2};
+                rho_{3,3},rho_{3,4},rho_{4,3},rho_{4,4};];
             r1 = [1 0; 0 0];
             r2 = [0 1; 0 0];
             r3 = [0 0; 1 0];

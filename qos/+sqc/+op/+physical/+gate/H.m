@@ -5,5 +5,5 @@ function g = H(qubit)
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 	
 	import sqc.op.physical.gate.*
-	g = Y4m(qubit)*X(qubit)*Y4p(qubit);
+	g = Y4p(qubit)*X(qubit)*Y4m(qubit);
 end
