@@ -1,4 +1,8 @@
-function [A,B,C,freq,varargout] = cosFit(t,P,A0,B0,C0,freq0)
+function [A,B,C,freq,varargout] = cosFit(t,P,...
+    A0,ABnd,...
+    B0,BBnd,...
+    C0,CBnd,...
+    freq0,freqBnd)
 % SinDecayFit fits curve P = P(t) with a Sinusoidal Decay function:
 % P = A*(cos(2*pi*freq*t+B)+C));
 %
@@ -11,8 +15,10 @@ Coefficients(1) = A0;
 Coefficients(2) = B0;
 Coefficients(3) = C0;
 Coefficients(4) = freq0;
+lb = [ABnd(1),BBnd(1),CBnd(1),freqBnd(1)];
+ub = [ABnd(2),BBnd(2),CBnd(2),freqBnd(2)];
 for ii = 1:3
-    [Coefficients,~,residual,~,~,~,J] = lsqcurvefit(@cos_,Coefficients,t,P);
+    [Coefficients,~,residual,~,~,~,J] = lsqcurvefit(@cos_,Coefficients,t,P,lb,ub);
 end
 A = Coefficients(1);
 B =  Coefficients(2);

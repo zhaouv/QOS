@@ -1,4 +1,10 @@
-function [B,C,D,freq,td,varargout] = sinDecayFit_s(t,P,B0,C0,D0,freq0,td0)
+function [B,C,D,freq,td,varargout] = sinDecayFit_m(t,P,...
+    B0,BBnd,...
+    C0,CBnd,...
+    D0,DBnd,...
+    freq0,freqBnd,...
+    td0,tdBnd)
+
 % SinDecayFit fits curve P = P(t) with a Sinusoidal Decay function:
 % P = B*(exp(-t/td)*(sin(2*pi*freq*t+D)+C));
 %
@@ -13,8 +19,11 @@ Coefficients(2) = C0;
 Coefficients(3) = D0;
 Coefficients(4) = freq0;
 Coefficients(5) = td0;
+lb = [BBnd(1),CBnd(1),DBnd(1),freqBnd(1),tdBnd(1)];
+ub = [BBnd(2),CBnd(2),DBnd(2),freqBnd(2),tdBnd(2)];
+
 for ii = 1:3
-    [Coefficients,~,residual,~,~,~,J] = lsqcurvefit(@SinusoidalDecay,Coefficients,t,P);
+    [Coefficients,~,residual,~,~,~,J] = lsqcurvefit(@SinusoidalDecay,Coefficients,t,P,lb,ub);
 end
 B = Coefficients(1);
 C =  Coefficients(2);
