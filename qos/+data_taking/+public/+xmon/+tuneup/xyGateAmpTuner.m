@@ -18,7 +18,7 @@ function varargout = xyGateAmpTuner(varargin)
     % Yulin Wu, 2017/1/8
     import data_taking.public.xmon.rabi_amp1
 	
-	NUM_RABI_SAMPLING_PTS = 40;
+	NUM_RABI_SAMPLING_PTS = 30;
 	MIN_VISIBILITY = 0.3;
 	AE_NUM_PI = 11; % must be an positive odd number
 	
@@ -147,14 +147,13 @@ function varargout = xyGateAmpTuner(varargin)
 %     end
 	
 	if args.AE  % use multiple pi gates to amplify error to fine tune gateAmp
-
+        % ~0.5% precision
         switch args.gateTyp
             case {'X','Y'}
-                amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS);
-            case {'X/2','-X/2','X2m','X2p','Y/2','-Y/2','Y2m','Y2p'}
-                amps_ae = linspace(0.85*gateAmp,min(da.vpp,1.15*gateAmp),NUM_RABI_SAMPLING_PTS);
-            case {'X/4','-X/4','X4m','X4p','Y/4','-Y/4','Y4m','Y4p'}
-                amps_ae = linspace(0.8*gateAmp,min(da.vpp,1.2*gateAmp),NUM_RABI_SAMPLING_PTS);
+                amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS*2);
+            case {'X/2','-X/2','X2m','X2p','Y/2','-Y/2','Y2m','Y2p'...
+                    'X/4','-X/4','X4m','X4p','Y/4','-Y/4','Y4m','Y4p'}
+                amps_ae = linspace(0.85*gateAmp,min(da.vpp,1.15*gateAmp),NUM_RABI_SAMPLING_PTS*2);
         end
 		e = rabi_amp1('qubit',q,'biasAmp',0,'biasLonger',0,'xyDriveAmp',amps_ae,...
 			'detuning',0,'numPi',AE_NUM_PI,'driveTyp',args.gateTyp,'gui',false,'save',false);
@@ -198,8 +197,10 @@ function varargout = xyGateAmpTuner(varargin)
             legend(ax,{'data(1\pi)',...
                 [sprintf('data(AE:%0.0f',AE_NUM_PI),'\pi)'],...
                 sprintf('%s gate amplitude',args.gateTyp)});
+            title('Precision: ~0.5%');
         else
             legend(ax,{'data(1\pi)',sprintf('%s gate amplitude',args.gateTyp)});
+            title('Precision: ~2%');
         end
         set(ax,'YLim',ylim);
         drawnow;

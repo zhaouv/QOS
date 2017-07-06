@@ -1,4 +1,4 @@
-function chi = processTomoData2Rho(data)
+function chi = processTomoData2Chi(data)
  
     numQs = round(log2(size(data,1))/2);
     switch numQs

@@ -59,10 +59,15 @@ function varargout = twoQProcessTomo(varargin)
     
 	
     if ~args.gui
-        
+        chi = sqc.qfcns.processTomoData2Rho(data);
+        figure();
+        bar3(real(chi));
+        figure();
+        bar3(imag(chi));
     end
     if ~args.save
         
     end
     varargout{1} = data;
+   
 end
