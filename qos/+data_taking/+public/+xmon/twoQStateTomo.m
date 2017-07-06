@@ -43,7 +43,7 @@ function varargout = twoQStateTomo(varargin)
         case {'++'}
             p = gate.Y2p(q1).*gate.Y2p(q2); 
         case {'--'}
-            p = gate.Y2p(q1).*gate.Y2p(q2);
+            p = gate.Y2m(q1).*gate.Y2m(q2);
         case {'ii'}
             p = gate.X2m(q1).*gate.X2m(q2);
         case {'GHZ'}

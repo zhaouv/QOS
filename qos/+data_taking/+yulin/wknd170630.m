@@ -45,3 +45,24 @@ spectroscopy1_zpa_bndSwp('qubit',q,...
        'swpBandCenterFcn',q8zAmp2f01,'swpBandWdth',70e6,...
        'biasAmp',[-32500:250:32500],'driveFreq',[4.37e9:0.1e6:4.77e9],...
        'gui',true,'save',true);
+   
+%% fully auto callibration
+qubits = {'q7','q8'};
+for ii = 1:numel(qubits)
+    q = qubits{ii};
+    tuneup.correctf01byRamsey('qubit',q,'gui',true,'save',true);
+    tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',true,'gui',true,'save',true);
+    tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
+    XYGate ={'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2','X/4', 'Y/4', '-X/4', '-Y/4'};
+    for jj = 1:numel(XYGate)
+        tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{jj},'AE',true,'gui',true,'save',true);
+    end
+end
+%%
+CZTomoData = twoQProcessTomo('qubit1','q7','qubit2','q8',...
+       'process','CZ','reps',1,...
+       'notes','','gui',true,'save',true);
+%%
+twoQStateTomoData = twoQStateTomo('qubit1','q7','qubit2','q8',...
+  'state','|00>','reps',1,...
+ 'notes','','gui',true,'save',true);

@@ -55,11 +55,11 @@ function varargout = randBenchMarking(varargin)
     data_i = zeros(1,N);
     ax = NaN;
     
-    str = ['D:\data\20170517\RndBenchMarking_',datestr(now,'yymmddTHHMMSS_')];
+    str = ['D:\data\20170627\RndBenchMarking_',datestr(now,'yymmddTHHMMSS_')];
     
     for ii = 1:N
         for jj = 1:args.numReps
-            R = measure.randBenchMarking(q,p,args.numGates(ii));
+            R = measure.randBenchMarking1(q,p,args.numGates(ii));
             data = R();
             data_ref(ii) = data_ref(ii)+ data(1);
             data_i(ii) = data_i(ii)+ data(2);

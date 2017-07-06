@@ -1,4 +1,4 @@
-classdef randBenchMarking < qes.measurement.measurement
+classdef randBenchMarking1 < qes.measurement.measurement
     % randomized benchmarking
     
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
@@ -30,10 +30,10 @@ classdef randBenchMarking < qes.measurement.measurement
         numS1Y2pGates = 3;
     end
     properties (SetAccess = private, GetAccess = private)
-        
+        R
     end
     methods
-        function obj = randBenchMarking(qubits, process,numGates)
+        function obj = randBenchMarking1(qubits, process,numGates)
             if ~isa(process,'sqc.op.physical.operator')
 				throw(MException('QOS_randBenchMarking:invalidInput',...
 						'the input is not a valid quantum operator.'));
@@ -79,6 +79,9 @@ classdef randBenchMarking < qes.measurement.measurement
                 case 'Y2m'
                     obj.processIdx = 16;
             end
+            
+            obj.R = sqc.measure.resonatorReadout_ss(obj.qubits);
+            obj.R.state = 1;
         end
         function Run(obj)
             Run@qes.measurement.measurement(obj);
@@ -93,17 +96,14 @@ classdef randBenchMarking < qes.measurement.measurement
                 Pi = Pi*obj.process*gs{ii};
             end
             Pi = Pi*obj.process*gf_i;
-            
-            R = sqc.measure.resonatorReadout_ss(obj.qubits);
-            R.state = 1;
-            
-			R.delay = PR.length;
+
+			obj.R.delay = PR.length;
 			PR.Run();
-            pa = R();
+            pa = obj.R();
             
-            R.delay = Pi.length;
+            obj.R.delay = Pi.length;
 			Pi.Run();
-            pb = R();
+            pb = obj.R();
             
             obj.data = [pa, pb];
         end

@@ -166,21 +166,8 @@ numGates = 1:1:20;
 [Pref,Pi] = randBenchMarking('qubit','q8',...
        'process','X','numGates',numGates,'numReps',20,...
        'gui',true,'save',true);
-%% auto
-for ii = [2,7,8]
-q = qNames{ii};
-
-tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
-tuneup.optReadoutFreq('qubit',q,'gui',true,'save',true);
-tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
-
-tuneup.correctf01bySpc('qubit',q,'gui',true,'save',true); % measure f01 by spectrum
-tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',true,'gui',true,'save',true);
-tuneup.optReadoutFreq('qubit',q,'gui',true,'save',true);
-end
 %%
-for ii = [2,7,8]
-q = qNames{ii};
+q = qNames{8};
 
 tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save','askMe');
 tuneup.optReadoutFreq('qubit',q,'gui',true,'save','askMe');
@@ -189,11 +176,17 @@ tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save','askMe');
 tuneup.correctf01bySpc('qubit',q,'gui',true,'save','askMe'); % measure f01 by spectrum
 tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',true,'gui',true,'save','askMe');
 tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save','askMe');
-end
-%%
-XYGate ={'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2','X/4', 'Y/4', '-X/4', '-Y/4'};
-for ii = 1:numel(XYGate)
-    tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{ii},'AE',true,'gui',true,'save',true); % finds the XY gate amplitude and update to settings
+%% fully auto callibration
+qubits = {'q7','q8'};
+for ii = 1:numel(qubits)
+    q = qubits{ii};
+    tuneup.correctf01byRamsey('qubit',q,'gui',true,'save',true);
+    tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',true,'gui',true,'save',true);
+    tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
+    XYGate ={'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2','X/4', 'Y/4', '-X/4', '-Y/4'};
+    for jj = 1:numel(XYGate)
+        tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{jj},'AE',true,'gui',true,'save',true);
+    end
 end
 %%
 zdc2f01('qubit','q7_c','gui',true,'save',true);

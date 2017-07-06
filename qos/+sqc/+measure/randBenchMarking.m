@@ -29,10 +29,10 @@ classdef randBenchMarking < qes.measurement.measurement
         s1Y2pGates = {{'Y2p'},{'Y','X2p'},{'X2m','Y2m','X2p'}}
         numS1Y2pGates = 3;
         
-        C2GateSet = cell{};
+        C2GateSet = cell();
     end
     properties (SetAccess = private, GetAccess = private)
-        
+        R
     end
     methods
         function obj = randBenchMarking(qubits, process,numGates)
@@ -80,9 +80,8 @@ classdef randBenchMarking < qes.measurement.measurement
                 case 'Y2m'
                     obj.processIdx = 16;
             end
-            
-            
-            
+
+            obj.R = sqc.measure.resonatorReadout_ss(obj.qubits);
         end
         function Run(obj)
             Run@qes.measurement.measurement(obj);
@@ -97,17 +96,16 @@ classdef randBenchMarking < qes.measurement.measurement
                 Pi = Pi*obj.process*gs{ii};
             end
             Pi = Pi*obj.process*gf_i;
+
+            obj.R.state = 1;
             
-            R = sqc.measure.resonatorReadout_ss(obj.qubits);
-            R.state = 1;
-            
-			R.delay = PR.length;
+			obj.R.delay = PR.length;
 			PR.Run();
-            pa = R();
+            pa = obj.R();
             
-            R.delay = Pi.length;
+            obj.R.delay = Pi.length;
 			Pi.Run();
-            pb = R();
+            pb = obj.R();
             
             obj.data = [pa, pb];
         end
@@ -177,9 +175,93 @@ classdef randBenchMarking < qes.measurement.measurement
                 g = g*feval(str2func(['@(q)sqc.op.physical.gate.',gfn{jj},'(q)']),obj.qubits);
             end
         end
+        
         function gs = cNotGates(obj)
             % 5184 gates
             
         end
-	end
+    end
+    methods(Static  = true)
+        function gates = C1Gates()
+            persistent C1;
+            if isempty(C1)
+                C1 = {{'I'},{'X'},{'Y'},{'Y','X'},...
+                            {'X2p','Y2p'},{'X2p','Y2m'},{'X2m','Y2p'},{'X2m','Y2m'},...
+                            {'Y2p','X2p'},{'Y2p','X2m'},{'Y2m','X2p'},{'Y2m','X2m'},...
+                            {'X2p'},{'X2m'},{'Y2p'},{'Y2m'},...
+                            {'X2m','Y2p','X2p'},{'X2m','Y2m','X2p'},...
+                            {'X','Y2p'},{'X','Y2m'},{'Y','X2p'},{'Y','X2m'},...
+                            {'X2p','Y2p','X2p'},{'X2m','Y2p','X2m'}};
+            end
+            % numC1Gates = 24;
+            gates = C1;
+        end
+        function gates = C2gates()
+            persistent C2;
+            persistent s1Gates;
+            persistent s1X2pGates;
+            persistent s1Y2pGates;
+            if isempty(C2)
+                C2 = cell(1,11520);
+                C1 = sqc.measure.C1Gates();
+                numC1Gates = 24;
+                if isempty(s1Gates)
+                    s1Gates = {{'I'},{'Y2p','X2p'},{'X2m','Y2m'}};
+                end
+                numS1Gates = 3;
+                if isempty(s1X2pGates)
+                    s1X2pGates = {{'X2p'},{'X2p','Y2p','X2p'},{'Y2m'}};
+                end
+                numS1X2pGates = 3;
+                if isempty(s1Y2pGates)
+                    s1Y2pGates = {{'Y2p'},{'Y','X2p'},{'X2m','Y2m','X2p'}};
+                end
+                numS1Y2pGates = 3;
+
+                n = 1;
+                for ii = 1:numC1Gates
+                    for jj = 1:numC1Gates
+                        C2{n} = {{C1{ii},C1{jj}}};
+                        n = n+1;
+                    end
+                end
+                NC1C1 = n-1;
+                
+                for ii = 1:NC1C1
+                    for jj = 1:numS1Gates
+                        for kk = 1:numS1Y2pGates
+                            C2{n} = {C2{ii},'CZ',{s1Y2pGates{kk},s1Gates{jj}}};
+                            n = n +1;
+                        end
+                    end
+                end
+                
+                for ii = 1:NC1C1
+                    for jj = 1:numS1Y2pGates
+                        for kk = 1:numS1X2pGates
+                            C2{n} = {C2{ii}, 'CZ', {'X2m','Y2p'}, 'CZ', {s1X2pGates{kk},s1Y2pGates{jj}}};
+                            n = n +1;
+                        end
+                    end
+                end
+                
+                for ii = 1:NC1C1
+                    C2{n} = {C2{ii}, 'CZ', {'Y2p','Y2m'}, 'CZ', {'Y2m','Y2p'}, 'CZ', {'Y2p','I'}};
+                    n = n +1;
+                end
+                
+            end
+            gates = C2;
+        end
+    end
 end
+
+
+
+
+
+
+
+
+
+
