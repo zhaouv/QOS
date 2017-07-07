@@ -162,9 +162,10 @@ data = singleQProcessTomo('qubit','q2','reps',2,'process',gate);
 chi = sqc.qfcns.processTomoData2Rho(data);
 h = figure();bar3(real(chi));h = figure();bar3(imag(chi));
 %%
-numGates = 1:1:20;
-[Pref,Pi] = randBenchMarking('qubit','q8',...
-       'process','X','numGates',numGates,'numReps',20,...
+setQSettings('r_avg',250);
+numGates = 1:1:5;
+[Pref,Pi] = randBenchMarking('qubit1','q7','qubit2','q8',...
+       'process','CZ','numGates',numGates,'numReps',20,...
        'gui',true,'save',true);
 %%
 q = qNames{8};

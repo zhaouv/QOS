@@ -1,8 +1,8 @@
 function varargout = randBenchMarking(varargin)
 % randBenchMarking
-% process options are: 'X','Z','Y','X/2','-X/2','Y/2','-Y/2'
+% process options are: 'X','Z','Y','X/2','-X/2','Y/2','-Y/2', 'CZ'
 %
-% <_o_> = randBenchMarking('qubit',_c&o_,...
+% <_o_> = randBenchMarking('qubit1',_c&o_,'qubit2',<_c&o_>,...
 %       'process',<_c_>,'numGates',[_i_],'numReps',_i_,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -23,31 +23,47 @@ function varargout = randBenchMarking(varargin)
     import sqc.op.physical.*
 
     args = util.processArgs(varargin,{'state','|0>','reps',1,'gui',false,'notes','','detuning',0,'save',true});
-    q = data_taking.public.util.getQubits(args,{'qubit'});
+    if isempty(args.qubit2)
+        q = data_taking.public.util.getQubits(args,{'qubit1'});
+    else
+        [q1,q2] = data_taking.public.util.getQubits(args,{'qubit1','qubit2'});
+        q = {q1,q2};
+    end
 
-    switch args.process
-        case 'I'
-            p = gate.I(q);
-        case 'X'
-            p = gate.X(q);
-        case 'Y'
-            p = gate.Y(q);
-        case {'X/2','X2p'}
-            p = gate.X2p(q);
-        case {'Y/2','Y2p'}
-            p = gate.Y2p(q);
-		case {'-X/2','X2m'}
-            p = gate.X2m(q);
-        case {'-Y/2','Y2m'}
-            p = gate.Y2m(q);
-		case {'Z'}
-            X = gate.X(q);
-			Y = gate.Y(q);
-			p = Y*X;
-        otherwise
-            throw(MException('randBenchMarking:unsupportedGate',...
-                sprintf('available process options for singleQProcessTomo is %s, %s given.',...
-                '''X'',''Z'',''Y'',''X/2'',''-X/2'',''Y/2'',''-Y/2''',args.process)));
+    if numel(q) == 1
+        switch args.process
+            case 'I'
+                p = gate.I(q);
+            case 'X'
+                p = gate.X(q);
+            case 'Y'
+                p = gate.Y(q);
+            case {'X/2','X2p'}
+                p = gate.X2p(q);
+            case {'Y/2','Y2p'}
+                p = gate.Y2p(q);
+            case {'-X/2','X2m'}
+                p = gate.X2m(q);
+            case {'-Y/2','Y2m'}
+                p = gate.Y2m(q);
+            case {'Z'}
+                X = gate.X(q);
+                Y = gate.Y(q);
+                p = Y*X;
+            otherwise
+                throw(MException('randBenchMarking:unsupportedGate',...
+                    sprintf('available process options is %s, %s given.',...
+                    '''X'',''Z'',''Y'',''X/2'',''-X/2'',''Y/2'',''-Y/2'' for single qubit.',args.process)));
+        end
+    else
+        switch args.process
+            case {'CZ'}
+                p = gate.CZ(q{1},q{2});
+            otherwise
+                throw(MException('randBenchMarking:unsupportedGate',...
+                    sprintf('available process options is %s, %s given.',...
+                    '''CZ'' for two qubits',args.process)));
+        end
     end
 	
     N = numel(args.numGates);
@@ -59,7 +75,7 @@ function varargout = randBenchMarking(varargin)
     
     for ii = 1:N
         for jj = 1:args.numReps
-            R = measure.randBenchMarking1(q,p,args.numGates(ii));
+            R = measure.randBenchMarking(q,p,args.numGates(ii));
             data = R();
             data_ref(ii) = data_ref(ii)+ data(1);
             data_i(ii) = data_i(ii)+ data(2);
