@@ -5,7 +5,7 @@ classdef ACZ < sqc.op.physical.operator
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
 	properties
-        ln % by ln, you can change the protected property length
+        aczLn % length of the acz pulse, pad length and meetup longer not included
         
         amp
         thf
@@ -14,8 +14,10 @@ classdef ACZ < sqc.op.physical.operator
         lam3
     end
     properties (SetAccess = private)
-        padLn
+        meetUpLonger % must be private
+        padLn % must be private
         meetUpDetuneFreq
+        dynamicPhase
     end
     properties (SetAccess = private, GetAccess = private)
         aczQ
@@ -29,8 +31,11 @@ classdef ACZ < sqc.op.physical.operator
             obj.thi = scz.thi;
             obj.lam2 = scz.lam2;
             obj.lam3 = scz.lam3;
-            obj.padLn = scz.padLn;
-            obj.length = scz.length;
+            
+            
+            obj.meetUpLonger = scz.meetUpLonger;
+            obj.padLn = cell2mat(scz.padLn);
+            obj.aczLn = scz.aczLn; % must be after the setting of meetUpLonger and padLn
             if scz.aczFirstQ
                 obj.aczQ = 1;
                 obj.meetUpQ = 2;
@@ -38,21 +43,25 @@ classdef ACZ < sqc.op.physical.operator
                 obj.aczQ = 2;
                 obj.meetUpQ = 1;
             end
-            obj.ln = scz.length;
+            obj.dynamicPhase = cell2mat(scz.dynamicPhase);
         end
-        function set.ln(obj,val)
-            obj.ln = val;
-            obj.length = val;
+        function set.aczLn(obj,val)
+            obj.aczLn = val;
+            obj.length = val+sum(obj.padLn)+2*obj.meetUpLonger;
         end
     end
 	methods (Hidden = true)
         function GenWave(obj)
-            obj.z_wv{1} = sqc.wv.acz(obj.length);
-            obj.z_wv{1}.amp = obj.amp;
-            obj.z_wv{1}.thf = obj.thf;
-            obj.z_wv{1}.thi = obj.thi;
-            obj.z_wv{1}.lam2 = obj.lam2;
-            obj.z_wv{1}.lam3 = obj.lam3;
+            aczWv = sqc.wv.acz(obj.aczLn);
+            aczWv.amp = obj.amp;
+            aczWv.thf = obj.thf;
+            aczWv.thi = obj.thi;
+            aczWv.lam2 = obj.lam2;
+            aczWv.lam3 = obj.lam3;
+            padWv1 = qes.waveform.spacer(obj.padLn(1)+obj.meetUpLonger);
+            padWv2 = qes.waveform.spacer(obj.padLn(2)+obj.meetUpLonger);
+            obj.z_wv{1} = [padWv1, aczWv, padWv2];
+            
             acz_q = obj.qubits{obj.aczQ};
             meetUp_q = obj.qubits{obj.meetUpQ};
             persistent da1
@@ -65,13 +74,16 @@ classdef ACZ < sqc.op.physical.operator
 			
             persistent da2
             if obj.meetUpDetuneFreq
-                obj.z_wv{2} = feval(['sqc.wv.',meetUp_q.g_detune_wvTyp],obj.length);
+                meetupWv = feval(['sqc.wv.',meetUp_q.g_detune_wvTyp],obj.aczLn+2*obj.meetUpLonger);
                 wvSettings = struct(meetUp_q.g_detune_wvSettings);
                 fnames = fieldnames(wvSettings);
                 for ii = 1:numel(fnames)
-                    obj.z_wv{2}.(fnames{ii}) = wvSettings.(fnames{ii});
+                    meetupWv.(fnames{ii}) = wvSettings.(fnames{ii});
                 end
-                obj.z_wv{2}.amp = sqc.util.detune2zpa(meetUp_q,obj.meetUpDetuneFreq);
+                meetupWv.amp = sqc.util.detune2zpa(meetUp_q,obj.meetUpDetuneFreq);
+                padWv3 = qes.waveform.spacer(obj.padLn(1));
+                padWv4 = qes.waveform.spacer(obj.padLn(2));
+                obj.z_wv{2} = [padWv3,meetupWv,padWv4];
                 if isempty(da2)
                     da2 = qes.qHandle.FindByClassProp('qes.hwdriver.hardware',...
                             'name',meetUp_q.channels.z_pulse.instru);

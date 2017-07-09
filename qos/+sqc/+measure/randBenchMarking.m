@@ -1,5 +1,6 @@
 classdef randBenchMarking < qes.measurement.measurement
     % randomized benchmarking
+    % for two qubits: CZ based
     
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
@@ -8,6 +9,7 @@ classdef randBenchMarking < qes.measurement.measurement
         process
         qubits % qubit objects or qubit names
         numGates
+        numShots
     end
     properties (GetAccess = private, SetAccess = private)
         processIdx
@@ -19,7 +21,7 @@ classdef randBenchMarking < qes.measurement.measurement
         numQs
     end
     methods
-        function obj = randBenchMarking(qubits, process,numGates)
+        function obj = randBenchMarking(qubits, process,numGates,numShots)
             if ~isa(process,'sqc.op.physical.operator')
 				throw(MException('QOS_randBenchMarking:invalidInput',...
 						'the input is not a valid quantum operator.'));
@@ -37,13 +39,15 @@ classdef randBenchMarking < qes.measurement.measurement
                 if ischar(qubits{ii})
                     qs = sqc.util.loadQubits();
                     qubits{ii} = qs{qes.util.find(qubits{ii},qs)};
-				end
+                end
+                qubits{ii} = Copy(qubits{ii}); % copy is important for CZ based two-qubit RB 
             end
             obj = obj@qes.measurement.measurement([]);
             obj.process = process;
 			obj.qubits = qubits;
             obj.numericscalardata = false;
             obj.numGates = numGates;
+            obj.numShots = numShots;
 
             className = class(process);
             className = strsplit(className,'.');
@@ -81,8 +85,7 @@ classdef randBenchMarking < qes.measurement.measurement
             end
             
             obj.R = sqc.measure.resonatorReadout_ss(obj.qubits);
-            obj.R.state = 2;
-            
+            obj.R.state = 1;
             if numQs == 1
                 obj.C1 = sqc.measure.randBenchMarking.C1Gates();
                 obj.C1m = sqc.measure.randBenchMarking.C1matrix();
@@ -94,29 +97,31 @@ classdef randBenchMarking < qes.measurement.measurement
         end
         function Run(obj)
             Run@qes.measurement.measurement(obj);
-            [gs,gf_ref,gf_i] = obj.randGates();
-            PR = gs{1};
-            for ii = 2:obj.numGates
-                PR = PR*gs{ii};
-            end
-            PR = PR*gf_ref;
-            Pi = gs{1};
-            for ii = 2:obj.numGates
-                Pi = Pi*obj.process*gs{ii};
-            end
-            Pi = Pi*obj.process*gf_i;
+            obj.data = NaN(obj.numShots,2);
+            for nn = 1:obj.numShots
+                [gs,gf_ref,gf_i] = obj.randGates();
+                PR = gs{1};
+                for ii = 2:obj.numGates
+                    PR = PR*gs{ii};
+                end
+                PR = PR*gf_ref;
+                Pi = gs{1};
+                for ii = 2:obj.numGates
+                    Pi = Pi*obj.process*gs{ii};
+                end
+                Pi = Pi*obj.process*gf_i;
 
-            obj.R.state = 1;
-            
-			obj.R.delay = PR.length;
-			PR.Run();
-            pa = obj.R();
-            
-            obj.R.delay = Pi.length;
-			Pi.Run();
-            pb = obj.R();
-            
-            obj.data = [pa, pb];
+                obj.R.state = 1;
+
+                obj.R.delay = PR.length;
+                PR.Run();
+                pa = obj.R();
+
+                obj.R.delay = Pi.length;
+                Pi.Run();
+                pb = obj.R();
+                obj.data(nn,:) = [pa, pb];
+            end
         end
     end
 	methods (Access = private)
@@ -194,12 +199,13 @@ classdef randBenchMarking < qes.measurement.measurement
             g = [];
             for ii = 1:numel(gn) % *
                 if ~iscell(gn{ii})
-                    assert(ischar(gn{ii}));
-                    disp('debug');
+                    % CZ
                     g_ = feval(str2func(['@(q1,q2)sqc.op.physical.gate.',gn{ii},'(q1,q2)']),q1,q2);
+                    if ~isempty(g_.dynamicPhase)
+                        q1.g_XY_phaseOffset = q1.g_XY_phaseOffset + g_.dynamicPhase(1);
+                        q2.g_XY_phaseOffset = q2.g_XY_phaseOffset + g_.dynamicPhase(2);
+                    end
                 else
-                    assert(numel(gn{ii})==2);
-                    disp('debug');
                     g_ = sqc.measure.randBenchMarking.generate1Qgates(gn{ii}{1},q1);
                     g_ = g_.*sqc.measure.randBenchMarking.generate1Qgates(gn{ii}{2},q2);
                 end
@@ -378,13 +384,3 @@ classdef randBenchMarking < qes.measurement.measurement
         end
     end
 end
-
-
-
-
-
-
-
-
-
-

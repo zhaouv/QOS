@@ -67,43 +67,47 @@ function varargout = randBenchMarking(varargin)
     end
 	
     N = numel(args.numGates);
-    data_ref =  zeros(1,N);
-    data_i = zeros(1,N);
+    Pref =  zeros(1,N);
+    Pgate = zeros(1,N);
     ax = NaN;
-    
-    str = ['D:\data\20170627\RndBenchMarking_',datestr(now,'yymmddTHHMMSS_')];
-    
+
+    Pref = NaN(args.numReps,N); 
+    Pgate = NaN(args.numReps,N);
     for ii = 1:N
-        for jj = 1:args.numReps
-            R = measure.randBenchMarking(q,p,args.numGates(ii));
-            data = R();
-            data_ref(ii) = data_ref(ii)+ data(1);
-            data_i(ii) = data_i(ii)+ data(2);
-        end
-        data_ref(ii) = data_ref(ii)/args.numReps;
-        data_i(ii) = data_i(ii)/args.numReps;
+        R = measure.randBenchMarking(q,p,args.numGates(ii),args.numReps);
+        data = R();
+        Pref(:,ii) = data(:,1);
+        Pgate(:,ii) = data(:,2);
         if args.gui
             if ~ishghandle(ax)
                 h = qes.ui.qosFigure(sprintf('Randomized Benchmarking | %s', args.process),true);
                 ax = axes('parent',h);
             end
-            plot(ax,...
-                args.numGates,data_ref,...
-                args.numGates,data_i);
+            try
+                plot(ax,...
+                args.numGates(1:ii),mean(Pref(:,1:ii),1),...
+                args.numGates(1:ii),mean(Pgate(:,1:ii),1));
+            catch
+            end
             xlabel(ax,'number of gates');
-            ylabel(ax,'P|0>');
-            legend(ax,{'ref','interleaved'});
+            if numel(q) == 1
+                ylabel(ax,'P|0>');
+            else
+                ylabel(ax,'P|00>');
+            end
+            legend(ax,{'reference','interleaved'});
             drawnow;
         end
         if args.save
-            save([str,'.mat'],'data_ref','data_i','args');
-            try
-                savefig(h,[str,'.fig']);
-            catch
-            end
+            QS = qes.qSettings.GetInstance();
+            dataPath = QS.loadSSettings('data_path');
+            dataFileName = ['RB',datestr(now,'_yymmddTHHMMSS_'),'.mat'];
+            sessionSettings = QS.loadSSettings;
+            hwSettings = QS.loadHwSettings;
+            save(fullfile(dataPath,dataFileName),'Pref','Pgate','args','sessionSettings','hwSettings');
         end
     end
 
-    varargout{1} = data_ref;
-    varargout{2} = data_i;
+    varargout{1} = Pref;
+    varargout{2} = Pgate;
 end

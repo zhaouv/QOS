@@ -5,14 +5,23 @@ classdef (Abstract = true) XY_base < sqc.op.physical.operator
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
     properties
-        amp % expose qubit setting g_X_amp for tunning
+        amp
         f01 % expose qubit setting f01 for tunning
+    end
+    properties (SetAccess = private, GetAccess = private)
+        phase
     end
     methods
         function obj = XY_base(qubit)
 			assert(numel(qubit)==1);
             obj = obj@sqc.op.physical.operator(qubit);
             obj.f01 = obj.qubits{1}.f01;
+            obj.phase = obj.qubits{1}.g_XY_phaseOffset;
+        end
+    end
+    methods(Access = protected)
+        function addPhase(obj,val)
+            obj.phase = obj.phase + val;
         end
     end
     methods (Hidden = true)
@@ -38,6 +47,7 @@ classdef (Abstract = true) XY_base < sqc.op.physical.operator
             obj.xy_wv{1}.df = (obj.f01-obj.mw_src_frequency(1))/da.samplingRate;
             obj.xy_wv{1}.awg = da;
             obj.xy_wv{1}.awgchnl = [obj.qubits{1}.channels.xy_i.chnl,obj.qubits{1}.channels.xy_q.chnl];
+            obj.xy_wv{1}.phase = obj.phase;
         end
     end
 end
