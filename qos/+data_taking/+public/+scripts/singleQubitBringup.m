@@ -12,16 +12,17 @@ import data_taking.public.xmon.*
 % sqc.util.resetQSettings();
 %%
 qNames = allQNames();
-readoutFreqs = getQSettings('r_fr');
+% readoutFreqs = getQSettings('r_fr');
 %%
-setQSettings('r_uSrcPower',22);
-setQSettings('r_ln',3000);
-setQSettings('r_amp',3e4);
-setQSettings('r_wvSettings.ring_amp',0);
-setQSettings('r_wvSettings.ring_w',150);
-setQSettings('qr_xy_uSrcPower',20);
+% setQSettings('r_uSrcPower',22);
+% setQSettings('r_ln',3000);
+% setQSettings('r_amp',3e4);
+% setQSettings('r_wvSettings.ring_amp',0);
+% setQSettings('r_wvSettings.ring_w',150);
+% setQSettings('qr_xy_uSrcPower',20);
 %% just in case the hardware dose not startup with zero dc output, we set the output of qubit dc channels to zero
-setQSettings('zdc_amp',0);
+% setQSettings('zdc_amp',0);
+qNames = allQNames();
 for ii = 1:numel(qNames)
     % set to the dc value in registry:
 	setZDC(qNames{ii});
@@ -143,14 +144,14 @@ photonNumberCal('qubit','q1',...
 'ring_amp',5000,'ring_w',200,...
 'gui',true,'save',true);
 %%
-zDelay('qubit','q2','zAmp',5000,'zLn',[],'zDelay',[-50:1:50],...
+zDelay('qubit','q7','zAmp',2000,'zLn',[],'zDelay',[-50:1:50],...
        'gui',true,'save',true)
 %%
-delayTime = [[0:1:20],[21:2:50],[51:5:100],[101:10:500],[501:50:3000]];
-delayTime = [0:5:1e3];
-zPulseRipple('qubit','q2',...
+% delayTime = [[0:1:20],[21:2:50],[51:5:100],[101:10:500],[501:50:3000]];
+delayTime = [0:20:2e3];
+zPulseRipple('qubit','q8',...
         'delayTime',delayTime,...
-       'zAmp',0e4,'gui',true,'save',true);
+       'zAmp',2e4,'gui',true,'save',true);
 %%
 state = '|0>-i|1>';
 data = singleQStateTomo('qubit','q2','reps',2,'state',state);
@@ -161,10 +162,18 @@ gate = 'Y/2';
 data = singleQProcessTomo('qubit','q2','reps',2,'process',gate);
 chi = sqc.qfcns.processTomoData2Rho(data);
 h = figure();bar3(real(chi));h = figure();bar3(imag(chi));
-%%
-numGates = 1:1:20;
-[Pref,Pi] = randBenchMarking('qubit','q8',...
-       'process','X','numGates',numGates,'numReps',20,...
+%% single qubit gate benchmarking
+setQSettings('r_avg',200);
+numGates = 1:1:5;
+[Pref,Pi] = randBenchMarking('qubit1','q7','qubit2',[],...
+       'process','-X/2','numGates',numGates,'numReps',70,...
+       'gui',true,'save',true);
+
+%% two qubit gate benchmarking
+setQSettings('r_avg',250);
+numGates = 1:1:10;
+[Pref,Pi] = randBenchMarking('qubit1','q7','qubit2','q8',...
+       'process','CZ','numGates',numGates,'numReps',70,...
        'gui',true,'save',true);
 %%
 q = qNames{8};
@@ -180,21 +189,42 @@ tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save','askMe');
 qubits = {'q7','q8'};
 for ii = 1:numel(qubits)
     q = qubits{ii};
+    setQSettings('r_avg',2000,q);
     tuneup.correctf01byRamsey('qubit',q,'gui',true,'save',true);
-    tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',true,'gui',true,'save',true);
+    tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',false,'gui',true,'save',true);
     tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save',true);
-    XYGate ={'X', 'Y', 'X/2', 'Y/2', '-X/2', '-Y/2','X/4', 'Y/4', '-X/4', '-Y/4'};
+    XYGate ={'X','X/2','X/4'};
     for jj = 1:numel(XYGate)
-        tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{jj},'AE',true,'gui',true,'save',true);
+        tuneup.xyGateAmpTuner('qubit',q,'gateTyp',XYGate{jj},'AE',true,'AENumPi',21,'gui',true,'save',true);
     end
 end
 %%
 zdc2f01('qubit','q7_c','gui',true,'save',true);
 
-
 %%
+setQSettings('r_avg',2000,'q7');
+setQSettings('r_avg',2000,'q8');
 acz_ramsey('controlQ','q7','targetQ','q8',...
-       'czLength',[100:10:300],'czAmp',[-1e4:-200:-2.5e4],'czDelay',20,'cState','0',...
+       'czLength',[70:5:150],'czAmp',[-1.9e4:-100:-2.2e4],'czDelay',20,'cState','0',...
+       'notes','','gui',true,'save',true);
+%%
+setQSettings('r_avg',2000,'q7');
+setQSettings('r_avg',2000,'q8');
+acz_ramsey('controlQ','q7','targetQ','q8',...
+       'czLength',[80:2:96],'czAmp',[-2.06e4:-50:-2.2e4],'czDelay',40,'cState','1',...
+       'notes','','gui',true,'save',true);
+%%
+setQSettings('r_avg',5000,'q7');
+setQSettings('r_avg',5000,'q8');
+acz_ramsey('controlQ','q7','targetQ','q8',...
+       'czLength',[86],'czAmp',[-2.08e4:-5:-2.18e4],'czDelay',40,'cState','1',...
+       'notes','','gui',true,'save',true);
+   
+%%
+setQSettings('r_avg',2000,'q7');
+setQSettings('r_avg',2000,'q8');
+acz_ramsey('controlQ','q7','targetQ','q8',...
+       'czLength',[70:2:100],'czAmp',[-1.95e4:-100:-2.2e4],'czDelay',20,'cState','1',...
        'notes','','gui',true,'save',true);
 
 %%
@@ -205,11 +235,13 @@ qqSwap('qubit1','q7','qubit2','q8',...
        'notes','','gui',true,'save',true);
    
 %%
-CZTomoData = twoQProcessTomo('qubit1','q7','qubit2','q8',...
+setQSettings('r_avg',2000,'q7');
+setQSettings('r_avg',2000,'q8');
+CZTomoData = Tomo_2QProcess('qubit1','q7','qubit2','q8',...
        'process','CZ','reps',1,...
        'notes','','gui',true,'save',true);
 %%
-twoQStateTomoData = twoQStateTomo('qubit1','q7','qubit2','q8',...
-  'state','|00>','reps',1,...
+twoQStateTomoData = Tomo_2QState('qubit1','q7','qubit2','q8',...
+  'state','|11>','reps',1,...
  'notes','','gui',true,'save',true);
 

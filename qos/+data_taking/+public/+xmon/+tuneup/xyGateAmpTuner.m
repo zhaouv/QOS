@@ -2,7 +2,7 @@ function varargout = xyGateAmpTuner(varargin)
 % tune xy gate amplitude: X, X/2, -X/2, X/4, -X/4, Y, Y/2, -Y/2, Y/4, -Y/4
 % 
 % <_f_> = xyGateAmpTuner('qubit',_c&o_,'gateTyp',_c_,...
-%		'AE',<_b_>,...  % insert multiple Idle gate(implemented by two pi rotations) to Amplify Error or not
+%		'AE',<_b_>,'AENumPi',<_i_>,...  % insert multiple Idle gate(implemented by two pi rotations) to Amplify Error or not
 %       'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -22,7 +22,8 @@ function varargout = xyGateAmpTuner(varargin)
 	MIN_VISIBILITY = 0.3;
 	AE_NUM_PI = 11; % must be an positive odd number
 	
-	args = qes.util.processArgs(varargin,{'AE',false,'gui',false,'save',true});
+	args = qes.util.processArgs(varargin,{'AE',false,'AENumPi',AE_NUM_PI,'gui',false,'save',true});
+    args.AENumPi = round(args.AENumPi);
 	q = data_taking.public.util.getQubits(args,{'qubit'});
     F = q.r_iq2prob_fidelity;
     vis = F(1)+F(2)-1;
@@ -46,30 +47,14 @@ function varargout = xyGateAmpTuner(varargin)
 				'X Y X/2 -X/2 X2m X2p X/4 -X/4 X4m X4p Y/2 -Y/2 Y2m Y2p Y/4 -Y/4 Y4m Y4p')));
     end
     
-    
-    
     QS = qes.qSettings.GetInstance();
 	switch args.gateTyp
-        case 'X'
-            gateAmpSettingsKey ='g_X_amp';
-        case {'X/2','X2p'}
-            gateAmpSettingsKey ='g_X2p_amp';
-        case {'-X/2','X2m'}
-            gateAmpSettingsKey ='g_X2m_amp';
-        case {'X/4','X4p'}
-            gateAmpSettingsKey ='g_X4p_amp';
-        case {'-X/4','X4m'}
-            gateAmpSettingsKey ='g_X4m_amp';
-        case 'Y'
-            gateAmpSettingsKey ='g_Y_amp';
-        case {'Y/2', 'Y2p'}
-            gateAmpSettingsKey ='g_Y2p_amp';
-        case {'-Y/2', 'Y2m'}
-            gateAmpSettingsKey ='g_Y2m_amp';
-        case {'Y/4','Y4p'}
-            gateAmpSettingsKey ='g_Y4p_amp';
-        case {'-Y/4','Y4m'}
-            gateAmpSettingsKey ='g_Y4m_amp';
+        case {'X','Y'}
+            gateAmpSettingsKey ='g_XY_amp';
+        case {'X/2','X2p','-X/2','X2m','Y/2','Y2p','-Y/2','Y2m'}
+            gateAmpSettingsKey ='g_XY2_amp';
+        case {'X/4','X4p','-X/4','X4m','Y/4','Y4p','-Y/4','Y4m'}
+            gateAmpSettingsKey ='g_XY4_amp';
         otherwise
             throw(MException('QOS_xyGateAmpTuner:unsupportedGataType',...
                 sprintf('gate %s is not supported, supported types are %s',args.gateTyp,...
@@ -148,15 +133,28 @@ function varargout = xyGateAmpTuner(varargin)
 	
 	if args.AE  % use multiple pi gates to amplify error to fine tune gateAmp
         % ~0.5% precision
-        switch args.gateTyp
-            case {'X','Y'}
-                amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS*2);
-            case {'X/2','-X/2','X2m','X2p','Y/2','-Y/2','Y2m','Y2p'...
-                    'X/4','-X/4','X4m','X4p','Y/4','-Y/4','Y4m','Y4p'}
-                amps_ae = linspace(0.85*gateAmp,min(da.vpp,1.15*gateAmp),NUM_RABI_SAMPLING_PTS*2);
+        if args.AENumPi <= 11
+            amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS*2);
+        else
+            amps_ae = linspace(0.95*gateAmp,min(da.vpp,1.05*gateAmp),NUM_RABI_SAMPLING_PTS*3);
         end
+%         switch args.gateTyp
+%             case {'X','Y'}
+%                 if args.AENumPi <= 11
+%                     amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS*2);
+%                 else
+%                     amps_ae = linspace(0.95*gateAmp,min(da.vpp,1.05*gateAmp),NUM_RABI_SAMPLING_PTS*3);
+%                 end
+%             case {'X/2','-X/2','X2m','X2p','Y/2','-Y/2','Y2m','Y2p'...
+%                     'X/4','-X/4','X4m','X4p','Y/4','-Y/4','Y4m','Y4p'}
+%                 if args.AENumPi <= 11
+%                     amps_ae = linspace(0.85*gateAmp,min(da.vpp,1.15*gateAmp),NUM_RABI_SAMPLING_PTS*2);
+%                 else
+%                     amps_ae = linspace(0.9*gateAmp,min(da.vpp,1.1*gateAmp),NUM_RABI_SAMPLING_PTS*3);
+%                 end
+%         end
 		e = rabi_amp1('qubit',q,'biasAmp',0,'biasLonger',0,'xyDriveAmp',amps_ae,...
-			'detuning',0,'numPi',AE_NUM_PI,'driveTyp',args.gateTyp,'gui',false,'save',false);
+			'detuning',0,'numPi',args.AENumPi,'driveTyp',args.gateTyp,'gui',false,'save',false);
 		P_ae = e.data{1};
 		if max(P_ae) < P0 + MIN_VISIBILITY
 			warning('QOS_xyGateAmpTuner:visibilityTooLow',...
@@ -195,7 +193,7 @@ function varargout = xyGateAmpTuner(varargin)
 		ylabel(ax,'P|1>');
         if args.AE
             legend(ax,{'data(1\pi)',...
-                [sprintf('data(AE:%0.0f',AE_NUM_PI),'\pi)'],...
+                [sprintf('data(AE:%0.0f',args.AENumPi),'\pi)'],...
                 sprintf('%s gate amplitude',args.gateTyp)});
             title('Precision: ~0.5%');
         else

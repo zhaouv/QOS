@@ -41,7 +41,7 @@ function varargout = acz_ramsey(varargin)
     
     czLength = qes.util.hvar(0);
     function procFactory(amp)
-        CZ.ln = czLength.val;
+        CZ.aczLn = czLength.val;
         CZ.amp = amp;
         proc = ((X.*Ip)*Y2m)*Id*CZ*Id*Y2p;  % CNOT
         % proc = (X.*Y2m)*Id*CZ*Id*Y2p;

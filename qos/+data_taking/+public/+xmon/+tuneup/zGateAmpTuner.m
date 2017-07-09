@@ -27,6 +27,8 @@ function varargout = zGateAmpTuner(varargin)
     args = util.processArgs(varargin,{'detuning',0,'dataTyp','P',...
         'gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
+    
+    error('todo...');
 
     X2 = gate.X2p(q);
     I = op.detune(q);
