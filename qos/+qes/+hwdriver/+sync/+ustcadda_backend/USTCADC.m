@@ -1,4 +1,4 @@
- % 	FileName:USTCADC.m
+% 	FileName:USTCADC.m
 % 	Author:GuoCheng
 % 	E-mail:fortune@mail.ustc.edu.cn
 % 	All right reserved @ GuoCheng.

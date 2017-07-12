@@ -2,6 +2,7 @@ function saveSettings(spath, field,value)
 % save settings
 % examples:
 % s = qes.util.saveSettings('F:\program\qes_settings',{'yulin','session1','q2','r_delay'},value)
+% s = qes.util.saveSettings('F:\program\qes_settings',{'yulin.session1.q2.r_delay'},value)
 
 % Copyright 2016 Yulin Wu, USTC
 % mail4ywu@gmail.com/mail4ywu@icloud.com
@@ -25,6 +26,17 @@ function saveSettings(spath, field,value)
     
     settings_exists = false;
     isJson = false;
+    while true
+        s = regexp(field{end},'[^\)\}]\.'); % handles case like 'yulin.session1.q2.r_delay' or 'yulin.session1.q2.r_delay.fieldName(3)'
+        if numel(s) > 1
+            fe = field{end};
+            field{end} = fe(1:s(1));
+            field{end+1} = fe(s(1)+2:end);
+        else
+            break;
+        end
+    end
+    
     try
         for ii = 1:numel(field)
             if ~isempty(regexp(field{ii},'{\d+}', 'once')) || ~isempty(strfind(field{ii},'.'))
@@ -40,7 +52,7 @@ function saveSettings(spath, field,value)
         settings_exists = true;
     catch ME
         if strcmp(ME.identifier,'loadSettings:invalidInput')
-            warning('saveSettings:addNewField','field %s not found, this field will be add into the setttings.', field);
+            warning('saveSettings:addNewField','field %s not found, this field will be add into the setttings.', field{1});
         else
             rethrow(ME);
         end

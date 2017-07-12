@@ -26,13 +26,7 @@ classdef X4p < sqc.op.physical.gate.XY_base
 %                 end
 %             end
             obj.length = obj.qubits{1}.g_XY4_ln;
-            obj.amp = obj.qubits{1}.g_X4p_amp;
-        end
-    end
-    methods (Hidden = true)
-        function GenWave(obj)
-            GenWave@sqc.op.physical.gate.XY_base(obj);
-            obj.xy_wv{1}.phase = obj.qubits{1}.g_XY_phaseOffset;
+            obj.amp = obj.qubits{1}.g_XY4_amp;
         end
     end
 end

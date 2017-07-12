@@ -32,7 +32,7 @@ function [fidelity,h] = randBenchMarking(numGates, Pref, Pgate, numQs, gateName)
     xlabel(ax,'number of Clifford gates','FontSize',16);
     ylabel(ax,'sequence fidelity','FontSize',16);
     legend(ax,{'reference',[gateName, ' interleaved']},'FontSize',16);
-    title(ax,[gateName,' fidelity: ',num2str(fidelity,'%0.3f')],...
+    title(ax,[gateName,' fidelity: ',num2str(fidelity,'%0.4f')],...
         'FontSize',16,'FontWeight','normal');
     xf = 0.5:0.1:numGates(end)+0.5;
     plot(ax,xf,fitFcn(Cref,xf),'-b','LineWidth',1);

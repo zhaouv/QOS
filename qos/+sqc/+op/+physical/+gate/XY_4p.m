@@ -7,12 +7,7 @@ classdef XY_4p < sqc.op.physical.gate.X
     methods
         function obj = XY_4p(qubit)
             obj = obj@sqc.op.physical.gate.X(qubit);
-        end
-    end
-    methods (Hidden = true)
-        function GenWave(obj)
-            GenWave@sqc.op.physical.gate.X(obj)
-            obj.xy_wv{1}.phase = obj.qubits{1}.g_XY_phaseOffset+pi/4;
+            obj.addPhase(pi/4);
         end
     end
 end

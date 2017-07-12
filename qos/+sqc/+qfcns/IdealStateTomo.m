@@ -96,10 +96,15 @@ for Ui = 1:36 % Ui is index as {u_q2,u_q1,s_q2,s_q1}
 end
 P = NaN(16,9,4);
 rho_ = cell(1,16);
+cz = [1,0,0,0;
+     0,1,0,0;
+     0,0,1,0;
+     0,0,0,-1];
+cz = kron(I,expm(-1i*pi*[1,0;0,-1]/2))*cz;
 for ii = 1:16
     iq2 = fix((ii-1)/4)+1;
     iq1 = ii-(iq2-1)*4;
-    rho_{ii} = rho{iq2,iq1};
+    rho_{ii} = cz*rho{iq2,iq1}*cz';
     P_ = U*rho_{ii}(:);
     P_ = reshape(P_,4,9);
     P(ii,:,:) = P_.';

@@ -26,6 +26,7 @@ function varargout = zPulseRipple(varargin)
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     X2 = gate.X2p(q);
+    Y2 = gate.Y2p(q);
     I1 = gate.I(q);
     I2 = gate.I(q);
     Z = op.zRect(q);
@@ -34,12 +35,11 @@ function varargout = zPulseRipple(varargin)
     R = measure.resonatorReadout_ss(q);
     R.state = 2;
     
-	X2_ = copy(X2);
     maxDelayTime = max(args.delayTime);
     function procFactory(delay)
         I1.ln = delay;
         I2.ln = maxDelayTime - delay;
-        proc = Z*I1*X2_*I2*X2;
+        proc = Z*I1*X2*I2*Y2;
         proc.Run();
         R.delay = proc.length;
     end

@@ -5,8 +5,8 @@
 g1 = sqc.wv.gaussian(20);
 g2 = sqc.wv.gaussian(80);
 g3 = sqc.wv.gaussian(30);
-g3 = [g1,g2,g3];
-g3 = [copy(g3),copy(g3)];
+% g3 = [g1,g2,g3];
+% g3 = [copy(g3),copy(g3)];
 
 n2p = nextpow2(g3.length)+1;
 numpts = 2^n2p;
@@ -19,7 +19,7 @@ samples = g3(t);
 freqs = fs*(-numpts/2:numpts/2-1)/numpts;
 s_fft = fft(samples);
 padLn = (timeSpan - g3.length)/2;
-s_fft = fftshift(s_fft).*exp(1j*2*pi*freqs*(padLn))/fs;
+s_fft = fftshift(s_fft)*exp(1j*2*pi*freqs*(padLn))/fs;
 % calculate frequency domain sample by freqFunc directly
 s_direct = g3(freqs,true);
 % check they are equal

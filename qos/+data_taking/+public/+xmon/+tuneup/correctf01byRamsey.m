@@ -20,7 +20,7 @@ function varargout = correctf01byRamsey(varargin)
     % Yulin Wu, 2017/4/14
     % resolution low, not recommended, use correctf01bySpc instead
     
-    MAXFREQDRIFT = 20e6;
+    MAXFREQDRIFT = 30e6;
     DELAYTIMERANGE = 500e-9;
     
     import data_taking.public.xmon.ramsey
@@ -45,40 +45,58 @@ function varargout = correctf01byRamsey(varargin)
       'time',t,'detuning',-MAXFREQDRIFT,'gui',false,'save',false);
     Pn = e.data{1};
     t = t/daSamplingRate;
-    
-    % P = B*(exp(-t/td)*(sin(2*pi*freq*t+D)+C));
     tf = linspace(t(1),t(end),200);
     
+    % P = B*(exp(-t/td)*(sin(2*pi*freq*t+D)+C));
+
+    [pxx,f] = plomb(Pp,t);
+    [~,idx] = max(pxx);
+    freqEstimation = f(idx);
+    
+    rng = range(Pp);
     [B,C,D,freqp,tdp,cip] =...
-        toolbox.data_tool.fitting.sinDecayFit_s(...
-        t,Pp,0.5,1,pi/2,toolbox.data_tool.fitting.FFT_Peak(t,Pp),5e-6);
+        toolbox.data_tool.fitting.sinDecayFit_m(t,Pp,...
+        0.5*rng,[0.3*rng,rng*0.7],...
+        1,[0.7,1.4],...
+        pi/2,[-pi,pi],...
+        freqEstimation,[0.95*freqEstimation,1.05*freqEstimation],...
+        5e-6,[0.2e-6,100e6]);
     Ppf = B*(exp(-tf/tdp).*(sin(2*pi*freqp*tf+D)+C));
     
     
     dcip = diff(cip,1,2);
     if  B < 0.3 || B > 0.7 || C < 0.5 || C > 2 ...
-        || freqp < 2e6 || freqp > 2*MAXFREQDRIFT || abs(tdp) < 200e-9 || any(abs(dcip([1,2,4])./[B;C;freqp]) > 0.20)
+        || freqp < 2e6 || freqp > 1.8*MAXFREQDRIFT || freqp < 0.8*MAXFREQDRIFT...
+        || abs(tdp) < 200e-9 || any(abs(dcip([1,2,4])./[B;C;freqp]) > 0.20)
     
-        if args.gui
-            h = qes.ui.qosFigure(sprintf('Correct f01 by ramsey | %s', q.name),true);
-            ax = axes('parent',h);
-            plot(ax,t,Pp,'.',tf,Ppf);
-            legend(ax,{num2str(MAXFREQDRIFT/1e6,'%0.2fMHz'),'fit'});
-            xlabel(ax,'time(us)');
-            ylabel(ax,'P|1>');
-            title('fitting failed.');
-        end    
-    
-        throw(MException('QOS_correctf01byRamsey:fittingFailed',...
-				'fitting failed.'));
-    end
 
+            if args.gui
+                h = qes.ui.qosFigure(sprintf('Correct f01 by ramsey | %s', q.name),true);
+                ax = axes('parent',h);
+                plot(ax,t,Pp,'.',tf,Ppf);
+                legend(ax,{num2str(MAXFREQDRIFT/1e6,'%0.2fMHz'),'fit'});
+                xlabel(ax,'time(us)');
+                ylabel(ax,'P|1>');
+                title('fitting failed.');
+            end    
+            throw(MException('QOS_correctf01byRamsey:fittingFailed',...
+                    'fitting failed.'));
+    end
+    
+    [pxx,f] = plomb(Pn,t);
+    [~,idx] = max(pxx);
+    freqEstimation = f(idx);
+    
+    rng = range(Pn);
     [B,C,D,freqn,tdn,cin] =...
-        toolbox.data_tool.fitting.sinDecayFit_s(...
-        t,Pn,0.5,1,pi/2,toolbox.data_tool.fitting.FFT_Peak(t,Pn),5e-6);
-    
+        toolbox.data_tool.fitting.sinDecayFit_m(t,Pn,...
+        0.5*rng,[0.3*rng,rng*0.7],...
+        1,[0.7,1.4],...
+        pi/2,[-pi,pi],...
+        freqEstimation,[0.95*freqEstimation,1.05*freqEstimation],...
+        5e-6,[0.2e-6,100e6]);
     Pnf = B*(exp(-tf/tdn).*(sin(2*pi*freqn*tf+D)+C));
-    
+
     dcip = diff(cin,1,2);
     if B < 0.3 || B > 0.7 || C < 0.5 || C > 2 ...
         || freqn < 2e6 || freqn > 2*MAXFREQDRIFT || abs(tdn) < 200e-9 || any(abs(dcip([1,2,4])./[B;C;freqn]) > 0.20)
@@ -94,8 +112,7 @@ function varargout = correctf01byRamsey(varargin)
             ylabel(ax,'P|1>');
             title('fitting failed.');
             drawnow;
-        end 
-    
+        end
         throw(MException('QOS_correctf01byRamsey:fittingFailed',...
 				'fitting failed.'));
     end
