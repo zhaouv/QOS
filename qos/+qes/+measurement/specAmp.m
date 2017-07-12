@@ -32,9 +32,6 @@ classdef specAmp < qes.measurement.measurement
                 obj.instrumentObject.bandwidth = 100;
                 obj.instrumentObject.startfreq = obj.freq - 500;
                 obj.instrumentObject.stopfreq = obj.freq + 500;
-%                 obj.instrumentObject.bandwidth = 1e6;
-%                 obj.instrumentObject.startfreq = obj.freq - 200e6;
-%                 obj.instrumentObject.stopfreq = obj.freq + 200e6;
                 obj.instrumentObject.numpts = 801;
             else % agilent_N9030B
                 obj.instrumentObject.bandwidth = 200;

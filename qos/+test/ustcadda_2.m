@@ -41,8 +41,8 @@ t=1:4000;
 wave1=32768+32768/2*cos(2*pi*t/40);
 wave2=32768+32768/2*sin(2*pi*t/40);
 ustcaddaObj.runReps = 1000000;
-ustcaddaObj.SendWave(2,wave1); % 620
-ustcaddaObj.SendWave(1,wave2); % 750
+ustcaddaObj.SendWave(10,wave1); % 620
+ustcaddaObj.SendWave(9,wave2); % 750
 [datai,dataq] = ustcaddaObj.Run(false);
 % plot(mean(datai,1));hold on;plot(datai(1,:));hold off;
 figure(11);
@@ -64,8 +64,8 @@ plot(datai);hold on;plot(dataq);hold off;
 t=1:4000;
 wave1=32768+32768/2*cos(2*pi*t/10);
 wave2=32768+32768/2*sin(2*pi*t/10);
-ustcaddaObj.SendContinuousWave(2,wave1)
-ustcaddaObj.SendContinuousWave(1,wave2)
+ustcaddaObj.SendContinuousWave(10,wave1)
+ustcaddaObj.SendContinuousWave(9,wave2)
 %% sin wave
 for ii = 10
     ustcaddaObj.SendWave(ii,32768+32768*sin((1:8000)/1000*2*pi));

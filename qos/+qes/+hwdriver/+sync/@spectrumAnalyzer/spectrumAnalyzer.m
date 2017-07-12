@@ -42,7 +42,8 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
                 fprintf(interfaceobj,':POW:RF:ATT 20dB');
                 fprintf(interfaceobj,':INIT:CONT ON');
             %%% uiinfoobj to be implemented
-            case{'tek_rsa607a'}
+                case{'tek_rsa607a'}
+                fprintf(interfaceobj, 'CALCULATE:MARKER:ADD');
             end
         end
         [varargout] = InitializeInstr(obj)
@@ -82,10 +83,9 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
                     % Gets the current amplitude from the peak detector
                     val = num2str(query(obj.interfaceobj, ':CALC:MARK:Y?'));
                 case{'tek_rsa607a'}
-                    
                     fprintf(obj.interfaceobj, 'CALCULATE:MARKER:ADD');
-                    fprintf(obj.interfaceobj, 'CALCULATE:SPECTRUM:MARKER1:MAXIMUM');
-                    val = num2str(query(obj.interfaceobj,'CALCulate:SPECtrum:MARKer1:Y?'));
+                    fprintf(obj.interfaceobj, 'CALCULATE:SPECTRUM:MARKER:MAXIMUM');
+                    val = num2str(query(obj.interfaceobj,'CALCulate:SPECtrum:MARKer:Y?'));
                     fprintf(obj.interfaceobj, 'CALCULATE:MARKER:DELETE');
             end
         end
@@ -98,9 +98,9 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
                     val = num2str(query(obj.interfaceobj, ':CALC:MARK:X?'));
                 case{'tek_rsa607a'}
                     fprintf(obj.interfaceobj, 'CALCULATE:MARKER:ADD');
-                    
-                    fprintf(obj.interfaceobj, 'CALCULATE:SPECTRUM:MARKER1:MAXIMUM');
-                    val = num2str(query(obj.interfaceobj,'CALCulate:SPECtrum:MARKer1:X?'));
+                    fprintf(obj.interfaceobj, 'CALCULATE:SPECTRUM:MARKER:MAXIMUM');
+                    val = num2str(query(obj.interfaceobj,'CALCulate:SPECtrum:MARKer:X?'));
+                    fprintf(obj.interfaceobj, 'CALCULATE:MARKER:DELETE');
             end
         end
         function val = get_trace(obj)
@@ -129,14 +129,6 @@ classdef spectrumAnalyzer < qes.hwdriver.sync.instrument
                     
                     fprintf(obj.interfaceobj,'initiate:immediate');
                     response=query(obj.interfaceobj,'*OPC?');
-                    
-%                     while ~str2double(query(obj.interfaceobj,'*STB?'))
-%                         pause(0.05);
-%                     end
-%                     fprintf(obj.interfaceobj,'DISPLAY:SPECTRUM:FREQUENCY:AUTO');
-%                     fprintf(obj.interfaceobj,'DISPLAY:SPECTRUM:Y:SCALE:AUTO');
-                    
-                    
                     fprintf(obj.interfaceobj,'FETCH:SPECTRUM:TRACE1?');
                     val = binblockread(obj.interfaceobj,'single');
                     fprintf(obj.interfaceobj,'DISPLAY:SPECTRUM:Y:SCALE:AUTO');
