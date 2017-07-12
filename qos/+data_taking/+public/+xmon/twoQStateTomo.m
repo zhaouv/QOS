@@ -34,12 +34,20 @@ function varargout = twoQStateTomo(varargin)
     switch args.state
         case '|00>'
             p = gate.I(q1).*gate.I(q2);
-        case '|10>'
-            p = gate.X(q1).*gate.I(q2);
         case '|01>'
+            p = gate.X(q1).*gate.I(q2);
+        case '|10>'
             p = gate.X(q2).*gate.I(q1);
         case '|11>'
             p = gate.X(q1).*gate.X(q2);
+        case {'++'}
+            p = gate.Y2p(q1).*gate.Y2p(q2); 
+        case {'--'}
+            p = gate.Y2p(q1).*gate.Y2p(q2);
+        case {'ii'}
+            p = gate.X2m(q1).*gate.X2m(q2);
+        case {'GHZ'}
+            p = (gate.H(q1).*gate.Y2m(q2))*gate.CZ(q1,q2)*(gate.H(q1).*gate.Y2p(q2));
 %         case '|01>+|1>'
 %             p = gate.Y2p(q);
 %         case '|0>-|1>'

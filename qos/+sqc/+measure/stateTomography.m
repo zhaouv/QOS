@@ -15,6 +15,7 @@ classdef stateTomography < qes.measurement.measurement
     properties (GetAccess = private, SetAccess = private)
 		readoutGates
 		process % for process tomography
+        R
     end
     methods
         function obj = stateTomography(qubits)
@@ -33,11 +34,15 @@ classdef stateTomography < qes.measurement.measurement
 			obj.qubits = qubits;
 			obj.readoutGates = cell(1,numTomoQs);
 			for ii = 1:numTomoQs
-				obj.readoutGates{ii} = {Y2m(obj.qubits{ii}),...
+%                 obj.readoutGates{ii} = {Y2m(obj.qubits{ii}),...
+% 										X2p(obj.qubits{ii}),...
+% 										I(obj.qubits{ii})};
+				obj.readoutGates{numTomoQs-ii+1} = {Y2m(obj.qubits{ii}),...
 										X2p(obj.qubits{ii}),...
 										I(obj.qubits{ii})};
             end
             obj.numericscalardata = false;
+            obj.R = sqc.measure.resonatorReadout(obj.qubits);
         end
         function Run(obj)
             Run@qes.measurement.measurement(obj);
@@ -63,11 +68,10 @@ classdef stateTomography < qes.measurement.measurement
 				end
 				if ~isempty(obj.process)
 					P = obj.process*P;
-				end
-				R = sqc.measure.resonatorReadout(obj.qubits);
-				R.delay = P.length;
+                end
+				obj.R.delay = P.length;
 				P.Run();
-				data(idx,:) = R();
+				data(idx,:) = obj.R();
 			end
             obj.data = data;
 			obj.dataready = true;

@@ -67,22 +67,23 @@ s = g3(freqs,true);
 
 figure();plot(freqs, real(sampleSpectrum), freqs, real(s));
 
-%         sampleSpectrum = sampleSpectrum * np.exp(2.0j * np.pi * (self.end-self.start+2*padTime)/2.0 * freqs)
-%         interpSpecFuncR = interp1d_cubic(freqs, np.real(sampleSpectrum),fill_value=0)
-%         interpSpecFuncI = interp1d_cubic(freqs, np.imag(sampleSpectrum),fill_value=0)
-% 
-%         if w>0.0:
-%             kernel = gaussian(0, w, 2*np.sqrt(np.log(2)/np.pi) / w)(f, fourier=True)
-%         else:
-%             kernel = 1.0
-% 
-%         # At this point, the middle of the pulse will be at time zero.  We need to shift it by end-start/2
-%         #fast_phase = 1 
-%         fast_phase = -2.0 * np.pi * (self.end+self.start)/2  * f
-% 
-%         return (interpSpecFuncR(f) + 1j*interpSpecFuncI(f)) * np.exp(1j*fast_phase) * kernel
+%% derivative waveform
+df = 0.05;
+
+g3 = sqc.wv.gaussian(100);
+t = 0:100;
+figure();plot(t, g3(t));
+g3d = qes.waveform.fcns.Deriv(g3);
+hold on;plot(t, 5*g3d(t));
+g3d.df = df;
+hold on;plot(t, 5*g3d(t));
+g3.df = df;
+hold on;plot(t, g3(t));
+
+
 %%
 g = sqc.wv.acz(100);
 t = -10:0.2:110;
 figure();plot(t,g(t));
+
 

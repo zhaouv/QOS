@@ -32,14 +32,14 @@ function varargout = twoQProcessTomo(varargin)
         case 'I'
             I1 = gate.I(q1);
             I2 = gate.I(q2);
-            p = I2*I1;
+            p = I2.*I1;
         case 'CZ'
-            p = gate.CZ(q1,q2); % q1, control qubit, q2, target qubit
+            p = gate.CZ(q1,q2); 
         case 'CNOT'
-            CZ = gate.CZ(q1,q2); % q1, control qubit, q2, target qubit
+            CZ = gate.CZ(q1,q2); 
             Y2m = gate.Y2m(q2);
             Y2p = gate.Y2p(q2);
-			p = Y2m*CZ*Y2p;
+			p = Y2m*CZ*Y2p; % q1, control qubit, q2, target qubit
         otherwise
             throw(MException('QOS_singleQProcessTomo:unsupportedGate',...
                 sprintf('available process options for singleQProcessTomo is %s, %s given.',...
