@@ -21,6 +21,10 @@ function SetPower(obj,val,chnl)
 		case {'sc5511a','simulatedmwsrc'}
 			obj.interfaceobj.setPower(val,chnl);
 			obj.power(chnl) = val;
+        case {'sinolink'}
+            fwrite(obj.interfaceobj,['LEVEL ',num2str(val(1),'%0.2f'),' dBm']);
+            obj.power(chnl) = val;
+            pause(0.1)
         otherwise
              error('MWSource:SetError', ['Unsupported instrument: ',TYP]);
     end

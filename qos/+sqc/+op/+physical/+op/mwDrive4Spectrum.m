@@ -12,7 +12,7 @@ classdef mwDrive4Spectrum < sqc.op.physical.operator
         function obj = mwDrive4Spectrum(qubit)
 			assert(numel(qubit)==1);
             obj = obj@sqc.op.physical.operator(qubit);
-            obj.mw_src_power = obj.qubits{1}.qr_xy_uSrcPower;
+%             obj.mw_src_power = obj.qubits{1}.qr_xy_uSrcPower;
             obj.amp = obj.qubits{1}.spc_driveAmp;
 			obj.length = obj.qubits{1}.spc_driveLn+2*obj.qubits{1}.spc_zLonger;
         end

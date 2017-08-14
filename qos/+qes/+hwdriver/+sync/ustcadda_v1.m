@@ -167,7 +167,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da.trig_delay = 0;
                 obj.da_list(k).da.daTrigDelayOffset =s.da_boards{k}.daTrigDelayOffset;% GuoCheng,20170701
                 obj.da_list(k).da.trig_sel=s.trigger_source;
-                if isfield(s,'da_master') && strcmp(s.da_master ,obj.da_list(k).da.name)  % GuoCheng, 20170701
+                if isfield(s,'da_master') && s.da_master == k  % GuoCheng, 20170701
                     obj.da_list(k).da.ismaster=true;
                     obj.da_master_index = k;
                 end
@@ -295,8 +295,12 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             while(ret ~= 0)
                 obj.ad_list(1).ad.EnableADC(); 
                 obj.da_list(obj.da_master_index).da.SendIntTrig();
-                if(isSample == true)
+                if~(isSample == false)
                     [ret,I,Q] = obj.ad_list(1).ad.RecvData(obj.runReps,obj.adRecordLength);
+%                     save([datestr(now,'HHMMss') 'data.mat'],'I','Q')
+%                     if(ret ~= 0)
+%                         disp('ÖØ´«ÁË');
+%                     end
                 else
                     ret = 0;
                 end
