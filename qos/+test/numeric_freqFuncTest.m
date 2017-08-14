@@ -28,8 +28,9 @@ legend({'Re: fft off time domain samples','Re: freqFunc'});
 figure();plot(freqs, imag(s_fft), freqs, imag(s_direct));
 legend({'Im: fft off time domain samples','Im: freqFunc'});
 %%
-g3 = sqc.wv.gaussian(16);
-g3.df = 0.05;
+% g3 = sqc.wv.gaussian(16);
+g3 = sqc.wv.rect(2^12);
+g3.df = 0;
 %g3 = [qes.waveform.spacer(20),copy(g3)];
 
 n2p = nextpow2(g3.length)+1;
@@ -49,7 +50,7 @@ padLn = (timeSpan - g3.length)/2;
 s_fft = ifft(samples.*exp(-1j*2*pi*freqs*(padLn)))*fs;
 s_direct = g3(t);
 figure();plot(t, real(s_fft),'-+', t, real(s_direct),'-s');
-legend({'Re: fft off freq domain samples','Re: timeFunc'});
+legend({'Re: ifft off freq domain samples','Re: timeFunc'});
 
 %%
 g3 = sqc.wv.gaussian0(40);

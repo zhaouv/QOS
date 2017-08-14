@@ -308,6 +308,9 @@ classdef (Sealed = true)DataViewer < handle
                         temp.Notes = Notes;
                         if exist('Info','var') % old version data
                             temp.Info = Info;
+                        elseif exist('Settings','var') % old version data
+                            temp.Config = Settings;
+                            clear('Settings');
                         else
                             temp.Config = Config;
                             if ~isfield(Config,'user')

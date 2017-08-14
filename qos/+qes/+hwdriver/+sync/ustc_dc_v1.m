@@ -42,7 +42,7 @@ classdef ustc_dc_v1 < qes.hwdriver.icinterface_compatible
             val = obj.ustcaddaObj.daVpp/2;
         end
         function SetDC(obj,dcval,chnl)
-            code = -dcval+32768;
+            code = dcval+32768;
             code = round(code);
             if code > 65535
                 code = 65535;
