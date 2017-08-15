@@ -45,10 +45,10 @@ if plotfit
     ax = gca;
     drawnow;
 end
-B0 = 0.45; % amplitude estimation
-td0 = 5000; % decay time estimation
-lb = [0.6*B0, 0.01*td0];
-ub = [B0/0.6, 2*td0];
+B0 = 1; % amplitude estimation
+td0 = 40000; % decay time estimation
+lb = [0.8*B0, 0.05*td0];
+ub = [B0/0.8, 3*td0];
 for ii = 1:nb
     
     
@@ -69,16 +69,21 @@ for ii = 1:nb
     end
 end
 
+%%
 time = time/2/1000;
 td = td/2/1000;
 wci = wci/2/1000;
+%%
+bias2f01 = @(x)x*1e9; % in case of no bias2f01 transformation needed.
+% bias2f01 = @(x)(- 2.99e-10*x.^2 - 9.005e-06*x + 5.572)*1e9;
+bias2f01 = @(x) (-8.029e-10*x.^2 + 3.476e-5*x + 5.397)*1e9;
+
 
 figure();
-imagesc(bias,time,z');
+h = pcolor(bias2f01(bias)/1e9,time,z'); set(h,'EdgeColor','none')
 hold on;
-errorbar(bias,td,td-wci(:,1)',wci(:,2)'-td,'ro-','MarkerSize',5,'MarkerFaceColor',[1,1,1]);
-set(gca,'YDir','normal');
+errorbar(bias2f01(bias)/1e9,td,td-wci(:,1)',wci(:,2)'-td,'ro-','MarkerSize',5,'MarkerFaceColor',[1,1,1]);
 xlabel('Z Bias');
 ylabel('Time (us)');
-colormap(jet)
+colormap(jet);
 

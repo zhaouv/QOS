@@ -21,6 +21,8 @@ function varargout = spectroscopy111_zpa_s21(varargin)
 
 % Yulin Wu, 2016/1/14
 
+error('spectroscopy111_zpa_s21 is obsolete, use spectroscopy111_zpa with dataTyp set to ''S21''');
+
 fcn_name = 'data_taking.public.xmon.spectroscopy111_zpa_s21'; % this and args will be saved with data
 import qes.*
 import sqc.*

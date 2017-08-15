@@ -11,7 +11,7 @@ function r = gauss(n, bandwidth)
 	end
 	assert(bandwidth > 0);
 	
-	x = 2/bandwidth*sqrt(log(2)/2);
+	x = 1/bandwidth*sqrt(log(2)/2);
 	r = exp(-(linspace(0,x/2,n)).^2);
 	x = exp(-(0.5*x)^2);
 	r = (r - x)/(1-x);

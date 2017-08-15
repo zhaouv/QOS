@@ -32,45 +32,68 @@ function [center0, center1, F00,F11,hf] =...
  
     e0 = real(iq_raw_0_);
 	e0_ = abs(e0 - mean(e0));
-	e0(e0_ > 3*median(e0_)) = []; % remove possible outerliers
+	e0(e0_ > 2*std(e0_)) = []; % remove outerliers
 	e1 = real(iq_raw_1_);
 	e1_ = abs(e1 - mean(e1));
-	e1(e1_ > 3*median(e1_)) = []; % remove possible outerliers
+	e1(e1_ > 2*std(e1_)) = []; % remove outerliers
 
 	x_0 = min(e0);
     x_1 = max(e0);
     binSize = abs(x_0 - x_1)/nBins;
     binEdges = x_0-binSize/2:binSize:x_1+binSize/2;
-	[~, idx] = max(smooth(histcounts(e0,binEdges)/num_samples,3));
-	c0r = binEdges(idx)+binSize/2;
+% 	[~, idx] = max(smooth(histcounts(e0,binEdges)/num_samples,3));
+% 	c0r = binEdges(idx)+binSize/2;
+    
+    dis = smooth(histcounts(e0,binEdges)/num_samples,5);  % smooth with 5 is better than with 3
+    xi = binEdges(1)+binSize/2:binSize/5:binEdges(end-1)+binSize/2;
+    disi = interp1(binEdges(1)+binSize/2:binSize:binEdges(end-1)+binSize/2,dis,xi);
+	[~, idx] = max(disi);
+	c0r = xi(idx);
 	
 	x_0 = min(e1);
     x_1 = max(e1);
     binSize = abs(x_0 - x_1)/nBins;
     binEdges = x_0-binSize/2:binSize:x_1+binSize/2;
-	[~, idx] = max(smooth(histcounts(e1,binEdges)/num_samples,3));
-	c1r = binEdges(idx)+binSize/2;
+    
+    
+    dis = smooth(histcounts(e1,binEdges)/num_samples,5);
+    xi = binEdges(1)+binSize/2:binSize/5:binEdges(end-1)+binSize/2;
+    disi = interp1(binEdges(1)+binSize/2:binSize:binEdges(end-1)+binSize/2,dis,xi);
+	[~, idx] = max(disi);
+	c1r = xi(idx);
     %%
 	e0 = imag(iq_raw_0_);
 	e0_ = abs(e0 - mean(e0));
-	e0(e0_ > 3*median(e0_)) = []; % remove possible outerliers
+	e0(e0_ > 2*std(e0_)) = []; % remove outerliers
 	e1 = imag(iq_raw_1_);
 	e1_ = abs(e1 - mean(e1));
-	e1(e1_ > 3*median(e1_)) = []; % remove possible outerliers
+	e1(e1_ > 2*std(e1_)) = []; % remove outerliers
 
 	x_0 = min(e0);
     x_1 = max(e0);
     binSize = abs(x_0 - x_1)/nBins;
     binEdges = x_0-binSize/2:binSize:x_1+binSize/2;
-	[~, idx] = max(smooth(histcounts(e0,binEdges)/num_samples,3));
-	c0i = binEdges(idx)+binSize/2;
+% 	[~, idx] = max(smooth(histcounts(e0,binEdges)/num_samples,3));
+% 	c0i = binEdges(idx)+binSize/2;
+    
+    dis = smooth(histcounts(e0,binEdges)/num_samples,5);
+    xi = binEdges(1)+binSize/2:binSize/5:binEdges(end-1)+binSize/2;
+    disi = interp1(binEdges(1)+binSize/2:binSize:binEdges(end-1)+binSize/2,dis,xi);
+	[~, idx] = max(disi);
+	c0i = xi(idx);
 	
 	x_0 = min(e1);
     x_1 = max(e1);
     binSize = abs(x_0 - x_1)/nBins;
     binEdges = x_0-binSize/2:binSize:x_1+binSize/2;
-	[~, idx] = max(smooth(histcounts(e1,binEdges)/num_samples,3));
-	c1i = binEdges(idx)+binSize/2;
+% 	[~, idx] = max(smooth(histcounts(e1,binEdges)/num_samples,3));
+% 	c1i = binEdges(idx)+binSize/2;
+    
+    dis = smooth(histcounts(e1,binEdges)/num_samples,5);
+    xi = binEdges(1)+binSize/2:binSize/5:binEdges(end-1)+binSize/2;
+    disi = interp1(binEdges(1)+binSize/2:binSize:binEdges(end-1)+binSize/2,dis,xi);
+	[~, idx] = max(disi);
+	c1i = xi(idx);
     
     %
     center0 = (c0r+1j*c0i)*exp(1j*ang);

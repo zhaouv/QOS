@@ -52,7 +52,7 @@ classdef prob_iq_ustc_ad_j < sqc.measure.prob_iq_ustc_ad
             Run@sqc.measure.prob_iq_ustc_ad(obj);
 			d = 2.^(0:obj.num_qs-1)*obj.data;
 			numStates = 2^obj.num_qs;
-			obj.data = zeros(1,2^obj.num_qs);
+			obj.data = zeros(1,numStates);
 			for ii = 0:numStates-1
 				obj.data(ii+1) = sum(d==ii)/obj.n;
             end

@@ -64,22 +64,28 @@ classdef ustc_da_v1 < qes.hwdriver.icinterface_compatible
             obj.ustcaddaObj.runReps = runReps;
             obj.ustcaddaObj.Run(false);
         end
+        
         function StartContinuousRun(obj,chnl,wavedata)
-            obj.ustcaddaObj.SendContinuousWave(chnl,wavedata);
+            obj.ustcaddaObj.SendContinuousWave(obj.chnlMap(chnl),wavedata);
         end
         function StopContinuousRun(obj,chnl)
-            obj.ustcaddaObj.StopContinuousWave(chnl);
+            obj.ustcaddaObj.StopContinuousWave(obj.chnlMap(chnl));
         end
+        
+        
         function SetBoardTrigDelayByChnl(obj,chnl,delay)
-            boardNames = obj.ustcaddaObj.GetDACNameByChnl(chnl);
+            boardNames = obj.ustcaddaObj.GetDACNameByChnl(obj.chnlMap(chnl));
             boardNames = unique(boardNames);
             for ii = 1:numel(boardNames)
                 obj.ustcaddaObj.SetDABoardTrigDelay(boardNames{ii},delay);
             end
         end
         function val = GetBoardTrigDelayByChnl(obj,chnl)
-            val =  obj.ustcaddaObj.GetDABoardTrigDelay(obj,obj.ustcaddaObj.GetDACNameByChnl(chnl));
+            val =  obj.ustcaddaObj.GetDABoardTrigDelay(...
+                obj,obj.ustcaddaObj.GetDACNameByChnl(obj.chnlMap(chnl)));
         end
+        
+        
 		function delete(obj)
 			obj.ustcaddaObj.ReleaseDAChnls(obj.chnlMap);
             if isempty(obj.ustcaddaObj.adTakenChnls) &&...

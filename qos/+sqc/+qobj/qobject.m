@@ -10,6 +10,9 @@ classdef (Abstract = true) qobject < handle & dynamicprops & matlab.mixin.Copyab
     properties (SetAccess = private)
         id@uint32 % globally unique id
     end
+    properties (SetAccess = private, GetAccess = private)
+        propLst = {}
+    end
     methods
         function obj = qobject(name)
             if nargin
@@ -21,6 +24,17 @@ classdef (Abstract = true) qobject < handle & dynamicprops & matlab.mixin.Copyab
             end
             obj.id = nextid;
             nextid  = nextid + uint32(1);
+        end
+        function prop = addprop(obj,propName)
+            prop = addprop@dynamicprops(obj,propName);
+            obj.propLst{end+1} = propName;
+        end
+        function newObj = Copy(obj)
+            newObj = copy(obj);
+            for ii = 1:numel(obj.propLst)
+                addprop(newObj,obj.propLst{ii});
+                newObj.(obj.propLst{ii}) = obj.(obj.propLst{ii});
+            end
         end
     end
     methods (Hidden = true)

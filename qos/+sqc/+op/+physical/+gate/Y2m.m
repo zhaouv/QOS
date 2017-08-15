@@ -26,13 +26,8 @@ classdef Y2m < sqc.op.physical.gate.XY_base
 %                 end
 %             end
 			obj.length = obj.qubits{1}.g_XY2_ln;
-            obj.amp = obj.qubits{1}.g_Y2m_amp;
-        end
-    end
-    methods (Hidden = true)
-        function GenWave(obj)
-            GenWave@sqc.op.physical.gate.XY_base(obj);
-            obj.xy_wv{1}.phase = obj.qubits{1}.g_XY_phaseOffset-pi/2;
+            obj.amp = obj.qubits{1}.g_XY2_amp;
+            obj.addPhase(-pi/2);
         end
     end
 end

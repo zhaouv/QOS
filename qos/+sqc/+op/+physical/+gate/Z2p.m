@@ -8,7 +8,7 @@ function g = Z2p(qubit)
 		case 'z' % implement by using z line
 			g = Z2p_z(qubit);
 		case 'xy' % implement by using X Y gates
-			g = XY_4p(qubit)*X(qubit);
+			g = X(qubit)*XY_4p(qubit);
 		otherwise
 			error('unrecognized Z gate type: %s, available z gate options are: xy and z',...
 				qubit.g_Z_typ);

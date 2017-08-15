@@ -8,7 +8,7 @@ function varargout = spectroscopy111_zdc(varargin)
 % 
 % <_o_> = spectroscopy111_zdc('biasQubit',_c&o_,'biasAmp',<[_f_]>,...
 %       'driveQubit',_c&o_,'driveFreq',<[_f_]>,...
-%       'readoutQubit',_c&o_,...
+%       'readoutQubit',_c&o_,'dataTyp',<_c_>,...
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
 % _i_: integer
@@ -39,13 +39,13 @@ if ~isempty(args.r_avg)
     readoutQubit.r_avg=args.r_avg;
 end
 X = op.mwDrive4Spectrum(driveQubit);
+X_ = op.mwDrive4Spectrum(biasQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 % R.state = 1;
 switch args.dataTyp %add by GM, 20170415
     case 'P'
         R.state = 2;
-        % pass
     case 'S21'
         R.swapdata = true;
         R.name = '|S21|';
@@ -57,7 +57,7 @@ switch args.dataTyp %add by GM, 20170415
 end
 
 X.Run(); % from this point on X will assume that the dc source and mw source are set
-x = expParam(X.zdc_src{1},'dcval');
+x = expParam(X_.zdc_src{1},'dcval');
 x.name = [biasQubit.name,' zdc bias amplitude'];
 y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;
