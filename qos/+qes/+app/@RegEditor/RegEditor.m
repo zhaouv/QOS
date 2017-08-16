@@ -19,6 +19,7 @@ classdef (Sealed = true)RegEditor < handle
         bigScreen = false
         winSize
         leftPanelWidth
+        treecontainer
     end
     properties (Constant = true, GetAccess = private)
         tblRefreshPeriond = 30
@@ -46,10 +47,10 @@ classdef (Sealed = true)RegEditor < handle
                 obj.bigScreen = false;
             end
             if obj.bigScreen
-                obj.winSize = [0,0,150,65];
+                obj.winSize = [0,0,0.35,0.7];
                 obj.leftPanelWidth = 50.5;
             else
-                obj.winSize = [0,0,100,40];
+                obj.winSize = [0,0,0.35,0.7];
                 obj.leftPanelWidth = 45.5;
             end
             userList_ = {'_Not set_'};
@@ -204,8 +205,13 @@ classdef (Sealed = true)RegEditor < handle
             else
                 Pos = [5,5,230,400];
             end
-            obj.guiHandles.mtree = uitree('v0', 'Root', rootNode,...
-                'Parent',obj.guiHandles.reWin,'Position',Pos);
+
+            [obj.guiHandles.mtree treecontainer]= uitree('v0', 'Root', rootNode,...
+                'Parent',obj.guiHandles.reWin,'Position',[5,5,255,600]);
+            treecontainer.Parent=obj.treecontainer;
+            obj.guiHandles.mtree.Units='normalized';
+            obj.guiHandles.mtree.Position=[0,0,1,1];
+                        
             set(obj.guiHandles.mtree,'NodeSelectedCallback', @SelectFcn);
             obj.guiHandles.mtree.expand(rootNode);
             obj.guiHandles.mtree.expand(ss);

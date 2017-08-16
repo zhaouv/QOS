@@ -2,7 +2,7 @@ function varargout = ramsey_df01(varargin)
 % ramsey: ramsey oscillation, detune by detuning iq frequency(sideband frequency)
 % 
 % <_o_> = ramsey_df01('qubit',_c&o_,...
-%       'time',[_i_],'detuning',<[_f_]>,...
+%       'time',[_i_],'detuning',<[_f_]>,'phaseOffset',<_f_>,...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -23,7 +23,7 @@ function varargout = ramsey_df01(varargin)
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'dataTyp','P','detuning',0,'biasAmp',0,'gui',false,'notes','','save',true});
+    args = util.processArgs(varargin,{'phaseOffset',0,'dataTyp','P','detuning',0,'gui',false,'notes','','save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     X2 = gate.X2p(q);
@@ -41,9 +41,11 @@ function varargout = ramsey_df01(varargin)
             throw(MException('QOS_ramsey_df01:unrcognizedDataTyp','unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
+    X2_ = copy(X2);
+    X2.phase = args.phaseOffset;
     function procFactory(delay)
         I.ln = delay;
-        proc = X2*I*X2;
+        proc = X2_*I*X2;
         proc.Run();
         R.delay = proc.length;
     end

@@ -1,4 +1,4 @@
-function [B,C,D,freq,td,varargout] = sinDecayFit_m(t,P,...
+function [B,C,D,freq,td,varargout] = sinDecayFitNoTilt(t,P,...
     B0,BBnd,...
     C0,CBnd,...
     D0,DBnd,...
@@ -22,9 +22,8 @@ Coefficients(5) = td0;
 lb = [BBnd(1),CBnd(1),DBnd(1),freqBnd(1),tdBnd(1)];
 ub = [BBnd(2),CBnd(2),DBnd(2),freqBnd(2),tdBnd(2)];
 
-for ii = 1:3
-    [Coefficients,~,residual,~,~,~,J] = lsqcurvefit(@SinusoidalDecay,Coefficients,t,P,lb,ub);
-end
+[Coefficients,~,residual,~,~,~,J] = lsqcurvefit(@SinusoidalDecay,Coefficients,t,P,lb,ub);
+
 B = Coefficients(1);
 C =  Coefficients(2);
 D = Coefficients(3);
@@ -34,16 +33,8 @@ if nargout > 5
     varargout{1} = nlparci(Coefficients,residual,'jacobian',J);
 end
 
-
 function [P]=SinusoidalDecay(Coefficients,t)
 % Sinusoidal Decay
-% Parameter estimation:
-% A: value of P at large x: P(end) or mean(P(end-##,end))
-% B: max(P) - min(P)
-% C: A - (max(P) + min(P))/2
-% D: 0
-% freq: use fft to detect
-% td: ...
 %
 % Yulin Wu, SC5,IoP,CAS. wuyulin@ssc.iphy.ac.cn/mail4ywu@gmail.com
 % $Revision: 1.0 $  $Date: 2012/03/28 $

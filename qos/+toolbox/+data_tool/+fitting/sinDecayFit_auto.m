@@ -1,4 +1,4 @@
-function [A,B,C,D,freq,td,varargout] = sinDecayFit(t,P,varargin)
+function [A,B,C,D,freq,td,varargout] = sinDecayFit_auto(t,P,varargin)
 % SinDecayFit fits curve P = P(t) with a Sinusoidal Decay function:
 % P = A +B*(exp(-t/td)*(sin(2*pi*freq*t+D)+C));
 % t unit should be nano-second.

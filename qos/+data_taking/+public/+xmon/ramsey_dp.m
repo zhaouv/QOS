@@ -3,7 +3,7 @@ function varargout = ramsey_dp(varargin)
 % detune by changing the second pi/2 pulse tracking frame
 % 
 % <_o_> = ramsey_dp('qubit',_c&o_,...
-%       'time',[_i_],'detuning',<[_f_]>,...
+%       'time',[_i_],'detuning',<[_f_]>,'phaseOffset',<_f_>,...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -24,7 +24,7 @@ function varargout = ramsey_dp(varargin)
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'dataTyp','P','biasAmp',0,'gui',false,'notes','','detuning',0,'save',true});
+    args = util.processArgs(varargin,{'phaseOffset',0,'dataTyp','P','gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
     X2 = op.XY2p(q,0);
@@ -50,7 +50,7 @@ function varargout = ramsey_dp(varargin)
 	X2_ = copy(X2);
     function procFactory(delay)
         I.ln = delay;
-		X2.phase = -2*pi*detuning.val*delay/daSamplingRate;
+		X2.phase = -2*pi*detuning.val*delay/daSamplingRate+args.phaseOffset;
         proc = X2_*I*X2;
         proc.Run();
         R.delay = proc.length;
