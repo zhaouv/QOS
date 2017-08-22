@@ -39,6 +39,7 @@ if ~isempty(args.r_avg)
     readoutQubit.r_avg=args.r_avg;
 end
 X = op.mwDrive4Spectrum(driveQubit);
+X_ = op.mwDrive4Spectrum(biasQubit);
 R = measure.resonatorReadout_ss(readoutQubit);
 R.delay = X.length;
 % R.state = 1;
@@ -56,7 +57,7 @@ switch args.dataTyp %add by GM, 20170415
 end
 
 X.Run(); % from this point on X will assume that the dc source and mw source are set
-x = expParam(X.zdc_src{1},'dcval');
+x = expParam(X_.zdc_src{1},'dcval');
 x.name = [biasQubit.name,' zdc bias amplitude'];
 y = expParam(X.mw_src{1},'frequency');
 y.offset = -driveQubit.spc_sbFreq;

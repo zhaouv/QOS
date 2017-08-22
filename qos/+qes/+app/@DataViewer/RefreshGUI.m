@@ -123,7 +123,10 @@ function RefreshGUI(obj)
         if isfield(data,'Info') && ~ischar(data.Info) &&...
                 isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn)
             if ischar(data.Info.plotfcn)
-                PlotFcn = str2func(data.Info.plotfcn);
+                if qes.util.startsWith(data.Info.plotfcn,'expplotfcn.') % old version support
+                    data.Info.plotfcn = strrep(data.Info.plotfcn,'expplotfcn.','qes.util.plotfcn.');
+                end
+                PlotFcn = str2func(strrep(data.Info.plotfcn,'expplotfcn.','qes.util.plotfcn.'));
             elseif isa(data.Info.plotfcn,'function_handle')
                 PlotFcn = data.Info.plotfcn;
             else
@@ -132,6 +135,9 @@ function RefreshGUI(obj)
         elseif isfield(data,'Config') && ~ischar(data.Config) &&...
                 isfield(data.Config,'plotfcn') && ~isempty(data.Config.plotfcn)
             if ischar(data.Config.plotfcn)
+                if qes.util.startsWith(data.Config.plotfcn,'expplotfcn.') % old version support
+                    data.Config.plotfcn = strrep(data.Config.plotfcn,'expplotfcn.','qes.util.plotfcn.');
+                end
                 PlotFcn = str2func(data.Config.plotfcn);
             elseif isa(data.Config.plotfcn,'function_handle')
                 PlotFcn = data.Config.plotfcn;
@@ -219,6 +225,9 @@ function RefreshGUI(obj)
                             isfield(data,'Config') && ~ischar(data.Config) % supported data format, data loaded successfully.
                         if isfield(data,'Info') &&  isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn)
                             if ischar(data.Info.plotfcn)
+                                if qes.util.startsWith(data.Info.plotfcn,'expplotfcn.') % old version support
+                                    data.Info.plotfcn = strrep(data.Info.plotfcn,'expplotfcn.','qes.util.plotfcn.');
+                                end
                                 PlotFcn = str2func(data.Info.plotfcn);
                             elseif isa(data.Info.plotfcn,'function_handle')
                                 PlotFcn = data.Info.plotfcn;
@@ -227,6 +236,9 @@ function RefreshGUI(obj)
                             end
                         elseif isfield(data,'Config') &&  isfield(data.Config,'plotfcn') && ~isempty(data.Config.plotfcn)
                             if ischar(data.Config.plotfcn)
+                                if qes.util.startsWith(data.Config.plotfcn,'expplotfcn.') % old version support
+                                    data.Config.plotfcn = strrep(data.Config.plotfcn,'expplotfcn.','qes.util.plotfcn.');
+                                end
                                 PlotFcn = str2func(data.Config.plotfcn);
                             elseif isa(data.Config.plotfcn,'function_handle')
                                 PlotFcn = data.Config.plotfcn;
@@ -317,6 +329,9 @@ function RefreshGUI(obj)
                             isfield(data,'Config') && ~ischar(data.Config)  % supported data format, data loaded successfully.
                         if isfield(data,'Info') &&  isfield(data.Info,'plotfcn') && ~isempty(data.Info.plotfcn)
                             if ischar(data.Info.plotfcn)
+                                if qes.util.startsWith(data.Info.plotfcn,'expplotfcn.') % old version support
+                                    data.Info.plotfcn = strrep(data.Info.plotfcn,'expplotfcn.','qes.util.plotfcn.');
+                                end
                                 PlotFcn = str2func(data.Info.plotfcn);
                             elseif isa(data.Info.plotfcn,'function_handle')
                                 PlotFcn = data.Info.plotfcn;
@@ -325,6 +340,9 @@ function RefreshGUI(obj)
                             end
                         elseif isfield(data,'Config') &&  isfield(data.Config,'plotfcn') && ~isempty(data.Config.plotfcn)
                             if ischar(data.Config.plotfcn)
+                                if qes.util.startsWith(data.Config.plotfcn,'expplotfcn.') % old version support
+                                    data.Config.plotfcn = strrep(data.Config.plotfcn,'expplotfcn.','qes.util.plotfcn.');
+                                end
                                 PlotFcn = str2func(data.Config.plotfcn);
                             elseif isa(data.Config.plotfcn,'function_handle')
                                 PlotFcn = data.Config.plotfcn;

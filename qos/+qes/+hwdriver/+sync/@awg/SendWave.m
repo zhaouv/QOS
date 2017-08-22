@@ -233,8 +233,19 @@ function SendWave(obj,WaveformObj)
             % SendWave(...); setChnlOutputDelay(...,200);
             % Run(..); % now delay is 100*4 ns, not 200*4 ns,
             % 200*4 ns will be the delay amount of next Run.
-            % this is a da driver bug, might be corrected in a future version. 
+            % this is a da driver bug, might be corrected in a future version.
+            
+%             persistent ax;
+%             if isempty(ax)
+%                 h = figure();
+%                 ax = axes('parent',h);
+%             end
+            
             if WaveformObj.iq
+                
+%                 hold(ax,'on');
+%                 plot(ax,WaveformData{1}(1:50));plot(ax,WaveformData{2}(1:50));
+%                 
                 obj.interfaceobj.setChnlOutputDelay(WaveformObj.awgchnl(1),output_delay_count(1));
                 obj.interfaceobj.setChnlOutputDelay(WaveformObj.awgchnl(2),output_delay_count(2));
                 obj.interfaceobj.SendWave(WaveformObj.awgchnl(1),WaveformData{1});
