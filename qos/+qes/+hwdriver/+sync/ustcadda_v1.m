@@ -205,7 +205,18 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 obj.da_list(k).da_trig_delay = 0;
                 % redefined offsetCorr settings, Yulin Wu
 %                 obj.da_list(k).da.set('offsetcorr',cell2mat(s.da_boards{k}.offsetCorr));
-                obj.da_list(k).da.offsetcorr=cell2mat(s.da_boards{k}.offsetCorr);
+                obj.da_list(k).da.offsetcorr= s.da_boards{k}.offsetCorr;
+                
+                if isfield(s.da_boards{k}, 'mixerZeros')
+                    mixerZerosDataFiles = s.da_boards{k}.mixerZeros;
+                    for ff = 1:numel(mixerZerosDataFiles)
+                        mixerZerosData = load(...
+                            fullfile(s.SETTINGS_PATH_,'_data',[mixerZerosDataFiles{ff}(2:end),'.mat']));
+                        obj.da_list(k).da.mixerZeros(ff).loFreq = mixerZerosData.loFreq;
+                        obj.da_list(k).da.mixerZeros(ff).iZeros = mixerZerosData.iZeros;
+                        obj.da_list(k).da.mixerZeros(ff).qZeros = mixerZerosData.qZeros;
+                    end
+                end
             end
 
             % 设置主�??
@@ -417,7 +428,11 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             end
         end
         
-        function SendWave(obj,channel,data)
+        function SendWave(obj,channel,data,isIChnl,freq)
+            if nargin < 4
+                isIChnl = false;
+                freq = 0;
+            end
             obj.da_channel_list(channel).data = data;
             ch_info = obj.da_channel_list(channel);
             ch_delay = obj.da_channel_list(channel).delay;
