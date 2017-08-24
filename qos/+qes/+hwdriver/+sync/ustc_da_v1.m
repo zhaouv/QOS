@@ -58,9 +58,9 @@ classdef ustc_da_v1 < qes.hwdriver.icinterface_compatible
             if(nargin == 4)
                 mixerZeros = obj.ustcaddaObj.da_channel_list(k).mixerZeros;
                 if(isIChnl)
-                    offset = interp1(mixerZeros.loFreq,mixerZeros.iZeros,loFreq,'spline');
+                    offset = interp1(mixerZeros.loFreq,mixerZeros.iZeros,loFreq,'linear');
                 else
-                    offset = interp1(mixerZeros.loFreq,mixerZeros.iZeros,loFreq,'spline');
+                    offset = interp1(mixerZeros.loFreq,mixerZeros.iZeros,loFreq,'linear');
                 end
                 obj.ustcaddaObj.setDAChnlOutputOffset(channel,offset);
             end
