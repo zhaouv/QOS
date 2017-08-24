@@ -3,7 +3,7 @@
 %%
 import qes.*
 import qes.hwdriver.sync.*
-QS = qSettings.GetInstance('D:\settings');
+QS = qSettings.GetInstance('C:\Users\fortu\Documents\GitHub\QOS\qos\settings');
 %% not needed unless you want to reconfigure the DACs and ADCs during the measurement
 % a DACs and ADCs reconfiguration is only needed when the hardware settings
 % has beens changed, a reconfiguration will update the changes to the
