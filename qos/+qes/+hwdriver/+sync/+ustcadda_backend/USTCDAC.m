@@ -241,7 +241,7 @@ classdef USTCDAC < handle
             obj.Block();
         end
         function SetTotalCount(obj,count)
-            ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00001805'),1,count*2^16);
+            ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00001805'),1,uint32(count*2^16));
             obj.DispError(['USTCDAC:SetTotalCount:',obj.name],ErrorCode);
             obj.Block();
         end

@@ -99,35 +99,30 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             else
                 count = count/8;
             end
-            seq  = zeros(1,16384);
+            seq  = zeros(1,8);
             function_ctrl = 64;     %53-63bits,set trig bits
             trigger_ctrl  = 0;      %48-55bits
             counter_ctrl  = 0;      %32-47bits
             length_wave   = 2;      %16-31bits
             address_wave  = 0;      %0-15bits
-            for  k = 1:2:4096       %trig sequence
-                seq(4*k-3) = function_ctrl*256 + trigger_ctrl;
-                seq(4*k-2) = counter_ctrl;
-                seq(4*k-1) = length_wave;
-                seq(4*k)   = address_wave;
-            end
-
+            seq(1) = function_ctrl*256 + trigger_ctrl;
+            seq(2) = counter_ctrl;
+            seq(3) = length_wave;
+            seq(4) = address_wave;
             if(delay ~= 0)
-                function_ctrl = 32;     %53-63bits,set delay bits
-                counter_ctrl  = delay-1;%32-47bits,set counter
+                function_ctrl = 32+128;     %53-63bits,set delay bits and stop bit
+                counter_ctrl  = delay-1;    %32-47bits,set counter
             else
-                function_ctrl = 0;      %zero delay,do not set delay bits.
+                function_ctrl = 128;        %do not set delay bits and set stop bit.
                 counter_ctrl  = 0;
             end
             trigger_ctrl = 0; 
             length_wave  = count;
             address_wave = count;
-            for k = 2:2:4096            % delay sequency.
-                seq(4*k-3) = function_ctrl*256 + trigger_ctrl;
-                seq(4*k-2) = counter_ctrl;
-                seq(4*k-1) = length_wave;
-                seq(4*k) = address_wave;
-            end
+            seq(5) = function_ctrl*256 + trigger_ctrl;
+            seq(6) = counter_ctrl;
+            seq(7) = length_wave;
+            seq(8) = address_wave;            
         end
         function seq = GenerateContinuousSeq(count)
             seq  = zeros(1,16384);
@@ -276,6 +271,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             I = 0; Q = 0; ret = -1;isSuccessed = 1;
             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
             for k = 1:obj.numDABoards
+                obj.da_list(k).da.SetLoop(obj.runReps,obj.runReps,obj.runReps,obj.runReps);
                 obj.da_list(k).da.StartStop((15 - obj.da_list(k).mask_min)*16);
                 obj.da_list(k).da.StartStop(obj.da_list(k).mask_plus);
                 obj.da_list(k).da.SetTrigDelay(obj.da_list(k).da_trig_delay);
