@@ -21,7 +21,7 @@ tic
 for jj = 1:numRuns
     for ii = 1:numChnls
         ustcaddaObj.SendWave(ii,wavedata);
-        ustcaddaObj.SendWave(ii,wavedata);
+%         ustcaddaObj.SendWave(ii,wavedata);
     end
     [datai,dataq] = ustcaddaObj.Run(false);
     t = toc;
@@ -52,7 +52,7 @@ ustcaddaObj.SendWave(2,wave2); % 750
 figure(12);
 plot(mean(datai));hold on
 plot(mean(dataq));hold off
-legend('ideal','mini DC 1K Ohm')
+legend('3','4')
 %%
 
 for ii=1:100
@@ -65,9 +65,9 @@ ustcaddaObj.SendWave(2,wave1); % 620
 ustcaddaObj.SendWave(1,wave2); % 750
 ustcaddaObj.adRecordLength = 1100;
 [datai,dataq] = ustcaddaObj.Run(true);
-figure(13);
+figure(11);
 hold on;plot(mean(datai,1))
-figure(14);
+figure(12);
 hold on;plot(mean(dataq,1))
 % figure;plot(datai(1,:));hold on;plot(dataq(1,:))
 % figure;plot(datai(end,:));hold on;plot(dataq(end,:))
