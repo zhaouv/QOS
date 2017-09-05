@@ -120,7 +120,10 @@ if L > 15           % data dense enoughe
         FreqLB = max([40e-3, LeastOscN/(t(min(idx2,L))-t(1))]);
         FreqHB = min([0.5, (1/(t(2)-t(1)))/2]);
         [Frequency,Amp] = qes.util.fftSpectrum(t,P);
+<<<<<<< HEAD
+=======
         %[Frequency,Amp] = FFTSpectrum(t,P);
+>>>>>>> a8438932b119574226b65e1ef4c2a76db4f154ce
         Lf = length(Amp);
         if Lf < 50
             Amp = smooth(Amp,3);
