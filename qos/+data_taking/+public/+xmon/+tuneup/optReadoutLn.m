@@ -22,7 +22,7 @@ h=figure;
 for ii=1:length(rlns)
     
     tt(ii)=abs(getMaxfid(rlns(ii)));
-    figure(h);plot(rlns(1:ii),tt)
+    figure(h);plot(rlns(1:ii),tt,'-o');drawnow;
 end
 
 [~,lo]=max(tt);

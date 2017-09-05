@@ -22,7 +22,7 @@ function varargout = T1_1(varargin)
 import qes.*
 import data_taking.public.xmon.T1_111
 args = util.processArgs(varargin,{'r_avg',[],'biasAmp',0,'biasDelay',0,'backgroundWithZBias',true,...
-    'gui',false,'notes','','save',true,'fit',false});
+    'gui',false,'notes','','save',true,'fit',true});
 varargout{1} = T1_111('biasQubit',args.qubit,'biasAmp',args.biasAmp,'biasDelay',args.biasDelay,...
     'backgroundWithZBias',args.backgroundWithZBias,'driveQubit',args.qubit,...
     'readoutQubit',args.qubit,'time',args.time,'r_avg',args.r_avg,'notes',args.notes,'gui',args.gui,'save',args.save);
@@ -51,7 +51,8 @@ if args.fit % Add by GM, 170623
             plot(gca,temp(3,:)/2000,[zf(end),zf(end)],'g-+');
             plot(gca,td_/2000,zf(end),'r+');
             hold off;
-            ylabel('Time (us)');
+            xlabel('Time (us)');
+            ylabel('diff(P<1>)')
             drawnow;
             legend('Raw','Fit','Errorbar','FitValue')
             if td_<time(end)

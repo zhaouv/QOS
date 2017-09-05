@@ -1,4 +1,4 @@
- % 	FileName:USTCADC.m
+% 	FileName:USTCADC.m
 % 	Author:GuoCheng
 % 	E-mail:fortune@mail.ustc.edu.cn
 % 	All right reserved @ GuoCheng.
@@ -173,16 +173,16 @@ classdef USTCADC < handle
             [ErrorCode,~] = calllib(obj.driver,'SendData',int32(8),pdata);
             obj.DispError('USTCADC:SetGain',ErrorCode);
         end
+        
         function [ret,I,Q] = RecvData(obj,row,column)
-            if(obj.isdemod)
-                IQ = zeros(2*row,1);
-                pIQ = libpointer('int32Ptr', IQ);
-                [ret,IQ] = calllib(obj.driver,'RecvDemo',int32(row),pIQ);
-                if(ret == 0)
-                    I = IQ(1:2:length(IQ));
-                    Q = IQ(2:2:length(IQ));
-                end
+            if (obj.isdemod)
+                [ret,I,Q] = RecvDemo(obj,row);
             else
+                [ret,I,Q] = RecvRawData(obj,row,column);
+            end
+        end
+        
+        function [ret,I,Q] = RecvRawData(obj,row,column)
                 I = zeros(row*column,1);
                 Q = zeros(row*column,1);
                 pI = libpointer('uint8Ptr', I);
@@ -190,7 +190,36 @@ classdef USTCADC < handle
                 [ret,I,Q] = calllib(obj.driver,'RecvData',int32(row),int32(column),pI,pQ);
                 I = (reshape(I,[obj.sample_depth,obj.trig_count]))';
                 Q = (reshape(Q,[obj.sample_depth,obj.trig_count]))';
-            end
         end
+        
+		function [ret,I,Q] = RecvDemo(obj,row) % GuoCheng 170605
+                IQ = zeros(2*row,1);
+                pIQ = libpointer('int32Ptr', IQ);
+                [ret,IQ] = calllib(obj.driver,'RecvDemo',int32(row),pIQ);
+                if(ret == 0)
+                    I = IQ(1:2:length(IQ));
+                    Q = IQ(2:2:length(IQ));
+                end
+        end
+        
+%         function [ret,I,Q] = RecvData(obj,row,column)
+%             if(obj.isdemod)
+%                 IQ = zeros(2*row,1);
+%                 pIQ = libpointer('int32Ptr', IQ);
+%                 [ret,IQ] = calllib(obj.driver,'RecvDemo',int32(row),pIQ);
+%                 if(ret == 0)
+%                     I = IQ(1:2:length(IQ));
+%                     Q = IQ(2:2:length(IQ));
+%                 end
+%             else
+%                 I = zeros(row*column,1);
+%                 Q = zeros(row*column,1);
+%                 pI = libpointer('uint8Ptr', I);
+%                 pQ = libpointer('uint8Ptr', Q);
+%                 [ret,I,Q] = calllib(obj.driver,'RecvData',int32(row),int32(column),pI,pQ);
+%                 I = (reshape(I,[obj.sample_depth,obj.trig_count]))';
+%                 Q = (reshape(Q,[obj.sample_depth,obj.trig_count]))';
+%             end
+%         end
      end
 end

@@ -21,7 +21,7 @@ classdef USTCDAC < handle
         sample_rate = 2e9;      % DAC sample rate
         sync_delay = 0;         % DAC sync delay
         trig_delay = 0;         % DAC trig sync delay
-        da_range = 0.8;         % maximum voltage，unused
+        da_range = 0.8;         % maximum voltage拢卢unused
         gain = zeros(1,4);      % DAC channel gain
         offset = zeros(1,4);    % DAC channel offset, unused
         offsetCorr = zeros(1,4);% DAC offset voltage code.
@@ -52,12 +52,12 @@ classdef USTCDAC < handle
         function data = FormatData(datain)
             len = length(datain);
             data = datain;
-            if(mod(len,32) ~= 0)     % 补齐512bit
+            if(mod(len,32) ~= 0)     % 虏鹿脝毛512bit
                 len = (floor(len/32)+1)*32;
                 data = zeros(1,len);
                 data(1:length(datain)) = datain;
             end
-            for k = 1:length(data)/2 % 颠倒前后数据，这是由于FPGA接收字节序问题
+            for k = 1:length(data)/2 % 碌脽碌鹿脟掳潞贸脢媒戮脻拢卢脮芒脢脟脫脡脫脷FPGA陆脫脢脮脳脰陆脷脨貌脦脢脤芒
                 temp = data(2*k);
                 data(2*k) = data(2*k-1);
                 data(2*k-1) = temp;
@@ -114,8 +114,7 @@ classdef USTCDAC < handle
             if(isDACReady == 0)
                 error('USTCDAC:Init',['Init DAC ',obj.name,' failed']);
             end
-            obj.SetTimeOut(0,2);
-            obj.SetTimeOut(1,2);
+            obj.SetTimeOut(0,10); obj.SetTimeOut(1,10);
             obj.SetIsMaster(obj.ismaster);
             obj.SetTrigSel(obj.trig_sel);
             obj.SetTrigInterval(obj.trig_interval);
@@ -130,27 +129,27 @@ classdef USTCDAC < handle
             end
         end
         function WriteReg(obj,bank,addr,data)
-             cmd = bank*256 + 2; %1表示ReadReg，指令和bank存储在一个DWORD数据中
+             cmd = bank*256 + 2; %1卤铆脢戮ReadReg拢卢脰赂脕卯潞脥bank麓忙麓垄脭脷脪禄赂枚DWORD脢媒戮脻脰脨
              ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,cmd,addr,data);
              obj.DispError(['USTCDAC:WriteReg:',obj.name],ErrorCode);
              obj.Block();
         end
         function reg = ReadReg(obj,bank,addr)
-             cmd = bank*256 + 1; %1表示ReadReg，指令和bank存储在一个DWORD数据中
+             cmd = bank*256 + 1; %1卤铆脢戮ReadReg拢卢脰赂脕卯潞脥bank麓忙麓垄脭脷脪禄赂枚DWORD脢媒戮脻脰脨
              ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,cmd,addr,0);
              obj.DispError(['USTCDAC:ReadReg:',obj.name],ErrorCode);
              value = obj.GetReturn(1);
              reg = value.ResponseData;
         end
         function WriteWave(obj,ch,offset,wave)
-            if(ch < 1 || ch > obj.channel_amount) % 从0通道开始编号
+            if(ch < 1 || ch > obj.channel_amount) % 麓脫0脥篓碌脌驴陋脢录卤脿潞脜
                 error('Wrong channel!');
             end
-            data = obj.FormatData(wave); % 调字节序以及补够512bit的位宽
-            data = data + obj.offsetCorr(ch) + obj.offset(ch);
-            data(data > 65535) = 65535;  % 范围限制
+            data = obj.FormatData(wave); % 碌梅脳脰陆脷脨貌脪脭录掳虏鹿鹿禄512bit碌脛脦禄驴铆
+            data = data + obj.offsetCorr(ch);
+            data(data > 65535) = 65535;  % 路露脦搂脧脼脰脝
             data(data < 0) = 0;
-            data = 65535 - data;         % 由于负通道接示波器，数据反相方便观察
+            data = 65535 - data;         % 脫脡脫脷赂潞脥篓碌脌陆脫脢戮虏篓脝梅拢卢脢媒戮脻路麓脧脿路陆卤茫鹿脹虏矛
             startaddr = (ch-1)*2*2^18+2*offset;
             len = length(data)*2;
             pval = libpointer('uint16Ptr', data);
@@ -161,10 +160,10 @@ classdef USTCDAC < handle
         function WriteSeq(obj,ch,offset,seq)
             data = obj.FormatData(seq);
             if(ch < 1 || ch > obj.channel_amount)
-                error('Wrong channel!');        % 检查通道编号
+                error('Wrong channel!');        % 录矛虏茅脥篓碌脌卤脿潞脜
             end
-            startaddr = (ch*2-1)*2^18+offset*8; %序列的内存起始地址，单位是字节。
-            len = length(data)*2;               %字节个数。
+            startaddr = (ch*2-1)*2^18+offset*8; %脨貌脕脨碌脛脛脷麓忙脝冒脢录碌脴脰路拢卢碌楼脦禄脢脟脳脰陆脷隆拢
+            len = length(data)*2;               %脳脰陆脷赂枚脢媒隆拢
             pval = libpointer('uint16Ptr', data);
             [ErrorCode,~] = calllib(obj.driver,'WriteMemory',obj.id,hex2dec('00000004'),startaddr,len,pval);
             obj.DispError(['USTCDAC:WriteSeq:',obj.name],ErrorCode);
@@ -176,8 +175,12 @@ classdef USTCDAC < handle
              template = {{'Write instruction type'},{'Write memory type.'},{'Read memory type.'}};
              functype = struct('functiontype',functiontype,'instruction',instruction,'para1',para1,'para2',para2,'description',template{functiontype});
         end
-        function SetTimeOut(obj,isOut,time)
-            ErrorCode = calllib(obj.driver,'SetTimeOut',obj.id,isOut,time);
+        function SetTimeOut(obj,isRecv,time)
+            if(isRecv)
+                ErrorCode = calllib(obj.driver,'SetTimeOut',obj.id,0,time);
+            else
+                ErrorCode = calllib(obj.driver,'SetTimeOut',obj.id,1,time);
+            end
             obj.DispError(['USTCDAC:SetTimeOut:',obj.name],ErrorCode);
         end
         function SetTrigDelay(obj,point)
@@ -201,11 +204,7 @@ classdef USTCDAC < handle
         end
         function value = GetReturn(obj,offset)
            functype = obj.GetFuncType(1);
-           if functype.functiontype ~= 1
-                pData = libpointer('uint16Ptr',zeros(1,functype.para2/2));
-           else
-                pData = libpointer('uint16Ptr',zeros(1,1));
-           end
+           pData = libpointer('uint16Ptr',zeros(1,functype.para2/2));
            [ErrorCode,ResStat,ResData,data] = calllib(obj.driver,'GetReturn',obj.id,offset,0,0,pData);
            obj.DispError(['USTCDAC:GetReturn:',obj.name],ErrorCode);
            obj.DispError(['USTCDAC:GetReturn:',obj.name],int32(ResStat));
@@ -241,7 +240,7 @@ classdef USTCDAC < handle
             obj.Block();
         end
         function SetTotalCount(obj,count)
-            ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00001805'),1,uint32(count*2^16));
+            ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00001805'),1,count*2^16);
             obj.DispError(['USTCDAC:SetTotalCount:',obj.name],ErrorCode);
             obj.Block();
         end
@@ -301,19 +300,17 @@ classdef USTCDAC < handle
             obj.DispError(['USTCDAC:SetGain:',obj.name],ErrorCode);
             obj.Block();
         end
-        function SetOffset(obj,channel,offset)
-%             map = [6,7,4,5]; channel = map(channel);
-%             ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00000702'),channel,data);
-%             obj.DispError(['USTCDAC:SetOffset:',obj.name],ErrorCode);
-%             obj.Block();
-             obj.offset(channel) = offset;
-             obj.SetDefaultVolt(obj,channel,32768+offset);
+        function SetOffset(obj,channel,data)
+            map = [6,7,4,5]; channel = map(channel);
+            ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00000702'),channel,data);
+            obj.DispError(['USTCDAC:SetOffset:',obj.name],ErrorCode);
+            obj.Block();
         end
         function SetDefaultVolt(obj,channel,volt)
             volt = volt + obj.offsetCorr(channel);
-            volt(volt > 65535) = 65535;  % 范围限制
+            volt(volt > 65535) = 65535;  % 路露脦搂脧脼脰脝
             volt(volt < 0) = 0;
-            volt = 65535 - volt;         % 由于负通道接示波器，数据反相方便观察
+            volt = 65535 - volt;         % 脫脡脫脷赂潞脥篓碌脌陆脫脢戮虏篓脝梅拢卢脢媒戮脻路麓脧脿路陆卤茫鹿脹虏矛
             ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00001B05'),channel-1,volt);
             obj.DispError(['USTCDAC:SetDefaultVolt:',obj.name],ErrorCode);
             obj.Block();
@@ -323,11 +320,6 @@ classdef USTCDAC < handle
             period(period > 255) = 255;
             ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00001305'),isBoardcast,period);
             obj.DispError(['USTCDAC:SetBoardcast:',obj.name],ErrorCode);
-            obj.Block();
-        end
-        function ConfigEEPROM(obj)
-            ErrorCode = calllib(obj.driver,'WriteInstruction',obj.id,hex2dec('00002005'),0,0);
-            obj.DispError(['USTCDAC:ConfigEEPROM:',obj.name],ErrorCode);
             obj.Block();
         end
     end

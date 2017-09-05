@@ -10,7 +10,7 @@ for ii=1:args.Repeat
     data0=spectroscopy1_zpa('qubit',args.qubit,...
         'biasAmp',args.biasAmp,'driveFreq',args.driveFreq,...
         'r_avg',args.r_avg,'notes',args.notes,'gui',args.gui,'save',args.save,'dataTyp',args.dataTyp);
-    data(ii,:)=cell2mat(data0.data{1,1});
+    data(ii,:)=data0.data{1,1};
     hf=figure(44);
     imagesc(1:args.Repeat,args.driveFreq,data')
     xlabel('Repeat times')

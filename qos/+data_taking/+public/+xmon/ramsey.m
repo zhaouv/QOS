@@ -24,7 +24,7 @@ function varargout = ramsey(varargin)
     
     import qes.util.processArgs
     import data_taking.public.xmon.*
-    args = processArgs(varargin,{'mode', 'df01','dataTyp','P','phaseOffset',0,...
+    args = processArgs(varargin,{'mode', 'df01','dataTyp','P','phaseOffset',0,'fit',true...
         'gui',false,'notes','','detuning',0,'save',true});
     switch args.mode
         case 'df01'
@@ -48,8 +48,8 @@ function varargout = ramsey(varargin)
         Ramsey_data=e.data{1,1};
         Ramsey_time=args.time/2;
         
-        detuning=args.detuning/1e9;
-        T1=args.T1;
+        detuning=toolbox.data_tool.fitting.FFT_Peak(Ramsey_time,Ramsey_data);
+        T1=args.T1*1000;
         
         Ramsey_length2=linspace(min(Ramsey_time),max(Ramsey_time),1000);
         f=@(a,x)(a(1)+a(2)*exp(-(x/a(3)).^2-x/T1).*cos(a(4)*2*pi.*x+a(5)));

@@ -12,9 +12,11 @@ import qes.*
 import qes.hwdriver.sync.*
 QS = qSettings.GetInstance('D:\Dropbox\MATLAB GUI\USTC Measurement System\settings');
 QS.SU('Ming');
-QS.SS('s170725');
+QS.SS('s170823');
 QS.CreateHw();
 ustcaddaObj = ustcadda_v1.GetInstance();
-% qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
-qubits = {'q10','q9','q8','q7','q6','q5','q4','q3','q2','q1'};
-dips = [6.58990 6.62315 6.64151 6.65922 6.68244 6.70705 6.75451 6.79346 6.81783 6.84831]*1e9; % by qubit index
+qubits = {'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'};
+% qubits = {'q3','q4','q5','q6','q7','q8','q10'};
+dips = [6.62 6.65210 6.70968 6.74174 6.77042 6.80191 6.86192]*1e9; % by qubit index
+
+app.RE

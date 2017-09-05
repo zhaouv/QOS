@@ -2,7 +2,7 @@
 % 	Author:GuoCheng
 % 	E-mail:fortune@mail.ustc.edu.cn
 % 	All right reserved @ GuoCheng.
-% 	Modified: 2017.8.24
+% 	Modified: 2017.7.1
 %   Description:The class of ADDA
 classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface_compatible, Yulin Wu
     properties
@@ -30,7 +30,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
         daTakenChnls
     end
     
-    properties(SetAccess = private) 
+    properties(SetAccess = private, GetAccess = private) 
         da_list = []
         ad_list = []
         da_channel_list = []
@@ -99,30 +99,35 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             else
                 count = count/8;
             end
-            seq  = zeros(1,8);
+            seq  = zeros(1,16384);
             function_ctrl = 64;     %53-63bits,set trig bits
             trigger_ctrl  = 0;      %48-55bits
             counter_ctrl  = 0;      %32-47bits
             length_wave   = 2;      %16-31bits
             address_wave  = 0;      %0-15bits
-            seq(1) = function_ctrl*256 + trigger_ctrl;
-            seq(2) = counter_ctrl;
-            seq(3) = length_wave;
-            seq(4) = address_wave;
+            for  k = 1:2:4096       %trig sequence
+                seq(4*k-3) = function_ctrl*256 + trigger_ctrl;
+                seq(4*k-2) = counter_ctrl;
+                seq(4*k-1) = length_wave;
+                seq(4*k)   = address_wave;
+            end
+
             if(delay ~= 0)
-                function_ctrl = 32+128;     %53-63bits,set delay bits and stop bit
-                counter_ctrl  = delay-1;    %32-47bits,set counter
+                function_ctrl = 32;     %53-63bits,set delay bits
+                counter_ctrl  = delay-1;%32-47bits,set counter
             else
-                function_ctrl = 128;        %do not set delay bits and set stop bit.
+                function_ctrl = 0;      %zero delay,do not set delay bits.
                 counter_ctrl  = 0;
             end
             trigger_ctrl = 0; 
             length_wave  = count;
             address_wave = count;
-            seq(5) = function_ctrl*256 + trigger_ctrl;
-            seq(6) = counter_ctrl;
-            seq(7) = length_wave;
-            seq(8) = address_wave;            
+            for k = 2:2:4096            % delay sequency.
+                seq(4*k-3) = function_ctrl*256 + trigger_ctrl;
+                seq(4*k-2) = counter_ctrl;
+                seq(4*k-1) = length_wave;
+                seq(4*k) = address_wave;
+            end
         end
         function seq = GenerateContinuousSeq(count)
             seq  = zeros(1,16384);
@@ -194,14 +199,9 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                 end
                 obj.da_channel_list(k).index = da_index; % bug fix: obj.da_channel_list(ch) -> obj.da_channel_list(k), Yulin Wu
                 obj.da_channel_list(k).ch = ch;
+
                 obj.da_channel_list(k).data = [];
                 obj.da_channel_list(k).delay = 0;
-                
-                if isfield(s.da_boards{da_index}, 'mixerZeros')
-                    mixerZerosDataFiles = s.da_boards{da_index}.mixerZeros{ch};
-                    filepath = [s.SETTINGS_PATH_,'\','_data','\',mixerZerosDataFiles,'.mat'];
-                    obj.da_channel_list(k).mixerZeros = load(filepath);
-                end
             end
             for k = 1:obj.numADBoards
                 obj.ad_list(k).ad = qes.hwdriver.sync.ustcadda_backend.USTCADC(s.ad_boards{k}.netcard);
@@ -239,7 +239,7 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             obj.numDAChnls = length(obj.da_channel_list);
             obj.numADChnls = length(obj.ad_channel_list);
             obj.adTakenChnls = [];
-            obj.daTakenChnls = [];     
+            obj.daTakenChnls = [];
         end   
         function Close(obj)
             len = length(obj.da_list);
@@ -271,18 +271,14 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             I = 0; Q = 0; ret = -1;isSuccessed = 1;
             obj.da_list(obj.da_master_index).da.SetTrigCount(obj.runReps);
             for k = 1:obj.numDABoards
-                obj.da_list(k).da.SetLoop(obj.runReps,obj.runReps,obj.runReps,obj.runReps);
                 obj.da_list(k).da.StartStop((15 - obj.da_list(k).mask_min)*16);
                 obj.da_list(k).da.StartStop(obj.da_list(k).mask_plus);
                 obj.da_list(k).da.SetTrigDelay(obj.da_list(k).da_trig_delay);
             end
-            if(isSample == true)
-                obj.ad_list(1).ad.SetMode(obj.ad_list(1).ad.isdemod);
-                obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
-                obj.ad_list(1).ad.SetTrigCount(obj.runReps);
-                if(obj.ad_list(1).ad.isdemod)
-                   obj.ad_list(1).ad.SetDemoFre(obj.ad_list(1).demod_frequency);
-                end
+            if(obj.ad_list(1).ad.isdemod || isSample)
+               obj.ad_list(1).ad.SetMode(obj.ad_list(1).ad.isdemod);
+               obj.ad_list(1).ad.SetSampleDepth(obj.adRecordLength);
+               obj.ad_list(1).ad.SetTrigCount(obj.runReps);
             end
             for k=1:obj.numDABoards
                 try
@@ -291,18 +287,20 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
                         obj.da_list(k).da.GetReturn(state.position);% Throw an exception.
                     end
                 catch
-                    obj.da_list(k).da.Close();
+                    obj.da_list(k).da.Close();pause(60);
                     obj.da_list(k).da.Open();
-                    obj.da_list(k).da.SetTimeOut(0,2);
-                    obj.da_list(k).da.SetTimeOut(1,2);
                     isSuccessed = 0;
                 end
             end
             while(ret ~= 0)
                 obj.ad_list(1).ad.EnableADC(); 
                 obj.da_list(obj.da_master_index).da.SendIntTrig();
-                if(isSample == true)
+                if~(isSample == false)
                     [ret,I,Q] = obj.ad_list(1).ad.RecvData(obj.runReps,obj.adRecordLength);
+%                     save([datestr(now,'HHMMss') 'data.mat'],'I','Q')
+%                     if(ret ~= 0)
+%                         disp('ÖØ´«ÁË');
+%                     end
                 else
                     ret = 0;
                 end
@@ -330,7 +328,9 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % around(65535+N is taken as N-1), this is  unacceptable for
             % qubits measurement applications, Yulin Wu
             % than a ustcadda property, Yulin Wu
-            da_struct.da.WriteWave(ch,0,uint16(data));
+            data = uint16(data +...
+                obj.da_list(obj.da_channel_list(channel).index).da.offset(obj.da_channel_list(channel).ch)); 
+            da_struct.da.WriteWave(ch,0,data);
             if(mod(floor(da_struct.mask_plus/(2^(ch-1))),2) == 0)
                 obj.da_list(ch_info.index).mask_plus = da_struct.mask_plus + 2^(ch-1);
             end
@@ -358,7 +358,9 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             % around(65535+N is taken as N-1), this is  unacceptable for
             % qubits measurement applications, Yulin Wu
             % than a ustcadda property, Yulin Wu
-            da_struct.da.WriteWave(ch,0,uint16(voltage));
+            voltage = uint16(voltage +...
+                obj.da_list(obj.da_channel_list(channel).index).da.offset(obj.da_channel_list(channel).ch)); 
+            da_struct.da.WriteWave(ch,0,voltage);
             if(mod(floor(da_struct.mask_min/(2^(ch-1))),2) == 0)
                 obj.da_list(ch_info.index).mask_min = da_struct.mask_min + 2^(ch-1);
             end
@@ -391,8 +393,10 @@ classdef ustcadda_v1 < qes.hwdriver.icinterface_compatible % extends icinterface
             end
             for ii = 1:length(ch)
                 ch_info = obj.da_channel_list(ch(ii));
+                channel = ch_info.ch;
                 da_struct = obj.da_list(ch_info.index);
-                da_struct.da.SetOffset(ch_info.ch,offset(ii));
+                da_struct.da.offset(channel) = offset(ii);
+                da_struct.da.SetDefaultVolt(32768 + offset(ii));
             end
         end
         function delay = GetDABoardTrigDelay(obj,da_name)
