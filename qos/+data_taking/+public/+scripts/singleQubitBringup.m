@@ -61,7 +61,7 @@ for ii = 1:numel(qNames)
     % r_fr, the qubit dip frequency, it's exact value changes with qubit state and readout power,
     % the value of r_fr is just a reference frequency for automatic
     % routines, a close value is sufficient.
-    setQSettings('r_fr',readoutFreqs(ii),qNames{ii}); 
+    setQSettings('r_fr',readoutFreqs(ii),qNames{ii});
     % also set r_freq is the frequency of the readout pulse, it is slightly
     % different than the qubit dip frequency after optimization, but at the beginning of the
     % meausrement, set it to the qubit dip frequency is OK.
@@ -120,12 +120,12 @@ rabi_long1('qubit','q3','biasAmp',0,'biasLonger',0,...
 %%
 s21_01('qubit','q2','freq',[],'notes','','gui',true,'save',true);
 %%
-ramsey('qubit','q9','mode','dp',... % available modes are: df01, dp and dz
-      'time',[0:50:30e3],'detuning',[2]*1e6,...
-      'dataTyp','P','notes','','gui',true,'save',true);
+ramsey('qubit','q9_1k','mode','dp',... % available modes are: df01, dp and dz
+      'time',[0:10:2e3],'detuning',[0]*1e6,...
+      'dataTyp','P','phaseOffset',pi/2,'notes','','gui',true,'save',true);
 %%
-spin_echo('qubit','q8','mode','dp',... % available modes are: df01, dp and dz
-      'time',[0:50:30e3],'detuning',[1]*1e6,...
+spin_echo('qubit','q9_1','mode','dp',... % available modes are: df01, dp and dz
+      'time',[0:50:30e3],'detuning',[2]*1e6,...
       'notes','','gui',true,'save',true);
 %%
 T1_1('qubit','q3','biasAmp',[0],'biasDelay',20,'time',[0:100:10e3],...
@@ -149,10 +149,10 @@ zDelay('qubit','q7','zAmp',2000,'zLn',[],'zDelay',[-50:1:50],...
        'gui',true,'save',true)
 %%
 % delayTime = [[0:1:20],[21:2:50],[51:5:100],[101:10:500],[501:50:3000]];
-delayTime = [0:20:2e3];
-zPulseRipple('qubit','q8',...
+delayTime = [-300:10:2e3];
+zPulseRipple('qubit','q9_1k',...
         'delayTime',delayTime,...
-       'zAmp',2e4,'gui',true,'save',true);
+       'zAmp',3e3,'gui',true,'save',true);
 %%
 state = '|0>-i|1>';
 data = singleQStateTomo('qubit','q2','reps',2,'state',state);
@@ -187,7 +187,8 @@ tuneup.correctf01bySpc('qubit',q,'gui',true,'save','askMe'); % measure f01 by sp
 tuneup.xyGateAmpTuner('qubit',q,'gateTyp','X','AE',true,'gui',true,'save','askMe');
 tuneup.iq2prob_01('qubit',q,'numSamples',1e4,'gui',true,'save','askMe');
 %% fully auto callibration
-qubits = {'q7','q8'};
+% qubits = {'q7','q8'};
+qubits = {'q9_1k'};
 for ii = 1:numel(qubits)
     q = qubits{ii};
     setQSettings('r_avg',2000,q);

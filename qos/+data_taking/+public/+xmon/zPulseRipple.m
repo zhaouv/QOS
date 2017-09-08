@@ -21,6 +21,8 @@ function varargout = zPulseRipple(varargin)
     import qes.*
     import sqc.*
     import sqc.op.physical.*
+    
+    Z_LENGTH = 10000;
 
     args = util.processArgs(varargin,{'dataTyp','P','gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
@@ -29,17 +31,25 @@ function varargout = zPulseRipple(varargin)
     Y2 = gate.Y2p(q);
     I1 = gate.I(q);
     I2 = gate.I(q);
-    Z = op.zRect(q);
-    Z.ln = 6000;
-    Z.amp = args.zAmp;
+    if args.zAmp ~= 0
+        Z = op.zRect(q);
+        Z.ln = Z_LENGTH;
+        Z.amp = args.zAmp;
+    else
+        Z = gate.I(q);
+        Z.ln = Z_LENGTH;
+    end
+    
     R = measure.resonatorReadout_ss(q);
     R.state = 2;
     
     maxDelayTime = max(args.delayTime);
     function procFactory(delay)
-        I1.ln = delay;
+        % I1.ln = delay;
+        I1.ln = Z_LENGTH+delay;
         I2.ln = maxDelayTime - delay;
-        proc = Z*I1*X2*I2*Y2;
+        % proc = Z*I1*X2*I2*Y2;
+        proc = Z.*(I1*X2*I2*Y2); % now minus delay is allowed
         proc.Run();
         R.delay = proc.length;
     end

@@ -4,7 +4,7 @@ classdef (Sealed = true)RegEditor < handle
 % Copyright 2017 Yulin Wu, University of Science and Technology of China
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    properties %(SetAccess = private, GetAccess = private)
+    properties (SetAccess = private, GetAccess = private)
         qs
         nodeParent
         nodeName

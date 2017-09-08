@@ -2,7 +2,7 @@ function varargout = ramsey_dz(varargin)
 % ramsey_dz: ramsey oscillation, detune by z detune pulse
 % 
 % <_o_> = ramsey_dz('qubit',_c&o_,...
-%       'time',[_i_],'detuning',<[_f_]>,...
+%       'time',[_i_],'detuning',<[_f_]>,'phaseOffset',<_f_>,...
 %       'dataTyp',<'_c_'>,...   % S21 or P
 %       'notes',<_c_>,'gui',<_b_>,'save',<_b_>)
 % _f_: float
@@ -24,7 +24,7 @@ function varargout = ramsey_dz(varargin)
     import sqc.*
     import sqc.op.physical.*
 
-    args = util.processArgs(varargin,{'detuning',0,'dataTyp','P',...
+    args = util.processArgs(varargin,{'phaseOffset',0,'detuning',0,'dataTyp','P',...
         'gui',false,'notes','','detuning',0,'save',true});
     q = data_taking.public.util.getQubits(args,{'qubit'});
 
@@ -44,9 +44,11 @@ function varargout = ramsey_dz(varargin)
                 'unrecognized dataTyp %s, available dataTyp options are P and S21.', args.dataTyp));
     end
 
+    X2_ = copy(X2);
+    X2.phase = args.phaseOffset;
     function procFactory(delay)
         I.ln = delay;
-        proc = X2*I*X2;
+        proc = X2_*I*X2;
         proc.Run();
         R.delay = proc.length;
     end

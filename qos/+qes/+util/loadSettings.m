@@ -56,7 +56,7 @@ function data = loadSettings(spath, fields)
                 cidx = strfind(fileinfo(ii).name(1:end-4),'@'); % char string
                 nidx = strfind(fileinfo(ii).name(1:end-4),'='); % numeric
 				didx = strfind(fileinfo(ii).name(1:end-4),'#'); % data
-                cidx = [cidx, didx]; % defer data loading to when it is needed, we'd like the qubit object to be light weighted, 2017/2/11, Yulin
+                % cidx = [cidx, didx]; % defer data loading to when it is needed, we'd like the qubit object to be light weighted, 2017/2/11, Yulin
                 if isempty(cidx) && isempty(nidx)
                     fieldname = fileinfo(ii).name(1:end-4);
                     if isvarname(fieldname)
@@ -68,6 +68,7 @@ function data = loadSettings(spath, fields)
                         else
                             data.(fieldname) = data_;
                         end
+                        data.SETTINGS_PATH_ = spath;
                     end
                 elseif ~isempty(cidx) && cidx(end) > 1
                     fieldname = fileinfo(ii).name(1:cidx(end)-1);
@@ -104,22 +105,23 @@ function data = loadSettings(spath, fields)
                         end
                         data.(fieldname) = data_;
                     end
-% 				elseif ~isempty(didx) && didx(end) > 1 % defer data loading to when needed, better to have the qubit object light weighted
-%                     fieldname = fileinfo(ii).name(1:didx(end)-1);
-%                     if isvarname(fieldname)
-% %                        data.(fieldname) = strsplit(strtrim(fileinfo(ii).name(cidx(end)+1:end-4)),',');
-% 						datafile = fullfile(spath,'_data',strtrim(fileinfo(ii).name(cidx(end)+1:end-4))));
-% 						if ~exist(datafile,'file')
-% 							throw(MException('QOS_loadSettings:invalidSettingsValue',...
-% 								sprintf('data for field ''%s'' not found.', fields{1})));
-% 						end
+				elseif ~isempty(didx) && didx(end) > 1 % defer data loading to when needed, better to have the qubit object light weighted
+                    fieldname = fileinfo(ii).name(1:didx(end)-1);
+                    if isvarname(fieldname)
+%                        data.(fieldname) = strsplit(strtrim(fileinfo(ii).name(cidx(end)+1:end-4)),',');
+						datafile = fullfile(spath,'_data',strtrim(fileinfo(ii).name(cidx(end)+1:end-4)));
+						if ~exist(datafile,'file')
+							throw(MException('QOS_loadSettings:invalidSettingsValue',...
+								sprintf('data for field ''%s'' not found.', fields{1})));
+                        end
+                        data.(fieldname) = datafile;
 % 						try
 % 							data.(fieldname) = load(datafile);
 % 						catch
 % 							throw(MException('QOS_loadSettings:invalidSettingsValue',...
 % 								sprintf('failed in loading data for field ''%s''.', fields{1})));
 % 						end
-% 					end
+					end
                 end
             end
         else % load a specific field
@@ -138,6 +140,7 @@ function data = loadSettings(spath, fields)
             end
             if strcmp(fileinfo(ii).name(1:end-4),fields{1})
                 jdata = qes.util.loadJson(fullfile(spath,fileinfo(ii).name));
+                data.SETTINGS_PATH_ = spath;
                 if numFields == 1
                     if isfield(jdata,fields{1})
                         data = jdata.(fields{1});
