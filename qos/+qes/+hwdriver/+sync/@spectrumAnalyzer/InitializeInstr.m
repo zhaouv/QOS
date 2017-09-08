@@ -10,12 +10,18 @@ function [varargout] = InitializeInstr(obj)
     if strcmp(obj.interfaceobj.Status,'open')
         fclose(obj.interfaceobj);
     end
-    %%% Keysight Technologies, N9030B default byte order is big endian
-    obj.interfaceobj.InputBufferSize = 1024*1024;
-    obj.interfaceobj.Timeout = 30;
-    obj.interfaceobj.ByteOrder = 'bigEndian';
-    %%%
-    
+    switch TYP
+        case{'agilent_N9030B'}
+            %%% Keysight Technologies, N9030B default byte order is big endian
+            obj.interfaceobj.InputBufferSize = 1024*1024;
+            obj.interfaceobj.Timeout = 30;
+            obj.interfaceobj.ByteOrder = 'bigEndian';
+            %%%
+        case{'tek_rsa607a'}
+            obj.interfaceobj.InputBufferSize = 1024*1024;
+            obj.interfaceobj.Timeout = 30;
+    end
     fopen(obj.interfaceobj);
     varargout{1} = ErrMsg;
+    fprintf(obj.interfaceobj,'*RST');
 end

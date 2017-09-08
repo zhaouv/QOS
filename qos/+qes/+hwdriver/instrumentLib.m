@@ -29,6 +29,7 @@ classdef instrumentLib
 						{'signalcore'},{'sc5511a'};...
                         {'simulatedhw'},{'simulatedmwsrc'};... % simulated mw source
                         {'agilent technologies','agilent', 'keysight technologies', 'keysight'}, {'keysight_multimeter','34465a','34461a'};... % multi meter
+                        {'tektronix','tek'}, {'tek_rsa607a','signalvu-pc'};...
                        }
     end
     methods

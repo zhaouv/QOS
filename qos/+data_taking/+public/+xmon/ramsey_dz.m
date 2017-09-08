@@ -65,7 +65,7 @@ function varargout = ramsey_dz(varargin)
     e.name = 'Ramsey(Detune by Z)';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    e.datafileprefix = sprintf('%s', q.name);
+    e.datafileprefix = sprintf('%s_Ramsey', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;

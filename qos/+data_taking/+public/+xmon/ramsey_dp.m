@@ -68,7 +68,7 @@ function varargout = ramsey_dp(varargin)
     e.name = 'Ramsey(Detune by Phase)';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    e.datafileprefix = sprintf('%s', q.name);
+    e.datafileprefix = sprintf('%s_Ramsey', q.name);
     if ~args.gui
         e.showctrlpanel = false;
         e.plotdata = false;
@@ -76,6 +76,7 @@ function varargout = ramsey_dp(varargin)
     if ~args.save
         e.savedata = false;
     end
+    
     e.notes = args.notes;
     e.addSettings({'fcn','args'},{fcn_name,args});
     e.Run();

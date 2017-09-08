@@ -53,7 +53,7 @@ function varargout = s21_rAmp(varargin)
     e.name = 'S21-Readout Amp.';
     e.sweeps = [s1,s2];
     e.measurements = R;
-    if s2.size > 1
+    if s2.size > 1 && s1.size > 1
         e.plotfcn = @util.plotfcn.OneMeasComplex_2DMap_Amp_dB_X; % add by GM, 20170413
     end
     e.datafileprefix = sprintf('%s_s21_rAmp', q.name);
