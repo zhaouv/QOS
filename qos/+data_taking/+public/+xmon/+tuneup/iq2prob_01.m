@@ -37,6 +37,7 @@ function varargout = iq2prob_01(varargin)
     num_reps = ceil(args.numSamples/q.r_avg);
     iq_raw_1 = NaN*ones(num_reps,q.r_avg);
     for ii = 1:num_reps
+        error('stop');
         X.Run();
         R.Run();
         iq_raw_1(ii,:) = R.extradata;

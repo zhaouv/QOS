@@ -1,3 +1,4 @@
+CZTomoData = P;
 chi = sqc.qfcns.processTomoData2Chi(CZTomoData);
 phi = toolbox.data_tool.fitting.fitCZPhase(CZTomoData)
 PIdeal = sqc.qfcns.CZP(phi);
