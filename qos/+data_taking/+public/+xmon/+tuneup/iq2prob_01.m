@@ -81,5 +81,6 @@ function varargout = iq2prob_01(varargin)
     end
 
 	varargout{1} = center0;
-	varargout{1} = center1;
+	varargout{2} = center1;
+    varargout{3} = F11+F00-1;
 end

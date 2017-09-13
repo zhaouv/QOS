@@ -13,7 +13,7 @@ function varargout = iqChnl(varargin)
 % Yulin Wu, 2017
 
     fcn_name = 'data_taking.public.calibration.iqChnl'; % this and args will be saved with data
-    args = qes.util.processArgs(varargin,{'notes','','spcAvgNum',1,'gui',false,'save',true});
+    args = qes.util.processArgs(varargin,{'notes','','spcAvgNum',1,'gui',false,'save',true,'calSideband',true});
     try
         QS = qes.qSettings.GetInstance();
     catch
@@ -33,6 +33,7 @@ function varargout = iqChnl(varargin)
     Calibrator = qes.measurement.iqMixerCalibrator(awgObj,awgchnls,spcAmpObj,loSource);
     Calibrator.lo_power = s.lo_power;
     Calibrator.pulse_ln = s.pulse_ln;
+    Calibrator.calSideband=args.calSideband;
     if args.gui
         Calibrator.showProcess = true;
     end
@@ -95,10 +96,10 @@ function varargout = iqChnl(varargin)
         figure;
         subplot(2,1,1);
         surface(sbFreq,loFreq,real(sbCompensation),'edgecolor','none');
-        ylabel('LoFreq');xlabel('SbFreq');title('Real');colorbar;
+        ylabel('LoFreq');xlabel('SbFreq');title('Real');colorbar;axis tight
         subplot(2,1,2);
         surface(sbFreq,loFreq,imag(sbCompensation),'edgecolor','none');
-        ylabel('LoFreq');xlabel('SbFreq');title('Image');colorbar;
+        ylabel('LoFreq');xlabel('SbFreq');title('Image');colorbar;axis tight
         saveas(gcf,[filename '_Sb.fig']);
     end
     varargout{1} = e.data{1};

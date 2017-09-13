@@ -70,7 +70,7 @@ e.name = 'T1';
 e.sweeps = [s1,s2];
 e.measurements = R;
 e.plotfcn = @qes.util.plotfcn.T1;
-e.datafileprefix = sprintf('%s%s[%s]',biasQubit.name, driveQubit.name,readoutQubit.name);
+e.datafileprefix = sprintf('%s%s[%s]_T1',biasQubit.name, driveQubit.name,readoutQubit.name);
 if ~args.gui
     e.showctrlpanel = false;
     e.plotdata = false;

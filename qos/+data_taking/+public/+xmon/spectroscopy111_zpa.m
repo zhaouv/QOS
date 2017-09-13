@@ -48,14 +48,13 @@ switch args.dataTyp
         R.state = 2;
     case 'S21'
         R.swapdata = true;
-        R.name = '|S21|';
+        R.name = '|IQ|';
         R.datafcn = @(x)mean(abs(x));
     otherwise
-        throw(MException('QOS_spectroscopy111_zdc',...
+        throw(MException('QOS_rabi_amp111:unsupportedDataTyp',...
 			'unrecognized dataTyp %s, available dataTyp options are P and S21.',...
 			args.dataTyp));
 end
-
 Z = op.zBias4Spectrum(biasQubit);
 function proc = procFactory(amp)
     Z.amp = amp;

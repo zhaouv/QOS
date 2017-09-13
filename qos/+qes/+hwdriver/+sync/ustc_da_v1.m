@@ -16,8 +16,6 @@ classdef ustc_da_v1 < qes.hwdriver.icinterface_compatible
     properties (SetAccess = private, GetAccess = private)
         chnlMap
         ustcaddaObj
-        
-        mixerZeros = struct('loFreq',[],'iZeros',[],'qZeros',[]);
     end
     methods
         function obj = ustc_da_v1(chnlMap_)
@@ -46,16 +44,6 @@ classdef ustc_da_v1 < qes.hwdriver.icinterface_compatible
             obj.cmdList = {'*IDN?','*CLS','*RST'};
             obj.ansList = {'USTC,USTC_DA_V1','',''};
             obj.fcnList = {[],[],[]};
-            
-            QS = qes.qSettings.GetInstance();
-            s = QS.loadHwSettings('ustcadda');
-            mixerZerosDataFiles = s.da_boards{k}.mixerZeros;
-            for ff = 1:numel(mixerZerosDataFiles)
-                mixerZerosData = load(fullfile(s.SETTINGS_PATH_,mixerZerosDataFiles{ff}));
-                obj.da_list(k).da.mixerZeros(ff).loFreq = mixerZerosData.loFreq;
-                obj.da_list(k).da.mixerZeros(ff).iZeros = mixerZerosData.iZeros;
-                obj.da_list(k).da.mixerZeros(ff).qZeros = mixerZerosData.qZeros;
-            end
         end
 		function val=get.outputDelayStep(obj)
 			val = obj.ustcaddaObj.daOutputDelayStep;
@@ -66,7 +54,16 @@ classdef ustc_da_v1 < qes.hwdriver.icinterface_compatible
 		function val=get.trigInterval(obj)
 			val = obj.ustcaddaObj.GetTrigInterval();
         end
-		function SendWave(obj,channel,data)
+		function SendWave(obj,channel,data,isIChnl,loFreq)
+            if(nargin == 4)
+                mixerZeros = obj.ustcaddaObj.da_channel_list(k).mixerZeros;
+                if(isIChnl)
+                    offset = interp1(mixerZeros.loFreq,mixerZeros.iZeros,loFreq,'linear');
+                else
+                    offset = interp1(mixerZeros.loFreq,mixerZeros.iZeros,loFreq,'linear');
+                end
+                obj.ustcaddaObj.setDAChnlOutputOffset(channel,offset);
+            end
             obj.ustcaddaObj.SendWave(obj.chnlMap(channel),data);
         end
         function setChnlOutputDelay(obj,channel,delay)

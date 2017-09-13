@@ -46,6 +46,10 @@ function [varargout] = InitializeInstr(obj)
 			obj.freqlimits = obj.interfaceobj.freqlimits; % GHz
             obj.powerlimits = obj.interfaceobj.powerlimits; % dBm
 			obj.numChnls = obj.interfaceobj.numChnls;
+        case {'sinolink'}
+            obj.freqlimits = [10e6,20e9]; % GHz
+            obj.powerlimits = [-50,24]; % dBm
+			obj.numChnls = 1;
         otherwise
              ErrMsg = ['Unsupported instrument: ',TYP];
     end

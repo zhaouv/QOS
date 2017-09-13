@@ -31,12 +31,12 @@ for ii = 1:nb
 %     A0 = mean(z(ii,end));
 %     B0 = mean(z(ii,1)) - A0;
     A0 = 0.05;
-    B0 = 0.7;
-    td0 = 10;
+    B0 = 0.5;
+    td0 = 1000;
     lb = [A0-0.3*B0, 0.6*B0, 0.2*td0];
     ub = [A0+0.3*B0, B0/0.6, 2*td0];
     
-    [A_,B_,td_,temp] = toolbox.data_tool.fitting.expDecayFit(time,z(ii,:),A0,B0,td0,lb,ub);
+    [A_,B_,td_,temp] = toolbox.data_tool.fitting.expDecayFit(time,z(ii,:),A0,B0,td0);%,lb,ub);
     
 %     [A_,B_,td_,temp] = ExpDecayFit(time,z(ii,:));
     
@@ -57,9 +57,9 @@ for ii = 1:nb
     end
 end
 
-time = time/1e3;
-td = td/1e3;
-wci = wci/1e3;
+time = time/2e3;
+td = td/2e3;
+wci = wci/2e3;
 
 figure();
 imagesc(bias,time,z');
