@@ -20,14 +20,14 @@ function varargout = optReadoutFreq(varargin)
     import data_taking.public.xmon.s21_01
 	import data_taking.public.util.getQubits
 
-    args = util.processArgs(varargin,{'gui',false,'save',true});
+    args = util.processArgs(varargin,{'gui',false,'save',true,'range',3});
 	q = data_taking.public.util.getQubits(args,{'qubit'});
 	
     R_AVG_MIN = 1e3;
     if q.r_avg < R_AVG_MIN
         q.r_avg = R_AVG_MIN;
     end
-    frequency = q.r_freq-3*q.t_rrDipFWHM_est:q.t_rrDipFWHM_est/20:q.r_freq+3*q.t_rrDipFWHM_est;
+    frequency = q.r_freq-args.range*q.t_rrDipFWHM_est:q.t_rrDipFWHM_est/20:q.r_freq+args.range*q.t_rrDipFWHM_est;
     e = s21_01('qubit',q,'freq',frequency);
     data = e.data{1};
     data = data(2:end,:); % 2:end, drop first point to deal with an ad bug, may not be necessary in future versions
@@ -43,9 +43,6 @@ function varargout = optReadoutFreq(varargin)
         throw(MException('QOS_XmonOptReadoutFreq:inproperSettings',...
             'inproper r_freq or t_rrDipFWHM_est value, dip(s) out of range.'));
     end
-
-%     data(:,1) = smooth(data(:,1),3);
-%     data(:,2) = smooth(data(:,2),3);
     
     [~, idx] = max(abs(data(:,1) - data(:,2)));
     optFreq = frequency(idx);

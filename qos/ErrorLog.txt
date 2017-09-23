@@ -1,0 +1,117 @@
+09-Jul-2017 22:16:02 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+09-Jul-2017 22:16:23 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+09-Jul-2017 22:16:55 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+09-Jul-2017 22:17:18 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:14:31 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:14:53 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:15:25 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:15:46 USTCDAC:Open:DAC_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:36:44 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:37:05 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:37:27 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:37:49 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:38:11 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:38:32 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:38:54 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 10:39:15 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 11:00:33 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 11:00:54 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 11:01:16 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+13-Jul-2017 11:01:37 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 14:48:14 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 15:35:57 USTCDAC:GetReturn:C_11 Error code:10054 --> Windows API failed: 远程主机强迫关闭了一个现有的连接。
+17-Jul-2017 15:36:52 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 15:37:14 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 15:37:35 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 15:37:57 USTCDAC:Open:C_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 16:35:30 USTCDAC:Open:D_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 16:35:51 USTCDAC:Open:D_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 16:36:12 USTCDAC:Open:D_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 16:36:34 USTCDAC:Open:D_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 16:41:41 USTCDAC:Open:C_09 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 20:22:01 USTCDAC:Close:D_24 Error code:-469762047 --> USTCDACDRIVER API failed: No object found.
+17-Jul-2017 20:22:07 USTCDAC:Close:D_24 Error code:-469762047 --> USTCDACDRIVER API failed: No object found.
+17-Jul-2017 20:22:29 USTCDAC:Close:D_24 Error code:-469762047 --> USTCDACDRIVER API failed: No object found.
+17-Jul-2017 20:22:36 USTCDAC:Close:D_24 Error code:-469762047 --> USTCDACDRIVER API failed: No object found.
+17-Jul-2017 20:23:04 USTCDAC:Close:D_24 Error code:-469762047 --> USTCDACDRIVER API failed: No object found.
+17-Jul-2017 20:23:04 USTCDAC:Close:D_24 Error code:-469762047 --> USTCDACDRIVER API failed: No object found.
+17-Jul-2017 20:34:24 USTCDAC:GetReturn:D_03 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 20:35:30 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+17-Jul-2017 20:35:37 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+17-Jul-2017 20:37:45 USTCDAC:GetReturn:D_03 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+17-Jul-2017 20:41:49 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+17-Jul-2017 20:41:49 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+17-Jul-2017 20:57:40 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+17-Jul-2017 20:57:41 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+17-Jul-2017 21:08:47 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+17-Jul-2017 21:08:47 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+20-Jul-2017 16:45:28 USTCDAC:GetReturn:D_03 Error code:-469762042 --> USTCDACDRIVER API failed: The task does not execute.
+24-Jul-2017 16:34:09 USTCDAC:GetReturn:D_03 Error code:10054 --> Windows API failed: 远程主机强迫关闭了一个现有的连接。
+24-Jul-2017 16:53:04 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+24-Jul-2017 16:53:04 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 16:57:55 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+24-Jul-2017 16:57:55 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 16:59:11 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 16:59:28 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:00:36 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:00:39 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:00:40 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:00:46 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:11:13 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:18:32 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:19:06 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:19:06 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:19:40 USTCDAC:GetReturn:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+24-Jul-2017 17:19:40 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:19:40 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:20:11 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:20:11 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:21:25 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+24-Jul-2017 17:21:25 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:27:47 USTCDAC:GetReturn:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 17:27:57 USTCDAC:GetReturn:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 17:34:53 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+24-Jul-2017 17:34:54 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+24-Jul-2017 17:39:51 USTCDAC:Open:D_23 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 17:40:12 USTCDAC:Open:D_23 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 17:40:34 USTCDAC:Open:D_23 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 17:40:55 USTCDAC:Open:D_23 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 17:46:44 USTCDAC:Open:D_03 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 17:49:55 USTCDAC:GetReturn:C_3 Error code:10054 --> Windows API failed: 远程主机强迫关闭了一个现有的连接。
+24-Jul-2017 17:50:55 USTCDAC:GetReturn:C_2 Error code:10054 --> Windows API failed: 远程主机强迫关闭了一个现有的连接。
+24-Jul-2017 17:52:16 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:14:29 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:14:50 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:15:12 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:15:33 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:16:28 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:16:49 USTCDAC:Open:C_1 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:45:30 USTCDAC:Open:D_03 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+24-Jul-2017 18:45:53 USTCDAC:Close:D_18 Error code:-469762047 --> USTCDACDRIVER API failed: No object found.
+31-Jul-2017 05:34:38 USTCDAC:GetReturn:D_03 Error code:10054 --> Windows API failed: 远程主机强迫关闭了一个现有的连接。
+31-Jul-2017 05:35:59 USTCDAC:Open:D_03 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:42:20 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:42:41 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:43:03 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:43:46 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:44:07 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:44:28 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:44:49 USTCDAC:Open:C_2 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:58:50 USTCDAC:Open:D_18 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:59:11 USTCDAC:Open:D_14 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:59:33 USTCDAC:Open:D_22 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 09:59:54 USTCDAC:Open:D_11 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 10:03:33 USTCDAC:Open:D_18 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 10:03:54 USTCDAC:Open:D_18 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 10:04:16 USTCDAC:Open:D_18 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 10:04:37 USTCDAC:Open:D_18 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+31-Jul-2017 10:43:29 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+31-Jul-2017 10:43:29 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+31-Jul-2017 10:44:25 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+31-Jul-2017 10:46:35 USTCDAC:CheckStatus:D_03 Error code:-1543503871 --> USTCDACDRIVER API failed: The task(s) timeout.
+31-Jul-2017 10:46:35 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+31-Jul-2017 15:52:52 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+31-Jul-2017 15:52:58 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+31-Jul-2017 15:52:58 USTCDAC:Close:D_03 Error code:-469762046 --> USTCDACDRIVER API failed: WaitForSingleObject error.
+14-Aug-2017 18:31:59 USTCDAC:Open:D_03 Error code:10060 --> Windows API failed: 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。
+14-Aug-2017 18:45:26 USTCADC:SetMode Error code:1 --> USTCDACDRIVER API failed: Reveive data timeout, check the net status.

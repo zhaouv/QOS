@@ -22,6 +22,10 @@ function SetFreq(obj,val,chnl)
 		case {'sc5511a','simulatedmwsrc'}
 			obj.interfaceobj.setFrequency(val,chnl);
 			obj.frequency(chnl) = val;
+        case {'sinolink'}
+            fwrite(obj.interfaceobj,['FREQ ',num2str(val(1)/1e9,'%0.9f'),' GHz']);
+            obj.frequency(chnl) = val;
+            pause(1)
         otherwise
             error('MWSource:SetError', ['Unsupported instrument: ',TYP]);
     end

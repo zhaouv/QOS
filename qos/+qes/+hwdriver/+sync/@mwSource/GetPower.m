@@ -14,6 +14,9 @@ function Power = GetPower(obj,chnl)
             Power = str2double(query(obj.interfaceobj, ':SOUR:POW?'));
         case {'sc5511a','simulatedmwsrc'}
 			Power = obj.interfaceobj.getPower(chnl);
+        case {'sinolink'}
+            fwrite(obj.interfaceobj,'LEVEL?');
+            Power = str2double(char(fread(obj.interfaceobj,obj.interfaceobj.BytesAvailable)'));
         otherwise
              error('MWSource:QueryError', ['Unsupported instrument: ',TYP]);
     end
