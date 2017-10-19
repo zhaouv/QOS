@@ -83,9 +83,9 @@ def addonelist(onelist):
                             oneqc.add_gate(gate, targets=[j,k])
                         elif gate=="CZ":
                             if int(num)%2:
-                                oneqc.add_gate("CRZ", targets=k, controls=j,arg_value=np.pi,arg_label=180)
+                                oneqc.add_gate("CSIGN", targets=k, controls=j,arg_value=np.pi,arg_label=180)
                             else:
-                                oneqc.add_gate("CRZ", targets=j, controls=k,arg_value=np.pi,arg_label=180)
+                                oneqc.add_gate("CSIGN", targets=j, controls=k,arg_value=np.pi,arg_label=180)
                         elif int(num)%2:
                             oneqc.add_gate(gate, targets=k, controls=j)
                         else:
@@ -257,7 +257,10 @@ from file:
 ProbabilityAmplitude=gatecal(init("gateforcal18.csv"))
 '''
 def mainfunc(gatestring):
-    ProbabilityAmplitude=gatecal(initfromstring(gatestring))
+    if len(sys.argv)<=2:
+        ProbabilityAmplitude=gatecal(initfromstring(gatestring))
+    else:
+        ProbabilityAmplitude=gatecal(init(sys.argv[2]))
     ProbabilityAmplitudeAsList=ProbabilityAmplitude.toarray().transpose()[0].tolist()
     RealList=[a.real for a in ProbabilityAmplitudeAsList]
     ImagList=[a.imag for a in ProbabilityAmplitudeAsList]
