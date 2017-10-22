@@ -1,9 +1,7 @@
 function result=qbitstatesimulate(celljsonorfile)
 % zhaouv https://zhaouv.github.io/
 
-warning('替换为 qutipenv=localconfig.pythonconfig.qutipenv;统一配置?否则若放入qos中会容易在移植时出bug')
-qutipenv='C:\Users\ZhaoUV\AppData\Local\conda\conda\envs\qutip-env\python.exe';
-%[~,qutipenv,~]=pyversion;%如果默认的python环境有qutip,使用此句即可
+qutipenv=qoslocal.get('qutipenv');
 
 %{
 %example1
@@ -92,6 +90,9 @@ if ~nargin
     %celljsonorfile='[["","","ry90","cz1","rx-90","ry-90","","rx-90","cz1","","ry90","rx90"],["rx-90","ry90","rx90","cz2","","ry90","x","ry-90","cz2","rx-90","ry-90","rx90"]]';
     [namestr,pathstr]=uigetfile({'*.csv';'*.txt';'*.in'});
     arcstr=['"',pathstr,namestr,'"'];
+    if isequal(double(arcstr),[34,0,0,34])
+        return;
+    end
     stringorfile=['file ',arcstr];
 elseif iscell(celljsonorfile)
     if isstr(celljsonorfile{1}) && strcmp(celljsonorfile{1},'file')
