@@ -131,3 +131,6 @@ startup.p
 
 qos\+data_taking\+yulin\
 qos\+data_taking\+ming\
+
+# local config
+qos\qoslocal_.m
