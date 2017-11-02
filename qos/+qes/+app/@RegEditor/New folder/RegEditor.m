@@ -20,7 +20,6 @@ classdef (Sealed = true)RegEditor < handle
         winSize
         leftPanelWidth
         treecontainer
-        udpHandle
     end
     properties (Constant = true, GetAccess = private)
         tblRefreshPeriond = 30
@@ -133,6 +132,7 @@ classdef (Sealed = true)RegEditor < handle
                 end
             end
             obj.keyAnnotation = anno;
+            
             CreateGUI(obj);
 %             %%% to deal with a bug in MATLAB 2016b
 %             close(obj.guiHandles.reWin);
@@ -241,10 +241,6 @@ classdef (Sealed = true)RegEditor < handle
             if ~isempty(obj.tblRefreshTmr)
                 stop(obj.tblRefreshTmr);
                 delete(obj.tblRefreshTmr);
-            end
-            if isvalid(obj.udpHandle)
-                fclose(obj.udpHandle);
-                delete(obj.udpHandle);
             end
         end
     end

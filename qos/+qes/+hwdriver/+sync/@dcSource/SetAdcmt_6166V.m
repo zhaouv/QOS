@@ -4,7 +4,8 @@ function SetAdcmt_6166V(obj,val)
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    if isempty(obj.tune) || ~obj.tune % round is automatic in ADCMT_6166
+    if false % set directly might leads to pikes, not safe for sensitive experiments
+%     if isempty(obj.tune) || ~obj.tune % round is automatic in ADCMT_6166
         fprintf(obj.interfaceobj,['SOV', num2str(val(1),'%6e')]);
     else % tune to target output value
         % query current output value

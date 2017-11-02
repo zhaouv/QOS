@@ -4,7 +4,8 @@ function SetAdcmt_6166I(obj,val)
 % Copyright 2015 Yulin Wu, Institute of Physics, Chinese  Academy of Sciences
 % mail4ywu@gmail.com/mail4ywu@icloud.com
 
-    if isempty(obj.tune) || ~obj.tune % round is automatic in ADCMT_6166
+    if false % set directly might leads to pikes, not safe for sensitive experiments
+%     if isempty(obj.tune) || ~obj.tune % round is automatic in ADCMT_6166
         fprintf(obj.interfaceobj,['SOI', num2str(val(1),'%6e')]);
     else % tune to target output value
         % query current output value
@@ -18,9 +19,9 @@ function SetAdcmt_6166I(obj,val)
             return;
         end
         temp = CurrentOutput:...
-            sign(val(1)-CurrentOutput)*5e-5:...
+            sign(val(1)-CurrentOutput)*10e-6:...
             val(1);
-        if temp(end) ~= val(1);
+        if temp(end) ~= val(1)
             OutputValue = [temp, val(1)];
         else
             OutputValue = temp;
@@ -30,7 +31,7 @@ function SetAdcmt_6166I(obj,val)
             if ii == 1
             	obj.on=1;
             end
-            pause(0.2);     % 40 seconds from 0 to 10mA
+            pause(0.2);
         end
     end
 end
