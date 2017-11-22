@@ -15,22 +15,22 @@ function [varargout] = InitializeInstr(obj)
             case {'adcmt6166i','adcmt6161i'} % as current source
                 fprintf(obj.interfaceobj,'IF'); % set to current source mode
                 fprintf(obj.interfaceobj,'SIRX');   % set to auto range.
-                fprintf(obj.interfaceobj,'LMV3.0E+1');   % set votage safety limit to 30V max
-                fprintf(obj.interfaceobj,'LMI1.25E-1');   % set current safety limit to 125mA max
-                obj.safty_limit = 50e-3;
+                fprintf(obj.interfaceobj,'LMV1.0E+1');   % set votage safety limit to 10V max
+                fprintf(obj.interfaceobj,'LMI2E-3');   % set current safety limit to 2mA max
+                obj.safty_limit = 5e-3;
                 obj.numChnls = 1;
             case {'adcmt6166v','adcmt61661'}  % as voltage source
                 fprintf(obj.interfaceobj,'VF'); % set to voltage source mode
                 fprintf(obj.interfaceobj,'SVRX');   % set to auto range.
                 % fprintf(DCSource,'V5');   % set to range 10V.
-                fprintf(obj.interfaceobj,'LMV3.0E+1');   % set votage safety limit to 30V max
-                fprintf(obj.interfaceobj,'LMI1.25E-1');   % set current safety limit to 125mA max
+                fprintf(obj.interfaceobj,'LMV1.0E+1');   % set votage safety limit to 10V max
+                fprintf(obj.interfaceobj,'LMI2E-3');   % set current safety limit to 2mA max
                 obj.safty_limit = 30;
                 obj.numChnls = 1;
             case {'yokogawa7651i'} % as current source
                 fprintf(obj.interfaceobj,'F5'); % set to current source mode
                 fprintf(obj.interfaceobj,'R5');   % R4/R5/R6: 1mA/10mA/100mA range, adjust to suit you application
-                obj.safty_limit = 50e-3;
+                obj.safty_limit = 5e-3;
                 obj.numChnls = 1;
             case {'yokogawa7651v'} % as voltage source
                 fprintf(obj.interfaceobj,'F1'); % set to voltage source mode
