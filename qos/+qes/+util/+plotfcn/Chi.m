@@ -1,4 +1,4 @@
-function ax = Chi(data,ax,FaceAlpha)
+function ax = Chi(data,ax,FaceAlpha, Fidelity)
     % plots process tomography data
     
 % Copyright 2017 Yulin Wu, USTC
@@ -6,8 +6,8 @@ function ax = Chi(data,ax,FaceAlpha)
 
 
     
-    if nargin < 2
-        hf = qes.ui.qosFigure('Density matrix',false);
+    if nargin < 2 || isempty(ax)
+        hf = qes.ui.qosFigure('Process Tomography',false);
         fpos = get(hf,'Position');
         fpos(1) = fpos(1) - fpos(3)/2;
         fpos(3) = fpos(3) + fpos(3)/2;
@@ -47,7 +47,7 @@ function ax = Chi(data,ax,FaceAlpha)
             case 1
                 tickLabels = {'I','X','Y','Z'};
                 set(ax(ii),'XTick',[1,2,3,4],'XTickLabel',tickLabels,...
-                    'YTick',[1,2],'YTickLabel',tickLabels);
+                    'YTick',[1,2,3,4],'YTickLabel',tickLabels);
             case 2
                 tickLabels = {'II','XI','YI','ZI',...
                               'IX','XX','YX','ZX',...
@@ -67,14 +67,19 @@ function ax = Chi(data,ax,FaceAlpha)
     %             set(ax,'CameraPosition',[-10   -10   10],'Projection','perspective');
         set(ax(ii),'Projection','perspective');
         set(ax(ii),'Projection','perspective','Color',get(gcf,'Color'),'YDir','reverse');
+        if ii == 1 && nargin > 3
+            title(ax(1),sprintf('Fidelity: %0.1f%%',Fidelity*100),'FontSize',10);
+        end
         if ii == 2
 %             linkaxes(ax);
             zLim1 = get(ax(1),'ZLim');
             zLim2 = get(ax(2),'ZLim');
             zLim = [min(zLim1(1),zLim2(1)),max(zLim1(2),zLim2(2))];
-            set(ax(1),'ZLim',zLim);
-            set(ax(2),'ZLim',zLim);
+            set(ax(1),'ZLim',zLim,'FontSize',6);
+            set(ax(2),'ZLim',zLim,'FontSize',6);
         end
+        xtickangle(ax(ii),30);
+        ytickangle(ax(ii),30);
     end
     
     

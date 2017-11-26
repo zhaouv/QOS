@@ -1,11 +1,10 @@
-function ax = Rho(data,ax,FaceAlpha)
+function ax = Rho(data,ax,FaceAlpha,isRawData)
     % plots state density matrix
     
 % Copyright 2017 Yulin Wu, USTC
 % mail4ywu@gmail.com/mail4ywu@icloud.com
-
-    
-    if nargin < 2
+ 
+    if isempty(ax)
         hf = qes.ui.qosFigure('Density matrix',false);
         fpos = get(hf,'Position');
         fpos(1) = fpos(1) - fpos(3)/2;
@@ -15,14 +14,17 @@ function ax = Rho(data,ax,FaceAlpha)
         set(ax(1),'Position',[0.0725,0.05,0.425,0.9]);
         set(ax(2),'Position',[0.55,0.05,0.425,0.9]);
     end
+    assert(numel(ax) <= 2);
     
-    M = sqc.qfcns.stateTomoData2Rho(data);
-    numQs = log2(size(M,1));
-    
-    if nargin < 3
-        FaceAlpha= 1;
+    if isRawData
+        M = sqc.qfcns.stateTomoData2Rho(data);
+    else
+        M = data;
     end
+    numQs = log2(size(M,1));
+
     for ii = 1:numel(ax)
+        hold(ax(ii),'on');
         if ii == 1
             z = real(M);
         else
@@ -99,8 +101,8 @@ function ax = Rho(data,ax,FaceAlpha)
             zLim1 = get(ax(1),'ZLim');
             zLim2 = get(ax(2),'ZLim');
             zLim = [min(zLim1(1),zLim2(1)),max(zLim1(2),zLim2(2))];
-            set(ax(1),'ZLim',zLim);
-            set(ax(2),'ZLim',zLim);
+            set(ax(1),'ZLim',zLim,'View',[-37.5,30]);
+            set(ax(2),'ZLim',zLim,'View',[-37.5,30]);
         end
     end
 
